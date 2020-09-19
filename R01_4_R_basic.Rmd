@@ -1,0 +1,376 @@
+---
+title: "p1_IntroR"
+author: "Jilung Hsieh"
+date: "2019/10/28"
+output:
+  html_document:
+    theme: spacelab
+    highlight: zenburn
+    toc: yes
+    toc_float:
+      collapsed: no
+    df_print: paged
+editor_options:
+  chunk_output_type: inline
+---
+<style>
+    .tocify-header{color:darkred; font-size:16px;}
+    .tocify-subheader{color:tomato; font-size:14px;}
+    h1{color:darkred; font-size:40px;}
+    h2{color:tomato; font-size:24px;}
+    strong {background-color:yellow;}
+</style>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+# 00 RStudio操作簡介
+
+## 0.1 執行程式碼
+- 這裏是個個人用markdown語法寫註解的地方，下面方塊才是個程式碼。
+- 在程式碼方塊，選擇一或多行，用**Mac: cmd+enter or Win: ctrl+enter**來執行程式碼；
+- 或，點按程式碼方塊右上方的**►**。來執行整個程式碼方塊；
+- 或，使用**Mac: shift+cmd+Enter or Win: shift+ctrl+enter**來執行整個程式碼方塊。
+
+```{r}
+print("hehehehe")
+print("hahahhaa")
+print("hihihihi")
+```
+
+
+## 0.2 插入新的程式碼與註解
+- 找空白處，用**Mac: option+cmd+i or Win: alt+ctrl+i** 即可插入（Insert）一個新的程式碼方塊。
+- 在程式碼方塊中，「#」開頭為註解，程式碼不會被執行。
+- 當選取一行或一行以上的程式碼時，可用**Mac: shift+cmd+c or Win: shift+ctrl+c**來切換註解的狀態。
+
+```{r}
+# Comment here
+# print("hahahaha")
+```
+
+
+
+# 01 R語言基礎
+
+## 1.1 安裝工作坊所需的相關套件（Packages）
+- 用快速鍵**Mac: shift+cmd+c or Win: shift+ctrl+c**將註解取消
+- 用快速鍵**Mac: shift+cmd+Enter or Win: shift+ctrl+enter**來執行以下整個程式碼方塊。
+
+```{r}
+# source("W0_install_pkgs.R")
+```
+
+
+## 1.2 用library()載入已經安裝好的套件
+- 用**Mac: cmd+enter or Win: ctrl+enter**逐行執行以下程式碼
+- 用`library()`載入已經安裝好的套件
+- 用`options()`新增適用於整份程式碼（全域）的參數值
+
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+options(stringsAsFactors = F)
+options(scipen = 999) # avoid scientific notion in R
+```
+
+
+## 1.3 印出執行結果
+- 用**Mac: cmd+enter or Win: ctrl+enter**逐行執行程式碼
+- 再用快速鍵**Mac: shift+cmd+Enter or Win: shift+ctrl+enter**來執行以下整個程式碼方塊。
+
+```{r}
+print("hehehehe")
+"yoyoyoyo"
+message("hahahaha")
+```
+
+
+## 1.4 Assigning
+- 使用`<-`的符號，將右方的物件Assign（指派）給左方的變數（variable）。
+- `a`、`b`、`d`均為變數名稱。
+- `c()`是R中最基本的資料型態Vector，可以把它想像成是Google sheet的一個垂直欄。
+- 在R中，直接打出變數名稱，就會直接印出該變數的內容。
+- 執行後，該變數的內容會被顯示在RStudio右上方（一般來說）的Environment視窗中。
+
+```{r}
+a <- c(1, 2, 3, 4, 5)
+b <- c(3, 4, 5, 6, 7)
+d <- a + b
+d
+```
+
+
+
+# 02 讀取資料
+
+## 2.1 讀取CSV（逗點分隔值）檔案
+- Reading csv by package `tidyr`'s `read_csv()` function.
+
+```{r}
+users_1 <- read_csv("data/china_082019_1_users_csv_hashed.csv")
+```
+
+
+
+## 2.1p (Practice) 讀取資料
+- 用快速鍵**Mac: shift+cmd+c or Win: shift+ctrl+c**將前三行註解取消
+- 同上，用`read_csv()`讀取set1的tweets資料並assign給新變數`tweets_1`。
+- 同上，用`read_csv()`讀取set2的users資料並assign給新變數`users_2`。
+- 同上，用`read_csv()`讀取set2的tweets資料並assign給新變數`tweets_2`。
+
+```{r}
+# tweets_1 <- 
+# users_2 <- 
+# tweets_2 <- 
+
+```
+
+
+
+# 03 觀察資料
+- 在R的教學中，我們多半引導學生將讀進來的一份資料想像為一個有欄有列的資料表（欄為變數、列為資料項或稱為觀察值）。而我們在資料分析前，首要動作都是將各種資料整併成為一個資料表。
+
+## 3.1 直接觀察資料內容
+- `View()`： 用RStuiod的視窗觀察資料。
+- `head()`: 抽取出前六筆（也就是前六列資料來觀察）。
+
+```{r}
+# View(users_1)
+# users_1 %>% View 
+
+# View(head(users_1))
+# users_1 %>% head %>% View
+users_1 %>% head 
+```
+
+
+## 3.2 觀察資料的整體維度和變數型態
+- `class()`: 用以觀察該變數的資料型態（types）。
+- `tidyr`套件所取出的資料均會轉為**dataframe**，dataframe就是我們所稱的資料表。
+- `dim()`: 取得資料維度（dimensions）。本課程多將「資料」想像為一個**列x欄**的資料表（此稱為data frame），每列（row）為一筆資料（或稱觀察值，Observation）、每欄（col）為一個變數（或變項，variables）。而`dim()`是以observsations x variables來呈現。
+
+
+```{r}
+class(users_1)
+# "spec_tbl_df" "tbl_df"      "tbl"         "data.frame"
+users_1 %>% class
+
+dim(users_1)
+users_1 %>% dim
+```
+
+## 3.3 觀察資料的結構
+- `glimpse()`: 縱覽變數、變數型態（type）、與變數內容範例
+- `summary()`: 提供該data frame的變數摘要，包含每個變數的平均數、四分位數、極大值等。
+
+```{r}
+
+glimpse(users_1)
+users_1 %>% glimpse()
+
+str(users_1)
+users_1 %>% str
+
+# summary(users_1)
+users_1 %>% summary
+```
+
+
+## 3.4 觀察資料中每個單一變數
+- 取出`users_1`這個data frame中的變項並觀察
+
+```{r}
+users_1$follower_count
+users_1$follower_count %>% class
+
+users_1$user_screen_name %>% head
+users_1$user_screen_name %>% class
+```
+
+
+
+## 3.4p (Practice) 請用以上函式觀察users_2或tweets_1，
+- users_2的總人數和users_1有何不同？
+- `tweets_1`資料表中的哪一個變數的內容和`users_1`的哪一個變數內容應該相同？
+- 在`users_1`中，以下變數的資料型態為何？`account_creation_date`、`is_retweet`、 `tweet_time`?
+
+```{r}
+# YOUR CODE HERE
+```
+
+
+
+## (Options) 用skimr套件縱覽資料
+```{r}
+# install.packages("skimr")
+library(skimr)
+users_1 %>% skim()
+```
+
+
+
+# 04 用dplyr操作資料
+- `select()`: 選取必要的欄（col），也就是變數、變項（variable）
+- `filter()`: 篩出符合條件的列（row），也就是資料項、觀察值（Observation）
+- `mutate()`: 在該dataframe中，從其他變項產生新的變項（例如相加）
+
+## 4.1 Selecting columns 選擇所要的變項欄
+- `select()`: 選取必要的欄（col），也就是變數、變項（variable）
+
+```{r}
+# selected <- select(users, userid, user_display_name, user_screen_name)
+selected <- users_1 %>% 
+    select(userid, user_display_name, user_screen_name)
+```
+
+
+## 4.2 Filter rows 篩選某變項符合條件的資料
+- `filter()`: 篩出符合條件的列（row），也就是資料項、觀察值（Observation）
+
+```{r}
+users_1 %>%
+    filter(nchar(user_screen_name) > 20)
+```
+
+
+## 4.3 Mutate() 以產生新的變項
+- `mutate()`: 在該dataframe中，從其他變項產生新的變項（例如相加）
+
+```{r}
+tweets_1 <- read_csv("data/china_082019_1_tweets_csv_hashed.csv")
+
+users_1 %>% 
+    mutate(ff_perc = follower_count / following_count) %>% 
+    select(ff_perc, follower_count, following_count, user_screen_name) %>%
+    head
+
+# Checking tweetid's variable type in data frame tweets_1
+tweets_1$tweetid %>% class
+
+# Converting tweetid's data type from numeric to character by as.character()
+tweets_1 %>%
+    mutate(tweetid = as.character(tweetid))
+```
+
+
+## 4.4 Assigning back
+- 當對資料做了操作（`filter()`, `select()`, `mutate()`）後，原本的dataframe內容仍不會改變，必須要把他assign以覆蓋掉原本的dataframe，才會實際上改變這個dataframe。
+```{r}
+
+# Not assigning to replace original datafrmae
+users_1 %>% 
+    mutate(ff_perc = follower_count / following_count)
+
+# Assigning to replace original dataframe
+users_1 <- users_1 %>% 
+    mutate(ff_perc = follower_count / following_count)
+
+# Assigning to a NEW dataframe
+test_1 <- users_1 %>% 
+    mutate(ff_perc = follower_count / following_count)
+
+```
+
+
+## 4.4p (Practice)
+- 讀取set1的tweets資料，assign給`tweets_1`，並觀察`tweetid`與`userid`兩個變項的資料型態
+- 觀察`users_1`中`userid`的資料型態是否和上述`tweets_1`中的`userid`資料型態相同
+- 將`tweets_1`中的`usersid`和`tweetid`兩個變數從numeric型態轉為character型態。
+
+```{r}
+# tweets_1 <- read_csv("data/china_082019_1_tweets_csv_hashed.csv")
+
+```
+
+
+## 4.5 (Advanced) 用if_else()產生判斷的結果並放至新變數
+
+
+# 05 觀察資料分布
+
+## 5.1 count() 計算出現次數
+
+```{r}
+# counting account language
+users_1 %>%
+    count(account_language)
+
+# counting account language in descending order
+users_1 %>%
+    count(account_language, sort = T)
+```
+
+## 5.2 Counting the number of tweets by year
+```{r}
+library(lubridate)
+tweets_1 %>%
+    mutate(year = year(tweet_time)) %>%
+    count(year)
+```
+
+
+# 06 用ggplot2視覺化
+- bbplot為bbc所推薦的R視覺化Sytle。可能會因為一開始安裝失敗而無法使用，此時就只需要把`bb_style()`拿掉，並把程式碼最末的`+`號一併拿除。
+
+## 6.1 barchart
+
+```{r}
+library(bbplot)
+
+tweets_1 %>%
+    mutate(year = year(tweet_time)) %>%
+    count(year) %>%
+    ggplot() + aes(year, n) + 
+    geom_col(fill = "royalblue") +
+    bbc_style()
+```
+
+
+## 6.2 Line chart
+
+```{r}
+tweets_1 %>%
+    mutate(month = floor_date(tweet_time, unit = "month")) %>%
+    count(month) %>%
+    ggplot() + aes(as.Date(month), n) +
+    # geom_line(color = "royalblue") +
+    geom_area(fill = "royalblue") +
+    # geom_step(color = "royalblue") + 
+    bbc_style() + 
+    geom_vline(xintercept = as.Date(c("2019-01-01", "2018-01-01", "2017-01-01", "2019-06-05")), color="red", alpha=0.5)
+```
+
+
+## 6.3 Options 
+
+```{r}
+tweets_1 %>%
+    mutate(date = date(tweet_time)) %>%
+    count(date) %>%
+    mutate(month = month(date)) %>%
+    mutate(wday = wday(date)) %>%
+    mutate(year = year(date)) %>%
+    mutate(week = week(date)) %>%
+    mutate(ym = str_c(year, "_", month)) %>% 
+    group_by(ym) %>%
+    mutate(week = 1 + week - min(week)) %>%
+    ungroup() %>%
+    ggplot() + aes(week, wday, fill=  n) + 
+    geom_tile(color = "white") + 
+    scale_fill_gradient(low="gold", high="royalblue") +
+    facet_grid(year~month) + 
+    theme(panel.grid.major.x = element_blank(),
+          panel.grid.major.y = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.background = element_blank(),
+          legend.background = element_blank(),
+          strip.background = element_rect(fill="white"),
+          strip.text = element_text(size  = 16,  hjust = 0))
+    
+    
+    
+```
+

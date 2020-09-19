@@ -1,0 +1,22 @@
+strong{
+    color:Crimson;
+    font-weight:normal;
+}
+
+li code{
+    color: dodgerblue;
+
+}
+.sourceCode{
+    margin-bottom: 0px;
+}
+pre{
+    border-radius: 0;
+}
+
+
+h2{
+    font-size: 18px;
+    color: dodgerblue;
+    font-weight: normal;
+}

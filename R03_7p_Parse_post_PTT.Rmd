@@ -1,0 +1,155 @@
+---
+title: "R03_7 Parse POST PTT"
+author: "Jilung Hsieh"
+date: "10/9/2019"
+output:
+  html_document:
+    highlight: zenburn
+    number_sections: yes
+    theme: cerulean
+    toc: yes
+    css: style.css
+editor_options:
+  chunk_output_type: inline
+---
+
+# loading packages
+```{r}
+library(tidyverse)
+library(httr)
+library(rvest)
+options(stringsAsFactors = F)
+```
+
+
+
+# Loading post list with links
+```{r}
+# Reading post link rds -> posts
+posts <- read_rds("data/post_HatePolitics_link.rds")
+posts %>% glimpse()
+
+```
+
+
+# Getting one post for examining html structure
+```{r}
+# WLOG, getting the first post link as an example, assign to -> url
+url <- posts$link[1]
+# Getting back the article and parsing as html
+# Remember to send cookie
+doc <- GET(url, config = set_cookies("over18" = "1")) %>%
+    content("text") %>%
+    read_html()
+
+
+
+# Verifying the doc by write_html() and browseURL()
+write_html(doc, "temp/test.html")
+browseURL("temp/test.html")
+
+```
+
+
+# Parse one post
+```{r}
+# Getting content by CSS selector
+pcontent <- html_node(doc, "#main-content") %>% html_text() %>% cat
+
+
+# BETTER for the case, Getting content by XPath
+pcontent <- html_nodes(doc, xpath = '//*[@id="main-content"]/text()') %>% 
+    html_text() %>%
+    str_c(collapse = "") %>%
+    str_replace_all("\n", "")
+
+
+
+
+
+
+# Getting metadata
+
+metadata <- html_nodes(doc, "#main-content > div.article-metaline > .article-meta-value") %>% html_text()
+
+ptime <- metadata[3]
+pauthor <- metadata[1]
+ptitle <- metadata[2]
+
+
+
+# Combining data to a data frame
+post.temp <- tibble(url, pcontent, ptitle, pauthor, ptime)
+
+```
+
+
+# Using for-loop to get all posts
+```{r}
+
+# Create an empty data frame -> all_posts
+
+all_posts <- tibble()
+# for-loop
+for(url in posts$link){
+    doc <- GET(url, config = set_cookies("over18" = "1")) %>%
+        content("text") %>%
+        read_html()   
+    pcontent <- html_nodes(doc, xpath = '//*[@id="main-content"]/text()') %>%
+        html_text() %>%
+        str_c(collapse = "") %>%
+        str_replace_all("\n", "")
+    
+    metadata <- html_nodes(doc, "#main-content > div.article-metaline > .article-meta-value") %>% html_text()
+    
+    ptime <- metadata[3]
+    pauthor <- metadata[1]
+    ptitle <- metadata[2]
+    
+    post.temp <- tibble(url, pcontent, ptitle, pauthor, ptime)
+    print(url)
+    
+    all_posts <- bind_rows(all_posts, post.temp)
+}
+
+
+
+
+
+
+
+
+```
+
+# Practice I. Crawling comments in the for-loop
+Modifying the for-loop content to scraping comments for each post. Each iteration of for-loop will scrape and parse multiple comments. Try to bind them together and store all comments in another data frame names "comments."
+
+```{r}
+
+```
+
+
+
+# Practice II. Cleaning variables
+- Converting posts timestamp to R datetime
+- Extracting id and nickname from the author field.
+```{r}
+
+```
+
+
+
+# Practice III. Writing to rds with timestamp
+- Saving posts by `write_rds()`
+- Using current time as part of file name.
+```{r}
+# Getting current time for file name -> current_time
+
+
+# Converting data type and writing rds
+
+
+```
+
+
+
