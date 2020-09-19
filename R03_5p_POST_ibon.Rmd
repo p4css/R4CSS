@@ -4,11 +4,12 @@ author: "Jilung Hsieh"
 date: "9/22/2019"
 output:
   html_document:
-    highlight: zenburn
-    number_sections: yes
     theme: cerulean
+    highlight: zenburn
     toc: yes
-    css: style.css
+    toc_float:
+      collapsed: no
+    df_print: paged
 editor_options:
   chunk_output_type: inline
 ---

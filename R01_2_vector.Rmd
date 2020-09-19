@@ -1,13 +1,15 @@
 ---
-title: "R01_2 R Basic: vector"
+title: "R Basic: Vector"
 author: "Jilung Hsieh"
 date: "2019/9/2"
 output:
   html_document:
-    highlight: zenburn
-    number_sections: yes
     theme: cerulean
+    highlight: zenburn
     toc: yes
+    toc_float:
+      collapsed: no
+    df_print: paged
 editor_options:
   chunk_output_type: inline
 ---

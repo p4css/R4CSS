@@ -4,7 +4,7 @@ author: "Jilung Hsieh"
 date: "2019/10/28"
 output:
   html_document:
-    theme: spacelab
+    theme: cerulean
     highlight: zenburn
     toc: yes
     toc_float:
@@ -13,13 +13,6 @@ output:
 editor_options:
   chunk_output_type: inline
 ---
-<style>
-    .tocify-header{color:darkred; font-size:16px;}
-    .tocify-subheader{color:tomato; font-size:14px;}
-    h1{color:darkred; font-size:40px;}
-    h2{color:tomato; font-size:24px;}
-    strong {background-color:yellow;}
-</style>
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -206,8 +199,8 @@ users_1$user_screen_name %>% class
 ## (Options) 用skimr套件縱覽資料
 ```{r}
 # install.packages("skimr")
-library(skimr)
-users_1 %>% skim()
+# library(skimr)
+# users_1 %>% skim()
 ```
 
 
@@ -240,7 +233,8 @@ users_1 %>%
 - `mutate()`: 在該dataframe中，從其他變項產生新的變項（例如相加）
 
 ```{r}
-tweets_1 <- read_csv("data/china_082019_1_tweets_csv_hashed.csv")
+
+# tweets_1 <- read_csv("data/china_082019_1_tweets_csv_hashed.csv")
 
 users_1 %>% 
     mutate(ff_perc = follower_count / following_count) %>% 
@@ -248,11 +242,11 @@ users_1 %>%
     head
 
 # Checking tweetid's variable type in data frame tweets_1
-tweets_1$tweetid %>% class
+# tweets_1$tweetid %>% class
 
 # Converting tweetid's data type from numeric to character by as.character()
-tweets_1 %>%
-    mutate(tweetid = as.character(tweetid))
+# tweets_1 %>%
+    # mutate(tweetid = as.character(tweetid))
 ```
 
 
@@ -306,9 +300,9 @@ users_1 %>%
 ## 5.2 Counting the number of tweets by year
 ```{r}
 library(lubridate)
-tweets_1 %>%
-    mutate(year = year(tweet_time)) %>%
-    count(year)
+# tweets_1 %>%
+#     mutate(year = year(tweet_time)) %>%
+#     count(year)
 ```
 
 
@@ -318,57 +312,57 @@ tweets_1 %>%
 ## 6.1 barchart
 
 ```{r}
-library(bbplot)
+# library(bbplot)
 
-tweets_1 %>%
-    mutate(year = year(tweet_time)) %>%
-    count(year) %>%
-    ggplot() + aes(year, n) + 
-    geom_col(fill = "royalblue") +
-    bbc_style()
+# tweets_1 %>%
+#     mutate(year = year(tweet_time)) %>%
+#     count(year) %>%
+#     ggplot() + aes(year, n) + 
+#     geom_col(fill = "royalblue") +
+#     bbc_style()
 ```
 
 
 ## 6.2 Line chart
 
 ```{r}
-tweets_1 %>%
-    mutate(month = floor_date(tweet_time, unit = "month")) %>%
-    count(month) %>%
-    ggplot() + aes(as.Date(month), n) +
-    # geom_line(color = "royalblue") +
-    geom_area(fill = "royalblue") +
-    # geom_step(color = "royalblue") + 
-    bbc_style() + 
-    geom_vline(xintercept = as.Date(c("2019-01-01", "2018-01-01", "2017-01-01", "2019-06-05")), color="red", alpha=0.5)
+# tweets_1 %>%
+#     mutate(month = floor_date(tweet_time, unit = "month")) %>%
+#     count(month) %>%
+#     ggplot() + aes(as.Date(month), n) +
+#     # geom_line(color = "royalblue") +
+#     geom_area(fill = "royalblue") +
+#     # geom_step(color = "royalblue") + 
+#     bbc_style() + 
+#     geom_vline(xintercept = as.Date(c("2019-01-01", "2018-01-01", "2017-01-01", "2019-06-05")), color="red", alpha=0.5)
 ```
 
 
 ## 6.3 Options 
 
 ```{r}
-tweets_1 %>%
-    mutate(date = date(tweet_time)) %>%
-    count(date) %>%
-    mutate(month = month(date)) %>%
-    mutate(wday = wday(date)) %>%
-    mutate(year = year(date)) %>%
-    mutate(week = week(date)) %>%
-    mutate(ym = str_c(year, "_", month)) %>% 
-    group_by(ym) %>%
-    mutate(week = 1 + week - min(week)) %>%
-    ungroup() %>%
-    ggplot() + aes(week, wday, fill=  n) + 
-    geom_tile(color = "white") + 
-    scale_fill_gradient(low="gold", high="royalblue") +
-    facet_grid(year~month) + 
-    theme(panel.grid.major.x = element_blank(),
-          panel.grid.major.y = element_blank(),
-          panel.grid.minor = element_blank(),
-          panel.background = element_blank(),
-          legend.background = element_blank(),
-          strip.background = element_rect(fill="white"),
-          strip.text = element_text(size  = 16,  hjust = 0))
+# tweets_1 %>%
+#     mutate(date = date(tweet_time)) %>%
+#     count(date) %>%
+#     mutate(month = month(date)) %>%
+#     mutate(wday = wday(date)) %>%
+#     mutate(year = year(date)) %>%
+#     mutate(week = week(date)) %>%
+#     mutate(ym = str_c(year, "_", month)) %>% 
+#     group_by(ym) %>%
+#     mutate(week = 1 + week - min(week)) %>%
+#     ungroup() %>%
+#     ggplot() + aes(week, wday, fill=  n) + 
+#     geom_tile(color = "white") + 
+#     scale_fill_gradient(low="gold", high="royalblue") +
+#     facet_grid(year~month) + 
+#     theme(panel.grid.major.x = element_blank(),
+#           panel.grid.major.y = element_blank(),
+#           panel.grid.minor = element_blank(),
+#           panel.background = element_blank(),
+#           legend.background = element_blank(),
+#           strip.background = element_rect(fill="white"),
+#           strip.text = element_text(size  = 16,  hjust = 0))
     
     
     

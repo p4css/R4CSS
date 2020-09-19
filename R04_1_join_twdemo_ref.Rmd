@@ -2,7 +2,16 @@
 title: "R04_1_join_twdemo_ref"
 author: "Jilung Hsieh"
 date: "2020/4/18"
-output: html_document
+output:
+  html_document:
+    theme: cerulean
+    highlight: zenburn
+    toc: yes
+    toc_float:
+      collapsed: no
+    df_print: paged
+editor_options:
+  chunk_output_type: inline
 ---
 
 ```{r setup, include=FALSE}

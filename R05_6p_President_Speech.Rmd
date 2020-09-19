@@ -1,6 +1,15 @@
 ---
 title: "R05_6_TM_President_Speech"
-output: html_document
+output:
+  html_document:
+    theme: cerulean
+    highlight: zenburn
+    toc: yes
+    toc_float:
+      collapsed: no
+    df_print: paged
+editor_options:
+  chunk_output_type: inline
 ---
 
 ```{r setup, include=FALSE}

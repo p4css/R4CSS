@@ -2,13 +2,15 @@
 title: "0_pre_install_packages"
 author: "Jilung Hsieh"
 date: "2018/7/1"
-output: 
-  html_document: 
-    number_sections: true
-    highlight: textmate
-    theme: spacelab
+output:
+  html_document:
+    theme: cerulean
+    highlight: zenburn
     toc: yes
-editor_options: 
+    toc_float:
+      collapsed: no
+    df_print: paged
+editor_options:
   chunk_output_type: inline
 ---
 
