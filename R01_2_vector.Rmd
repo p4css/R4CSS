@@ -18,6 +18,8 @@ editor_options:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+
+
 # R syntax
 
 ## Assignment

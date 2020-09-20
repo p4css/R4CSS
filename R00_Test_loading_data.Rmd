@@ -83,6 +83,8 @@ library(httr)
 * 先不要去管`fromJSON(content(GET(url), "text"))`是什麼意思，先著重在語言的形式。通常一個函式會寫為`func_name()`，所以上述其實是三個函式由內而外一層套一層，從最內層開始往外做。
 * 這其實很make-sense，因為如果你有一個數學式`(1 + (3-3)/2)/8`，也是會從最裡面那層做出來。
 ```{r}
+library(jsonlite)
+library(httr)
 url <- "https://www.dcard.tw/_api/forums/relationship/posts?popular=true"
 res <- fromJSON(content(GET(url), "text"))
 dplyr::glimpse(res)
