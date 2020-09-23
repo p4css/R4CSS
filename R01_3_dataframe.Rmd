@@ -14,6 +14,12 @@ editor_options:
   chunk_output_type: inline
 ---
 
+
+```{r}
+options(stringsAsFactors = F)
+```
+
+
 # Data1: Taipei city population data
 ## Copying data and creating vectors
 
@@ -26,7 +32,9 @@ area <- c(7.6071, 5.6815, 13.6821, 9.2878, 11.3614, 8.8522)
 ## Building a data.frame
 ```{r}
 df <- data.frame(town, population, area)
-df
+df$density = df$population / df$area
+str(df)
+summary(df)
 # View(df)
 ```
 
@@ -205,6 +213,7 @@ df <- data.frame(country, import, export, stringsAsFactors = F)
 df <- mutate(df, sub = import - export)
 filter(df, import > export)
 select(df, c(1, 3))
-
+message(df$country)
+print(df$country)
 ```
 

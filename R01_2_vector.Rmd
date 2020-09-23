@@ -62,6 +62,12 @@ income <- c(70100, 51300, 51100, 48400, 47600, 43000)
 county <- c("台北", "新北", "桃園", "高雄", "台中", "台南")
 population <- c(2.6, 3.9, 2.2, 2.7, 2.8, 1.8)
 area <- c(271.8, 2052.5, 1221, 2951.9, 2214.9, 2191.7)
+income
+county[c(5, 3, 1)]
+county <- county[c(5, 3, 1)]
+county
+area
+population
 ```
 
 
@@ -76,7 +82,7 @@ b
 
 ## Creating sequences by distribution
 ```{r}
-x <- runif(1000, 1, 10) # uniform dist, n=1000
+x <- runif(10000000, 1, 10) # uniform dist, n=1000
 plot(density(x))
 x <- rnorm(1000, 1, 10) # uniform dist, n=1000
 plot(density(x))
@@ -93,7 +99,11 @@ income
 head(county)
 tail(county)
 length(county)
+mode(county)
+class(county)
 # View(county)
+length(county)
+length(income)
 ```
 
 
@@ -155,6 +165,9 @@ a / 2
 a %% 2
 a %/% 2
 a %% 2== 0
+which(a %% 2== 0)
+a[which(a%% 2 == 0)]
+a[c(2, 4, 6, 8)]
 a %% 2 != 0
 a[a%% 2 == 0]
 a[a%%2 != 0]
@@ -212,10 +225,13 @@ which(a%%2==1)
 
 ```{r}
 x <- c(33, 55, 22, 13, 4, 24)
+mode(x)
+class(x)
 sort(x)
-x <- sort(x) # assign to replace original x
+# x <- sort(x) # assign to replace original x
 order(x) 
 x[order(x)]
+x[c(5, 4, 3, 6, 1, 2)]
 ```
 
 
@@ -261,6 +277,8 @@ a <- c(a, "100")
 a <- seq(11, 99, 11)
 sum(a%%2==1)
 
+
+max(a)
 ```
 
 
