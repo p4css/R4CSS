@@ -43,6 +43,13 @@ comments %>%
 
     
     slice(1:5)
+
+# 參考解答
+# gn02118620	7362			
+# zeumax	5908			
+# ninaman	5237			
+# bottger	5062			
+# bluesunflowe	4421	
 ```
 
 
@@ -57,6 +64,13 @@ posts %>%
     
     # you cade should be here
     slice(1:5)
+
+
+# mark2165	198			
+# kolod546	106			
+# sincsnow	86			
+# c1951	85			
+# fantasy14	82	
 ```
 
 
@@ -76,6 +90,18 @@ comments %>%
     # you cade should be here
     select(tag, commentor, cindex, ctotal) %>%
     head(n=20)
+
+# tag commentor   cindex  ctotal
+# →	tarcowang	1	103	
+# 推	alex8725	2	103	
+# →	lovebxcx	3	103	
+# 推	want150	4	103	
+# →	want150	5	103	
+# →	lovebxcx	6	103	
+# →	dai26	7	103	
+# →	lovebxcx	8	103	
+# →	lovebxcx	9	103	
+# →	lovebxcx	10	103	
 ```
 
 
@@ -108,7 +134,19 @@ comments %>%
     # you cade should be here
     slice(1:10)
 
-    
+
+# 參考答案
+# commentor avg_order sd_order tot_comment
+# jma306	0.05493002	0.07529088	13	
+# ckbdfrst	0.08982297	0.05369776	14	
+# popy8789	0.09612579	0.06651135	15	
+# flavorBZ	0.09687205	0.08332761	18	
+# wangyc	0.10526316	0.06208009	14	
+# GalLe5566	0.12664135	0.05661774	14	
+# WeiYinChen16	0.13256803	0.17645476	16	
+# hachime	0.14190509	0.09977058	20	
+# Rrrxddd	0.15630718	0.20187598	32	
+# jk952840	0.15926640	0.10011586	14	
 ```
 
 # 7. Challenge: Counting how many posts each commentor has responded to 
@@ -136,6 +174,18 @@ comments %>%
 
     # you cade should be here
     slice(1:30)
+# 參考答案
+# aylao	1775	3090	1.740845	29	1	2.1007312
+# bottger	1569	5062	3.226259	148	1	6.1644491
+# ninaman	1497	5237	3.498330	87	1	6.6914547
+# zeumax	1286	5908	4.594090	110	1	7.6819114
+# gn02118620	1206	7362	6.104478	128	1	13.5951186
+# bluesunflowe	1197	4421	3.693400	86	1	7.3393883
+# pupu20317	1190	3184	2.675630	103	1	5.8934179
+# formatted	1114	3609	3.239677	77	1	6.3197949
+# alex8725	984	3611	3.669715	64	1	5.5738506
+# c1951	886	2017	2.276524	38	1	2.9875924 
+
 ```
 
 # 8. Call for idea
