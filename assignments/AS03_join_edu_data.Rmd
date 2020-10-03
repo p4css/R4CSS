@@ -1,14 +1,13 @@
 ---
 title: "AS03_join_edu_data"
 author: "Jilung Hsieh"
-date: "9/25/2019"
+date: "10/03/2020"
 output:
   html_document:
     highlight: zenburn
     number_sections: no
     theme: cerulean
     toc: yes
-    css: style.css
 editor_options:
   chunk_output_type: inline
 ---
@@ -36,18 +35,15 @@ read_csv("data/opendata107Y020.csv") %>%
 
 ## Town level educational data 
 - Original data is village-level data
-- Following In-Class tutorial, using `group_by()` to create town-level statistical data.
+- Using `group_by()` to create town-level statistical data.
 
 ```{r}
 
 ```
 
 
-## Add code chunks as you need here. 
-
-
 ## Loading town-level age, marriage, and referendum data
-- Loading town-level data created in class
+- Loading previous town-level age-marriage-referendum-data
 
 ```{r}
 
@@ -56,26 +52,34 @@ read_csv("data/opendata107Y020.csv") %>%
 
 
 ## Joining data together
-- Joining all town-leave data together (Including new educational dada, and age, marriage, referendum data introduced in class)
+- Joining two town-leave data together 
+- data 1: new added educational data
+- data 2: previous age-marriage-referendum-data
+
 ```{r}
 
 ```
 
 ## **Q1 Ans: Joined data dimension**
-- using `dim()` to display data dimension (should be 368). TAs will score Q1 according to the outcome.
+- using `dim()` to display data dimension (should be 368). 
+- TAs will score Q1 according to the outcome.
+
 ```{r}
 # dim(YOUR_DATA_FRAME_NAME)
 ```
 
 
 ## **Q1 Ans: glimpse()**
-- Using `glimpse()` to print out data you join below. TAs will score Q1 according to the `glimpse()` outcome.
+- Using `glimpse()` to print out data you join below. 
+- TAs will score Q1 according to the `glimpse()` outcome.
+
 ```{r}
 # glimpse(YOUR_DATA_FRAME_NAME)
 ```
 
 # Q2 Open Question - Joining one more dimension
-- TASK: Collecting one more dimension from open data for town level and join it with the eucation, married, age, and referendum data.
+- TASK: Collecting one more dimension from open data and join it to the above two-level data
+- e.g., economic, wealth, educational resource, ...
 
 
 ## Read the file
@@ -124,7 +128,7 @@ read_csv("data/opendata107Y020.csv") %>%
 # Q4 Challenge: The median of grouped data
 - Calculating age median of grouped data
 - Reference: https://www.themathdoctors.org/finding-the-median-of-grouped-data/
-- Solve it wit dplyr pkgs
+- Solve it by dplyr pkgs
 - If you can't answer the question correctly, keep your code (even wrong) to get partial scores.
 
 ## **Q4 Ans: glimpse()**
