@@ -24,6 +24,8 @@ library(rvest)
 library(httr)
 library(tidyverse)
 options(stringsAsFactors = F)
+options(verbose = T)
+options(scipen = 999)
 ```
 
 # GET() html with cookie

@@ -23,6 +23,8 @@ library(httr)
 library(rvest) # for traversing html structure
 library(tidyverse)
 options(stringsAsFactors = F)
+options(verbose = T)
+options(scipen = 999)
 ```
 
 

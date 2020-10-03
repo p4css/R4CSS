@@ -24,6 +24,8 @@ You may need to install packages into your computer firstly, by `install.package
 ```{r}
 library(tidyverse)
 options(stringsAsFactors = F)
+options(verbose = T)
+options(scipen = 999)
 
 # loading httr package to get back web data
 

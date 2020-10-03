@@ -25,10 +25,12 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 ```{r}
-library(tidyverse)
 library(httr)
 library(rvest) 
+library(tidyverse)
 options(stringsAsFactors = F)
+options(verbose = T)
+options(scipen = 999)
 ```
 
 

@@ -23,6 +23,8 @@ editor_options:
 ```{r}
 library(tidyverse)
 options(stringsAsFactors = F)
+options(verbose = T)
+options(scipen = 999)
 ```
 
 # Loading data

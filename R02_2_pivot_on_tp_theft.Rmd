@@ -269,8 +269,9 @@ df$month <- substr(x, 3, 4) # is this correct? Try to modify it!
 
 library(readr)
 library(tidyverse)
-
-library(readr)
+options(stringsAsFactors = F)
+options(verbose = T)
+options(scipen = 999)
 url <- "http://data.taipei/opendata/datalist/datasetMeta/download?id=68785231-d6c5-47a1-b001-77eec70bec02&rid=34a4a431-f04d-474a-8e72-8d3f586db3df"
 df <- read_csv(url, locale = locale(encoding = "Big5"))
 

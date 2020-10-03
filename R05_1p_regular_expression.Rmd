@@ -22,6 +22,8 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
 library(tidyverse)
 options(stringsAsFactors = F)
+options(verbose = T)
+options(scipen = 999)
 ```
 # Online tools for detecting regular expression (RE)
 - https://regex101.com/

@@ -23,6 +23,9 @@ editor_options:
 
 ```{r}
 library(tidyverse)
+options(stringsAsFactors = F)
+options(verbose = T)
+options(scipen = 999)
 # library(stringr)
 library(tidytext) # unnest() unnest_tokens()
 library(jiebaR)
