@@ -30,7 +30,7 @@ options(stringsAsFactors = F)
 # Read by read_csv()
 # Will raise error
 # Error in make.names(x) : invalid multibyte string at '<bd>s<b8><b9>'
-# df <- read_csv("data/tp_theft.csv")
+# df <- read_csv("data/tptheft.csv")
 
 # read_csv() with locale encoding = "Big5"
 df <- read_csv("data/tptheft.csv", locale = locale(encoding = "Big5"))
@@ -58,7 +58,7 @@ df <- read_csv("data/tptheft.csv", locale = locale(encoding = "Big5")) %>%
 - Filtering out irrelevant data records
 
 ```{r}
-# readr::guess_encoding("data/tp_theft.csv")
+# readr::guess_encoding("data/tptheft.csv")
 df <- df %>%
     # count(year) %>% View
     filter(year >= 104) %>%

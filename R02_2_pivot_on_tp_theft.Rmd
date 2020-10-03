@@ -264,7 +264,7 @@ df$month <- substr(x, 3, 4) # is this correct? Try to modify it!
 
 # (dplyr) on tp theft
 ```{r}
-# readr::guess_encoding("data/tp_theft.csv")
+# readr::guess_encoding("data/tptheft.csv")
 
 
 library(readr)
