@@ -16,10 +16,12 @@ editor_options:
 
 # loading packages
 ```{r}
-library(tidyverse)
 library(httr)
 library(rvest)
+library(tidyverse)
 options(stringsAsFactors = F)
+options(verbose = T)
+options(scipen = 999)
 ```
 
 

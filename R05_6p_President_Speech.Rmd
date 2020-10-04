@@ -17,14 +17,13 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r}
-library(stringr)
-library(tidytext)
-library(jiebaR)
-library(lubridate)
 library(tidyverse)
 options(stringsAsFactors = F)
 options(verbose = T)
 options(scipen = 999)
+library(tidytext)
+library(jiebaR)
+library(lubridate)
 ```
 
 

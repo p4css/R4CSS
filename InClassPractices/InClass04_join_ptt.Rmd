@@ -24,7 +24,7 @@ options(stringsAsFactors = F)
 
 # Loading data
 ```{r}
-load("data/HatePolitics_Hang_20190101_2019_06_01.rda")
+load("../data/HatePolitics_Hang_20190101_2019_06_01.rda")
 ```
 
 # Filtering posts by year >= 2019
@@ -40,8 +40,12 @@ comments2019 <- comments %>% right_join(posts2019, by = "plink")
 ```
 
 # Filter posts with title category [新聞]
+- https://rstudio.github.io/DT/options.html
+
 ```{r}
-posts %>% filter(str_detect(ptitle, "^\\[新聞\\]")) %>% head %>% knitr::kable()
+posts %>% filter(str_detect(ptitle, "^\\[新聞\\]")) %>% 
+  select(-1) %>% 
+  DT::datatable() %>%  DT::saveWidget("test.html")
 ```
 
 # Computing number of comments of selected posts
@@ -85,20 +89,22 @@ posts %>% select(plink, poster) %>%
 ```{r}
 library(igraph)
 library(ggraph)
-posts %>% select(plink, poster) %>%
+g <- posts %>% select(plink, poster) %>%
     left_join(comments, by = "plink") %>%
     group_by(plink) %>%
     filter(!duplicated(commentor)) %>%
     ungroup() %>%
-    filter(!poster == "mark2165") %>%
+    # filter(!poster == "mark2165") %>%
     count(commentor, poster, sort = T) %>%
-    slice(1:3000) %>%
+    slice(1:2000) %>%
     group_by(commentor) %>%
     filter(n() >= 20) %>%
     ungroup() %>%
     group_by(poster) %>%
     filter(n() >= 20) %>%
-    ungroup() %>%
+    ungroup()
+
+g %>% 
     graph_from_data_frame(directed = T) %>%
     ggraph(layout = "fr") +
     geom_edge_link(aes(edge_alpha = n), color="dimgray") +
