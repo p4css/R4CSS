@@ -27,7 +27,7 @@ options(scipen = 999)
 
 # Read demographic data: read csv
 ```{r read csv}
-raw <- read_csv("data/opendata107Y030.csv") %>%
+raw <- read_csv("../data/opendata107Y030.csv") %>%
     slice(-1) %>%
     mutate(vname = str_c(site_id, village)) %>%
     select(vname, everything())
@@ -43,8 +43,8 @@ tidy_data <- raw %>%
     mutate(key = str_replace(key, "100up", "100_110")) %>%
     mutate(key = str_replace(key, "15down", "0_15")) %>%
     separate(key, c("married", "ageLower", "ageUpper", "gender")) %>%
-    mutate(age = str(ageLower, ageUpper), 
-           ageLower = as.numeric(ageLower),
+    mutate(ageLower = as.numeric(ageLower),
+           # age = str(ageLower, ageUpper), 
            ageUpper = as.numeric(ageUpper),
            value = as.numeric(value)) %>%
     select(-statistic_yyy) %>%

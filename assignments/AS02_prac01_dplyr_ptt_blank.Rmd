@@ -28,8 +28,8 @@ options(stringsAsFactors = F)
 將會產生兩個data frames, `posts` and `comments`。你得依照提議自己判斷，你會需要用到哪個data frame。
 
 ```{r}
-load("data/HatePolitics_Hang_20190101_2019_06_01.rda")
-
+load("../data/HatePolitics_Hang_20190101_2019_06_01.rda")
+readr::write_csv(posts, "posts.csv")
 ```
 
 
