@@ -20,7 +20,7 @@ options(stringsAsFactors = F)
 # Loading data
 
 ```{r echo=TRUE}
-data_url <- "https://github.com/P4CSS/R4CSS/raw/master/data/newswawawa_yt_comments.rds"
+data_url <- "https://github.com/P4CSS/R4CSSData/raw/main/newswawawa_yt_comments.rds"
 raw <- read_rds(url(data_url))
 ```
 
