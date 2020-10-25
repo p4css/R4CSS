@@ -1,0 +1,175 @@
+---
+title: "R03_1 Crawling 104"
+author: "Jilung Hsieh"
+date: "2020/10/25"
+output:
+  html_document:
+    highlight: zenburn
+    number_sections: yes
+    theme: cerulean
+    toc: yes
+    css: style.css
+editor_options:
+  chunk_output_type: inline
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# Loading essential packages
+```{r}
+library(tidyverse)
+options(stringsAsFactors = F)
+
+
+
+```
+
+
+
+# Get the first page
+
+## (try to) Load the 2nd page
+
+```{r}
+# Copy and assign the 2nd page url to url2
+url2 <- 
+
+# Copy and assign  the 3rd page url to url3
+url3 <- 
+
+# Send GET() request to get the page of url2, 
+# parse it, 
+# and assign it to res2
+
+res2 <-  GET(url2) %>% 
+  content("text") %>% 
+  fromJSON()
+
+# Tracing variable result2 and finding the data frame, 
+# assign to df2
+
+df2 
+
+```
+
+
+
+## Add "Referer" argument to request page data correctly
+
+```{r}
+response <- GET(url2, config = add_headers("Referer" = "https://www.104.com.tw/"))
+res <- response %>% content("text") %>%
+  fromJSON()
+res$data$list %>% View
+```
+
+
+
+## Get the first page by modifying url
+
+```{r}
+# Guessing the 1st page data url to url1
+
+
+# Getting back the 1st page data
+
+
+
+
+```
+
+
+# Combine data frames by row
+
+## (try to) Combine two pieces of data (having exactly the same variables)
+
+```{r}
+# all.df <- bind_rows(df1, df2) # will raise error
+# Error in bind_rows_(x, .id) : 
+#   Argument 31 can't be a list containing data frames
+```
+
+## Drop out hierarchical variables
+- Preserving numeric or character, dropping list of data.frame by assigning NULL to the variable
+
+```{r}
+# Drop list and data.frame inside the data.frame
+
+
+# Re-binding two data.frames df1 and df2 by rows
+
+
+```
+
+## Dropping hierarchical variables by dplyr way
+```{r}
+
+# Getting the 1st page data and dropping variable tags and link
+# Assigning to df1
+
+
+# Getting the 2nd page data and dropping variable tags and link
+# Assigning to df2
+
+
+# binding df1 and df2
+
+
+```
+
+
+# Finding out the last page number
+```{r}
+# Tracing the number of pages in result1
+
+
+# Checking the page number of the last page
+# Examining if the last page data available by re-composing URL with paste0()
+
+
+# Getting back and parsing the last page data
+
+
+
+```
+
+# Use for-loop to get all pages
+```{r}
+
+
+
+
+
+```
+
+# Combine all data.frame
+```{r}
+
+#  The 1st url of the query
+
+
+# Getting back the 1st page data
+
+
+# Tracing and getting total number of page
+
+
+# Truncating hierarchical variables: link and tags
+
+
+
+# for-loop to getting back data and joining them
+
+
+
+```
+
+
+
+
+
+
+

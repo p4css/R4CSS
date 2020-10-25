@@ -79,7 +79,7 @@ clean %>%
     mutate(d = floor_date(ptime, unit = "day")) %>%
     mutate(h = hour(ptime)) %>%
     count(d, h) %>%
-    mutate(wd = wday(d, label = T, locale = Sys.getlocale("LC_TIME"))) %>% View
+    mutate(wd = wday(d, label = F, locale = Sys.getlocale("LC_TIME"))) %>% View
     mutate(isweekend = ifelse(wd >= 6, "weekend", "weekday")) %>%
     ggplot() + aes(h, n, color = as.character(d)) + 
     geom_line() + 
