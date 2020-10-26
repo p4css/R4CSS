@@ -23,6 +23,8 @@ You may need to install packages into your computer firstly, by `install.package
 
 ```{r}
 library(tidyverse)
+library(httr)
+library(jsonlite)
 options(stringsAsFactors = F)
 options(verbose = T)
 options(scipen = 999)
@@ -37,7 +39,7 @@ options(scipen = 999)
 # Case 1: Well-formatted Air-Quality
 
 ```{r Getting AQI data}
-url <- "http://opendata.epa.gov.tw/ws/Data/REWIQA/?$orderby=SiteName&$skip=0&$top=1000&format=json"
+url <- "https://airtw.epa.gov.tw/gis_ajax.aspx?Type=GetAQInfo&Layer=EPA&QueryTime=2020/10/26%2010:00"
 
 df <- fromJSON(content(GET(url), "text", encoding = "utf-8"))
 df %>% glimpse()
@@ -102,7 +104,7 @@ df %>% glimpse()
 
 ## Combining all functions
 ```{r}
-url <- "http://opendata.epa.gov.tw/ws/Data/REWIQA/?$orderby=SiteName&$skip=0&$top=1000&format=json"
+url <- "https://airtw.epa.gov.tw/gis_ajax.aspx?Type=GetAQInfo&Layer=EPA&QueryTime=2020/10/26%2010:00"
 
 # Combining all functions
 
