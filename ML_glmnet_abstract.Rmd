@@ -1,0 +1,145 @@
+---
+title: "ML03_glmnet_abstract"
+author: "Jilung Hsieh"
+date: "11/17/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# loading library
+```{r}
+set.seed(1)
+# install.packages("glmnet")
+library(glmnet)
+?glmnet
+```
+
+
+## ?glmnet
+- `alpha=1` is the lasso penalty, and `alpha=0` the ridge penalty.
+
+```
+glmnet(x, y, 
+    family=c("gaussian","binomial","poisson","multinomial","cox","mgaussian"),
+    weights, offset=NULL, alpha = 1, nlambda = 100,
+    lambda.min.ratio = ifelse(nobs<nvars,0.01,0.0001), lambda=NULL,
+    standardize = TRUE, intercept=TRUE, thresh = 1e-07,  dfmax = nvars + 1,
+    pmax = min(dfmax * 2+20, nvars), exclude, penalty.factor = rep(1, nvars),
+    lower.limits=-Inf, upper.limits=Inf, maxit=100000,
+    type.gaussian=ifelse(nvars<500,"covariance","naive"),
+    type.logistic=c("Newton","modified.Newton"),
+    standardize.response=FALSE, type.multinomial=c("ungrouped","grouped"))
+
+```
+
+
+# One pass test
+- Pre-defining lambda to 0.001
+
+```{r}
+stime <- Sys.time()
+glm.fit <- glmnet(train.df %>% select(-sentence_type, -sentence_id) %>% as.matrix(), 
+                  as.factor(train.df$sentence_type), 
+                  family = 'multinomial')
+Sys.time() - stime
+
+predicted.df <- predict(glm.fit, 
+                       test.df %>% select(-sentence_id, -sentence_type) %>% as.matrix(), 
+                       s = 0.0025) %>%  
+    as.data.frame() %>% View
+    bind_cols(test.df %>% select(sentence_id)) %>%
+    select(sentence_id,
+           BACKGROUND=BACKGROUND.1, 
+           CONCLUSIONS=CONCLUSIONS.1, 
+           METHODS=METHODS.1, 
+           OBJECTIVES=OBJECTIVES.1, 
+           RESULTS=RESULTS.1) %>%
+    gather(predicted_type, value, -sentence_id) %>%
+    group_by(sentence_id) %>%
+    arrange(-value) %>%
+    slice(1:1) %>%
+    ungroup() %>%
+    left_join(test.df %>% select(sentence_id, sentence_type), by = "sentence_id")
+
+conf.mat <- table(Prediction = predicted.df$predicted_type, Actual = predicted.df$sentence_type)
+conf.mat %>% as_tibble %>% spread(Actual, n)
+(accuracy <- sum(diag(conf.mat))/sum(conf.mat) * 100)
+```
+
+
+# Regularization
+
+> [1] "[Iteration 1 with lambda 1e-04] Accuracy:  50.1750547045952"
+> [1] "[Iteration 1 with lambda 0.001] Accuracy:  51.2691466083151"
+> [1] "[Iteration 1 with lambda 0.0025] Accuracy:  52.1006564551422"
+> [1] "[Iteration 1 with lambda 0.005] Accuracy:  51.925601750547"
+> [1] "[Iteration 1 with lambda 0.01] Accuracy:  50.8752735229759"
+> [1] "[Iteration 1 with lambda 0.025] Accuracy:  29.1028446389497"
+> [1] "[Iteration 1 with lambda 0.5] Accuracy:  27.1115973741794"
+> [1] "[Iteration 1 with lambda 0.1] Accuracy:  28.5120350109409"
+
+```{r}
+performance <- tibble()
+
+for (i in 1:10){
+    
+    index <- sample(1:nrow(mat.df), ceiling(nrow(mat.df) * .70))
+    train.df <- mat.df[index, ]
+    test.df <- mat.df[-index, ]
+
+    
+    for (lambda in c(0.0001, 0.001, 0.0025, 0.005, 0.01, 0.025, 0.5, 0.1)){
+        glm.fit <- glmnet(train.df %>% select(-sentence_type, -sentence_id) %>% as.matrix(), 
+                          as.factor(train.df$sentence_type), 
+                          family = 'multinomial')
+        
+        predicted.df <- predict(glm.fit, 
+                                test.df %>% select(-sentence_id, -sentence_type) %>% as.matrix(), 
+                                s = lambda) %>%  
+            as.data.frame() %>%
+            bind_cols(test.df %>% select(sentence_id)) %>%
+            select(sentence_id,
+                   BACKGROUND=BACKGROUND.1, 
+                   CONCLUSIONS=CONCLUSIONS.1, 
+                   METHODS=METHODS.1, 
+                   OBJECTIVES=OBJECTIVES.1, 
+                   RESULTS=RESULTS.1) %>%
+            gather(predicted_type, value, -sentence_id) %>%
+            group_by(sentence_id) %>%
+            arrange(-value) %>%
+            slice(1:1) %>%
+            ungroup() %>%
+            left_join(test.df %>% select(sentence_id, sentence_type), by = "sentence_id")
+        
+        conf.mat <- table(Prediction = predicted.df$predicted_type, Actual = predicted.df$sentence_type)
+        conf.mat %>% as_tibble %>% spread(Actual, n)
+        accuracy <- sum(diag(conf.mat))/sum(conf.mat) * 100
+        print(str_interp("[Iteration ${i} with lambda ${lambda}] Accuracy:  ${accuracy}"))
+        
+        performance <- bind_rows(performance,
+                             data.frame(Lambda = lambda,
+                                        Iteration = i,
+                                        Accuracy = accuracy))
+    }
+    print(i)
+}
+??glmnet
+```
+
+
+```{r}
+glm.fit
+```
+```{r}
+
+?stat_summary
+# install.packages("Hmisc")
+library(Hmisc)
+ggplot(performance, aes(x = Lambda, y = Accuracy)) + stat_summary(fun.data = 'mean_cl_boot', geom = 'errorbar') + stat_summary(fun.data = 'mean_cl_boot', geom = 'point') + scale_x_log10()
+
+```
+
