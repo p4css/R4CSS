@@ -99,9 +99,14 @@ head(res)
 # Getting Taipei theft report data
 
 ## Getting from the web directly
+- Go to data.taipei
+- Make a query "住宅竊盜"
+- Open "住宅竊盜點位資訊"
+- Click "API"
+- Copy the API address and assign to url
 ```{r}
-url <- "http://data.taipei/opendata/datalist/datasetMeta/download?id=68785231-d6c5-47a1-b001-77eec70bec02&rid=34a4a431-f04d-474a-8e72-8d3f586db3df"
-df <- read.csv(url, fileEncoding = "big5")
+url <- "https://data.taipei/api/v1/dataset/93d9bc2d-af08-4db7-a56b-9f0a49226fa3?scope=resourceAquire"
+df <- read_json(url, simplifyVector = T)
 head(df)
 dplyr::glimpse(df)
 ```
