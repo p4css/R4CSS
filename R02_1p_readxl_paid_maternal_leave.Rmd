@@ -391,11 +391,13 @@ for (i in c(1:nrow(m55))){
 
 # by dplyr
 ```{r}
+library(readxl)
 library(dplyr)
 library(tidyr)
 library(ggplot2)
 raw <- read_excel("data/WORLD-MACHE_Gender_6.8.15.xls", "Sheet1", col_names=T)
 matleave <- select(raw, iso3, 6:24)
+
 m5 <- filter(matleave, matleave_13==5)
 m55 <- filter(m5, matleave_95==5)
 ```
