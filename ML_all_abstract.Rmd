@@ -53,6 +53,7 @@ raw <- read_csv("data/hackathon/task1_trainset.csv") %>%
 
 raw %>% count(sentence_type)
 raw %>% glimpse()
+raw %>% write_csv("../R4CSSData/ml_data_splitted.csv")
 
 ```
 
@@ -256,6 +257,9 @@ index <- sample(1:nrow(mat.df), ceiling(nrow(mat.df) * .70))
 
 train.df <- mat.df[index, ]
 test.df <- mat.df[-index, ]
+
+train.df %>% write_csv("train_paper_label.csv")
+test.df %>% write_csv("test_paper_label.csv")
 
 dim(train.df)
 dim(test.df)
