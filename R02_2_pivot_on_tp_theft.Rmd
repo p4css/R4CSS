@@ -18,47 +18,57 @@ editor_options:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-# Reading CSV
-## From the web
+
+
+# I. Reading TP theft data (CSV)
+
+## Read from the web
 * 直接從網路上載入台北市竊盜案資料（至台北資料大平台上查詢住宅竊盜，對下載處按右鍵取得連結）
-* `df <- read.csv(url, fileEncoding = "big5")`這行的意思是把上面那個`url`用`read.csv()`這個函式讀取。讀取的同時，由於一般EXCEL為中文編碼`BIG5`，所以該文件八成是該台北市政單位還用EXCEL在編資料，所以要跟程式碼講說，這個網址所指到的檔案編碼為`BIG5`。
+* `df <- read.csv(url, fileEncoding = "big5")` 用`read.csv()`這個函式讀取上面那個`url`。讀取的同時，由於一般EXCEL為中文編碼`BIG5`，所以要跟程式碼講說，這個網址所指到的檔案編碼為`BIG5`。
     * `fileEncoding = "big5"`稱為`read.csv()`這個函式的**參數(parameter)。
 
 ```{r}
 library(httr)
+options(stringsAsFactors = F)
+
 url <- "https://data.taipei/api/getDatasetInfo/downloadResource?id=68785231-d6c5-47a1-b001-77eec70bec02&rid=93d9bc2d-af08-4db7-a56b-9f0a49226fa3"
 df <- read.csv(url, fileEncoding = "big5")
 ```
 
+
 ## Read CSV by read.csv() from local directory
 - reading `tp_theft_.csv` in the subfolder `data`
 - Remember to use the `fileEncoding` argument to `big5`
+
 ```{r}
 # read.csv() to read csv and convert it to a data.frame
 df <- read.csv("data/tptheft.csv", fileEncoding = "big5")
 
 # Checking the strcutrue of it
 str(df)
-
+# View(df)
 ```
 
+
 ## Setting `stringAsFactors`
+
 ```{r}
-# Add stringsAsFactors argument  to avoid converting string to factor
+# Add an argument to avoid reading string as factor
 df <- read.csv("data/tptheft.csv", fileEncoding = "big5", stringsAsFactors = FALSE)
+
 # double-check the structure of it
 str(df)
 ```
 
-## Using `read_csv()` to read the csv
+
+## Using `read_csv()` of `readr` library to read the csv
 - remember to specify the `locale` argument to `big5`. `locale = locale(encoding = "Big5")`
+
 ```{r}
 library(readr)
 df <- read_csv(url, locale = locale(encoding = "Big5"))
 
 ```
-
-
 
 
 ## (Option) Geting a file back to local directory
@@ -71,7 +81,8 @@ df <- read.csv("data/tptheft.csv", fileEncoding = "big5", stringsAsFactors = FAL
 ```
 
 
-# Inspecting data
+
+# II. Observing data
 * `View(df)` 用RStudio所提供的GUI直接觀看變數
 * `head(df)` 取前面六筆資料（也就是六列的資料來概觀該資料）
 * `class(df)` 印出該
@@ -88,7 +99,6 @@ help(summary)
 ?summary
 
 ```
-
 
 
 ## Dimension
@@ -116,9 +126,11 @@ length(df$發生時段)
 
 
 
-# Cleaning data
-* 目標：「發生時段」我打算取出前面的數字來代表時間就好，「發生地點」我打算只取出行政區名，其他地址不要。邏輯上，我要把那串字取出第x個字到第y個字，所以要用`substr()`這個函式，或者未來會教到的`stringr::str_sub()`函式。
-* 用`?substr`查詢其用法和意義。相當於`getting sub string since x to y`。
+# III. Selecting data
+- 中文變數名改英文
+- 從變數`發生地點`，用`substr()`取出行政區（`region`）和縣市（`county`）。
+- 或用`stringr::str_sub()`
+- `?substr`查詢其用法和意義。相當於`getting sub string since x to y`。
 
 ```{r}
 # Get substring of var "發生時段" and assign to a new time var
@@ -132,11 +144,13 @@ df$region <- substr(df$發生.現.地點, 4, 5)
 
 
 
-# Pivot analysis: Counting and Summarizing
-
+# IV. Pivot analysis: Counting and Summarizing
+* to observe variable distribution, and detect outliers or irrelevant data
 * 我們要回答的第一個數據問題通常是，那XXX的案例有幾個？例如大安區有多少竊盜案？買超過10000元訂單的客戶有多少人？男生和女生會修程式課的個別有多少人？這稱為計數。
 
-## Counting single variable by table()
+
+## Method 1. Counting single variable by table()
+
 ```{r}
 # Filtering observations happened in Taipei city
 df <- df[df$county == "台北市", ]
@@ -151,8 +165,9 @@ table(df$region)
 
 
 
-## Counting by tapply()
+## Method 2. Counting by tapply()
 * Using `length()` as counting method
+
 ```{r}
 # tapply() one arbitrary var by var time with length() function
 tapply(df$編號, df$time, length)
@@ -162,12 +177,12 @@ tapply(df$編號, df$region, length)
 ```
 
 
-# Filtering data
+# V. Filtering data
+- 該項資料整理方法經常不慎用不同的時間區間來標記，或者不慎加入基隆或新北市的資料，需要靠自己觀察篩除。
+
 ```{r}
 # filter out irrelevant timestamp
 df <- df[!df$time %in% c("00~03", "06~09", "09~12", "12~15", "15~18", "19~21", "21~24"), ]
-
-df <- df[!df$time %in% c("00", "02", "06", "08", "12", "14" ,"18", "20"), ]
 
 # filter out irrelevant region(area)
 df <- df[!df$region %in% c("三重", "中和", "淡水", "板橋"), ]
@@ -175,9 +190,10 @@ df <- df[!df$region %in% c("三重", "中和", "淡水", "板橋"), ]
 
 
 
-# Pivot analysis on 2 vars
+# VI. Pivot analysis on 2 vars
 
-## by `table()` with 2 independent vars
+## 1. by `table()` with 2 independent vars
+
 ```{r}
 
 # Tabulating time and region variables
@@ -188,7 +204,9 @@ class(res_table)
 res_table
 ```
 
-## by `tapply()` with 2 independent vars
+
+## 2 by `tapply()` with 2 independent vars
+
 ```{r}
 res_tapply <- tapply(df$編號, list(df$time, df$region), length)
 class(res_tapply)
@@ -196,7 +214,8 @@ res_tapply
 # View(res)
 ```
 
-# Pivot by dplyr::count()
+
+## 3. Pivot by dplyr::count()
 
 ```{r}
 # counting by dplyr::count()
@@ -211,7 +230,8 @@ res_count_spread
 ```
 
 
-# Plotting
+
+# VII. Plotting
 
 ```{r}
 # mosaicplot() to plot 2-dim categorical vars.
@@ -221,7 +241,30 @@ mosaicplot(res_table)
 mosaicplot(res_table, main="mosaic plot")
 ```
 
-# Clean version
+
+## (Option) Cannot show Chinese?
+```{r}
+par(family=('Heiti TC Light'))
+par(family=('STKaiti'))
+mosaicplot(res_table, main="mosaic plot")
+```
+
+
+## (Option) Self-defined color?
+
+```{r}
+# Set up color by yourself.
+colors <- c('#D0104C', '#DB4D6D', '#E83015',  '#F75C2F',
+            '#E79460', '#E98B2A', '#9B6E23', '#F7C242',
+            '#BEC23F', '#90B44B', '#66BAB7', '#1E88A8')
+par(family=('STKaiti'))
+mosaicplot(res_table, color=colors, border=0, off = 3,
+		   main="Theft rate of Taipei city (region by hour)")
+```
+
+
+
+# VIII. Clean version
 ```{r}
 library(httr)
 options(stringsAsFactors = F)
@@ -237,57 +280,17 @@ df <- df[!df$time %in% c("00~03", "06~09", "09~12", "12~15", "15~18", "19~21", "
 table(df$time)
 
 res_table <- table(df$time, df$region)
+res_table
+View(res_table)
 par(family=('Heiti TC Light'))
 # par(family=('STKaiti'))
 mosaicplot(res_table, main="mosaic plot")
 ```
 
+# IX Practice: Deleted
 
 
-## (Option) Cannot show Chinese?
-```{r}
-par(family=('Heiti TC Light'))
-par(family=('STKaiti'))
-mosaicplot(res_table, main="mosaic plot")
-```
-
-## (Option) Self-defined color?
-
-```{r}
-# Set up color by yourself.
-colors <- c('#D0104C', '#DB4D6D', '#E83015',  '#F75C2F',
-            '#E79460', '#E98B2A', '#9B6E23', '#F7C242',
-            '#BEC23F', '#90B44B', '#66BAB7', '#1E88A8')
-par(family=('STKaiti'))
-mosaicplot(res_table, color=colors, border=0, off = 3,
-		   main="Theft rate of Taipei city (region by hour)")
-```
-
-# Practices
-
-## Practice02_2_1
-
-* Check what happens if you swap the time and region in tapply()
-* does it possible to extract month  by substr()?
-* (you may need to search how to extract the last n characters in R)
-
-```{r}
-x <- df$發生.現.日期
-df$month <- substr(x, 3, 4) # is this correct? Try to modify it!
-# res2 <- tapply(df$編號, list(df$month, df$region), length)
-# res2 <- tapply(df$編號, list(df$region, df$month), length)
-# mosaicplot(res2, color=colors, border=0, off = 3, main="Theft rate of Taipei city (region by hour)")
-```
-
-## Practice02_2_2
-* Reading maternal leave data
-* Summarize the last year data by world region
-```{r}
-
-```
-
-
-# (dplyr) on tp theft
+# X. (dplyr) on tp theft
 ```{r}
 # readr::guess_encoding("data/tptheft.csv")
 
