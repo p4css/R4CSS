@@ -27,7 +27,7 @@ options(scipen = 999)
 
 # Read demographic data: read csv
 ```{r read csv}
-raw <- read_csv("../data/opendata107Y030.csv") %>%
+raw <- read_csv("data/opendata107Y030.csv") %>%
     slice(-1) %>%
     mutate(vname = str_c(site_id, village)) %>%
     select(vname, everything())
@@ -38,7 +38,7 @@ raw %>% glimpse()
 # Tidy data
 ```{r}
 tidy_data <- raw %>%
-    gather("key", "value", 6:ncol(.)) %>%
+    gather("key", "value", 6:ncol(.)) %>% 
     mutate(key = str_replace(key, "_age", "")) %>%
     mutate(key = str_replace(key, "100up", "100_110")) %>%
     mutate(key = str_replace(key, "15down", "0_15")) %>%
@@ -55,9 +55,6 @@ tidy_data <- raw %>%
 # Summarized by villages
 
 ```{r}
-tidy_data %>%
-    count(married) %>% View
-
 
 village_stat <- tidy_data %>%
     filter(ageLower >= 20) %>%
@@ -76,6 +73,15 @@ village_stat <- tidy_data %>%
 
 ```{r}
 village_stat %>%
+  mutate(townname = str_sub(vname, 1, 6)) %>%
+  filter(site_id != townname) %>% View
+
+
+village_stat %>%
+  separate(vname, c("townname", "villagename"), sep = "鄉|鎮|市|區", remove = F) %>%
+  filter(site_id != townname) %>% View
+
+village_stat %>%
     left_join(raw %>% select(vname, site_id), by = "vname") %>% head()
 ```
 
@@ -85,6 +91,7 @@ village_stat %>%
 
 ```{r}
 town_stat <- village_stat %>%
+    # mutate(site_id = str_sub(vname, 1, 6)) %>%
     mutate(site_id = str_replace(site_id, "三民一|三民二", "三民區")) %>%
     mutate(site_id = str_replace(site_id, "鳳山一|鳳山二", "鳳山區")) %>%
     group_by(site_id) %>%
@@ -126,9 +133,9 @@ names(ref10)
 ```
 
 
-# Cleaning and summarizing
+# try to join data
 ```{r}
-
+town_stat %>% left_join(ref10, by = "site_id") %>% View
 ```
 
 
