@@ -19,6 +19,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r}
+install.packages("tidyverse")
 library(tidyverse)
 options(stringsAsFactors = F)
 options(verbose = T)
@@ -31,6 +32,11 @@ raw <- read_csv("data/opendata107Y030.csv") %>%
     slice(-1) %>%
     mutate(vname = str_c(site_id, village)) %>%
     select(vname, everything())
+
+raw %>% 
+    mutate_at(vars(6:157), as.numeric) %>%
+    replace(is.na(.), 0) %>% View
+    mutate(single = rowSums(vars(contains('single')))) %>% View
 
 raw %>% glimpse()
 ```
@@ -150,6 +156,7 @@ town_stat %>%
     left_join(ref10, by = "site_id") %>%
     mutate(agreeRate = agree / legalVote,
            marriedPerc = marriedSum / legalPopulation.x) %>%
+    select(site_id, agree, legalVote, marriedSum, legalPopulation.x) %>% View
     ggplot() + 
     aes(agreeRate, marriedPerc) + 
     geom_jitter(alpha = 0.5, color = "royalblue") + 
