@@ -19,7 +19,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r}
-install.packages("tidyverse")
+# install.packages("tidyverse")
 library(tidyverse)
 options(stringsAsFactors = F)
 options(verbose = T)
@@ -35,8 +35,11 @@ raw <- read_csv("data/opendata107Y030.csv") %>%
 
 raw %>% 
     mutate_at(vars(6:157), as.numeric) %>%
-    replace(is.na(.), 0) %>% View
-    mutate(single = rowSums(vars(contains('single')))) %>% View
+    replace(is.na(.), 0) %>%
+    rowwise() %>% 
+    mutate(married = sum(c_across(matches("widowed|divorced|married")), na.rm = T)) %>%
+  mutate(lt65 = sum(c_across(matches("65|70|75|80|85|90|95|100")), na.rm = T)) %>%
+    select(vname, married, lt65) %>% View
 
 raw %>% glimpse()
 ```
