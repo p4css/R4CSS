@@ -1,0 +1,401 @@
+---
+title: "Twitter"
+author: "Chiayu"
+date: "August 2019"
+output:
+  html_document:
+    theme: spacelab
+    highlight: zenburn
+    toc: yes
+    toc_float:
+      collapsed: no
+    df_print: paged
+editor_options:
+  chunk_output_type: inline
+---
+<style>
+    .tocify-header{color:darkred; font-size:16px;}
+    .tocify-subheader{color:tomato; font-size:14px;}
+    h1{color:darkred; font-size:40px;}
+    h2{color:tomato; font-size:24px;}
+    strong {background-color:yellow;}
+</style>
+
+# 01 Prepare
+
+## 1.1 Sourcing and loading packages
+- `install.packages()` ,`library()`
+
+```{r echo=TRUE, warning=FALSE}
+library(tidyverse)
+options(stringsAsFactors = FALSE) # avoid strings were converted to factors 
+options(scipen = 999) # avoid scientific notion in R
+options(verbose = T)
+```
+
+
+
+## 1.2  The data
+- [Data download link]1(https://www.dropbox.com/sh/93kyyo4bmz7ggxj/AACT5Ilx70JFQJ17XwNEDZUQa?dl=0)
+- 資料集分成set1、set2，每個set裡面分別有帳號集(users)以及推文集(tweets), 分別assign給四個variables, users_1, users_2, tweets_1, tweets_2.
+- 若電腦不夠存，`load("data/presave.rda")`
+
+
+```{r echo=TRUE}
+
+# Reading datasets of delected accounts (provided by twitter)
+users_1 <- read_csv("data/china_082019_1_users_csv_hashed.csv")
+users_2 <- read_csv("data/china_082019_2_users_csv_hashed.csv")
+
+# Reading tweets from delected accounts (provided by twitter)
+tweets_1 <- read_csv("data/china_082019_1_tweets_csv_hashed.csv")
+tweets_2 <- read_csv("data/china_082019_2_tweets_csv_hashed.csv")
+
+# Loading pre-saving rda
+# load("data/presave.rda")
+```
+
+
+# 02 Exploatory Data Analysis
+
+## 2.1 Inspecting data structure
+
+```{r echo=TRUE, results = "hide"}
+
+# Previewing sample data
+tweets_2 %>% head(n=20) %>% View
+
+# Previewing twitter account demographics
+users_2 %>% glimpse()
+
+# Previewing tweets by specific accounts.
+tweets_2 %>% glimpse()
+
+```
+
+
+
+## 2.2 Counting, summarizing, and sorting
+
+```{r}
+
+# counting major account creating date
+users_1 %>%
+    count(account_creation_date) %>%
+    arrange(-as.numeric(account_creation_date))%>%
+    mutate(portion = n/sum(n)) %>% View
+
+# sorting to inspect super star or questionable behaviors
+users_1 %>%
+    filter(account_creation_date == "2017-08-30")%>%
+    arrange(-follower_count)%>%
+    select(userid, follower_count, following_count)
+
+```
+
+
+## 2.3 (Practice) Display the top 10 users who have the most number of tweets.
+
+```{r}
+tweets_2 %>%
+  count(userid) %>%
+  arrange(-n) %>% 
+  left_join(users_2, by = 'userid') %>% View
+
+```
+
+
+
+# 03 Visual exploration
+## 3.1 plotting users_1 account creating date
+
+```{r}
+library(bbplot)
+
+users_1 %>%
+
+  
+  
+  
+```
+
+
+
+## 3.2 plotting by bar chart
+
+```{r}
+users_2 %>%
+
+  
+  
+  
+  
+  
+```
+
+
+
+## 3.3 plotting users_2 account creating date
+
+```{r}
+
+users_2 %>%
+
+  
+  
+  
+  
+```
+
+## 3.4 (Practice) Comparing users_1 and users_2 sets account creation date 
+1. Mutating a common variable `set` for users_1 and users_2, to indicate their set
+2. Binding two users dataframe
+3. Plotting and using `set` as grouping variable
+4. What kind of plotting methods should you use?
+
+```{r}
+users_1 <- users_1 %>%
+  mutate(set = 'users_1')
+users_2 <- users_2 %>%
+  mutate(set = 'users_2')
+
+users_2 %>% bind_rows(users_1) %>%
+
+
+
+  
+
+  
+  
+users_2 %>% bind_rows(users_1) %>%
+
+  
+```
+
+
+
+# 04 Studying account language
+
+```{r}
+
+# Counting account language
+users_1 %>%
+
+  
+  
+  
+  
+  
+# Visualizing account language proportion
+users_1 %>%
+
+  
+  
+  
+  
+  
+
+```
+
+## 4.1 (Practice) Question: does the account_language correlate with year?
+```{r}
+users_1 %>%
+
+  
+  
+  
+  
+```
+
+
+# 05 Studying follower vs following
+
+## 5.1 plot
+- using following as x, follower as y
+
+```{r}
+
+# Combining follower/following from users_1 and users_2
+users_1_follow <- users_1 %>% 
+    select(userid, follower_count, following_count)%>%
+    mutate(dataset = "set1")
+
+all_follow <- users_2 %>%
+    select(userid, follower_count, following_count)%>%
+    mutate(dataset = "set2") %>%
+    bind_rows(users_1_follow)
+
+# Plot users_1 & users_2 
+options(scipen = 999)
+all_follow %>% 
+  
+  
+  
+  
+  
+  
+  
+```
+
+
+
+## 5.2 Comparing behaviors to random accounts
+- Comparing follower/following behavior between deleted accounts and random accounts
+- normal account of twitter: https://twitter.com/conspirator0/status/1149851150658748416
+
+```{r error=FALSE, message=FALSE,results = "hide"}
+
+# Loading pre-saving data
+random_users <- readRDS("data/random_users.rds") %>%
+    mutate(dataset = "random")
+
+all_follow %>%
+    bind_rows(random_users) %>%
+    ggplot() + 
+    aes(x = following_count+1, y = follower_count+1, color = dataset) +
+    geom_point(position = "jitter", size = 2, alpha = 0.5) + 
+    scale_color_manual(values = c("gray", "gold", "royalblue")) + 
+    labs(title = "The distribution of follow", subtitle = "dataset: set1 & set2") +
+    # xlim(0,15000) + ylim(0,20000) +
+    scale_x_log10() + scale_y_log10() + 
+    bbc_style()
+
+```
+
+
+
+# 06 Accounts related to HK antiELAB
+- Retrieving accounts related to HK antiELAB
+
+## 6.1 binding two dataset
+
+```{r}
+
+# Binding tweets from set1 and set2
+tweets_1 %>% glimpse()
+
+# Converting datatype of set 1
+tweets_1 <- tweets_1 %>% 
+    mutate(dataset = "set1") %>%
+    mutate(tweetid = as.character(tweetid)) %>%
+    mutate(userid = as.character(userid)) %>%
+    mutate(in_reply_to_userid  = as.character(in_reply_to_userid)) %>%
+    mutate(in_reply_to_tweetid = as.character(in_reply_to_tweetid))
+    
+    
+
+# Converting datatype of set 2
+tweets_2 <- tweets_2 %>% 
+    mutate(dataset = "set2") %>%
+    mutate(tweetid = as.character(tweetid)) %>%
+    mutate(userid = as.character(userid)) %>%
+    mutate(retweet_userid = as.character(retweet_userid)) %>%
+    mutate(retweet_tweetid = as.character(retweet_tweetid))
+
+# Binding (combining) tweets of set1 and set2
+all_tweets <- bind_rows(tweets_1, tweets_2)
+
+# tweets_1$retweet_userid %>% class
+# tweets_2$retweet_userid %>% class
+
+```
+
+
+
+## 6.2 Filtering by tweet content
+- The most dangerous part of research confidence
+
+```{r}
+
+# Keywords to detect
+detects <- "港警|逃犯條例|反修例|遊行|修例|反送中|anti-extradition|hongkong|hkpolicebrutality|soshk|hongkongprotesters|HongKongPolice|hkpoliceforce|freedomHK|antiELAB|HongKongProtests|antiextraditionlaw|HongKongProtest|七一|游行|民阵|HongKong|逃犯条例|民陣|撐警|香港眾志|HongKongProterst|林鄭|警队|力撑"
+
+# Filtering tweets relevant to hk antiELAB
+hk_tweets <- all_tweets %>%
+    filter(tweet_time > as.Date("2019-01-01")) %>%
+    mutate(hits = str_extract_all(tweet_text, detects)) %>%
+    drop_na(hits)
+
+# hk_tweets <- all_tweets %>%
+#     filter(hashtags != "[]")
+```
+
+
+
+## 6.3 Previewing hk related tweets
+```{r}
+
+# Counting by dataset
+hk_tweets %>%
+    count(dataset)
+
+# Previewing set2
+hk_tweets %>%
+    filter(dataset == "set2")
+```
+
+
+
+## 6.4 (Practice) Filtering relevant tweets
+- Filtering tweets relevant to anti-extradition
+
+```{r}
+# Add your code here
+```
+
+
+
+# 07 Computing word frequency
+- example:tweets contains "反送中|anti-extradition"
+    
+## 7.1 Initializing tokenization process
+
+```{r}
+library(jiebaR)
+
+# Setting user-defined keywords
+segment_not <- c("反送中", "送中條例", "香港人", "支持警察", "革命派", "勇武派", "人權", "泛民", "严惩", "暴乱", "力撑", "港警", "撐警集會", "法治社会", "逃犯条例", "逃犯條例", "警队加油", "警队", "香港加油","反對派","反对派","林鄭","林鄭月娥","做對","做对","夏悫道","龙道","撐政府","香港警察")
+
+# Initilizing jieba cutter for tokenization
+cutter <- worker()
+
+# Adding user-defined keywords
+new_user_word(cutter, segment_not)
+
+# Adding hk stop words
+stopWords <- read_csv("data/stopwords_hk.csv") %>%
+    select(word = ",")
+```
+
+
+
+## 7.2 Tokenization
+```{r}
+tokens <-  hk_tweets%>%
+    select(tweetid, tweet_time, tweet_text)%>%
+    mutate(word = purrr::map(tweet_text, function(x)segment(x, cutter)))%>%
+    unnest(word)%>%
+    filter(!(word %in% stopWords$word)) %>%
+    filter(!str_detect(word, "[a-zA-Z0-9]+"))
+```
+
+
+
+## 7.3 Visualizing word frequency
+
+```{r}
+tokens %>%
+    select(word)%>%
+    count(word, sort = TRUE) %>%
+    head(20)%>%
+    mutate(word = reorder(word, n)) %>%
+    ggplot() + 
+    aes(word, n) + 
+    geom_col(fill = "royalblue") +
+    coord_flip() + 
+    labs(title = "反送中相關推文詞頻",subtitle = "Dataset: set1 & set2") +
+    bbc_style() +
+    theme(axis.text.y = element_text(hjust = 0.9,size = 10, family = "Heiti TC Light"),
+          plot.title = element_text(family = "Heiti TC Light"))
+```
+
