@@ -13,10 +13,10 @@ editor_options:
 ---
 
 # Source
-* Author: The case is written by David Robinson, author of the book "R for text mining", author of library tidytext, data scientist at StackOverFlow.
-* Link of github: https://github.com/dgrtwo/dgrtwo.github.com/blob/master/_R/2016-08-09-trump-tweets.Rmd
-* Link of the article: http://varianceexplained.org/r/trump-tweets/
 
+-   Author: The case is written by David Robinson, author of the book "R for text mining", author of library tidytext, data scientist at StackOverFlow.
+-   Link of github: <https://github.com/dgrtwo/dgrtwo.github.com/blob/master/_R/2016-08-09-trump-tweets.Rmd>
+-   Link of the article: <http://varianceexplained.org/r/trump-tweets/>
 
 # Load and clean data
 
@@ -28,16 +28,26 @@ options(scipen = 999)
 ```
 
 # Loading data
+
 ```{r}
 load(url("http://varianceexplained.org/files/trump_tweets_df.rda"))
 dim(trump_tweets_df)
 names(trump_tweets_df)
 ```
 
-
 # Cleaning data
+
+## Extract source/user-agent
+
+        source  n
+        <chr>   <int>
+    1   Android 762     
+    2   iPhone  628 
+
 ```{r}
 trump_tweets_df$statusSource[1]
+
+## Extract source/user-agent
 
 tweets <- trump_tweets_df %>%
     select(id, created, text, statusSource) %>% 
@@ -47,10 +57,10 @@ tweets <- trump_tweets_df %>%
 tweets %>% count(source)
 ```
 
-
 # Vis: Hour by tweet percentage
-- Converting timezone
-- Plotting number of tweets by hour
+
+-   Converting timezone
+-   Plotting number of tweets by hour
 
 ```{r}
 library(lubridate)
@@ -63,26 +73,30 @@ tweets %>%
     ggplot() + aes(hour, percent, color = source) + 
     scale_color_manual(labels = c("Adroid", "iPhone"), 
                        values = c("royalblue", "gold")) + 
-    
     geom_line(size = 1) + 
     labs(x = "Hour of day (EST)") + 
     theme_minimal()
 
 ```
 
-
 # With Pictures or Not
-- Filtering out tweets starting with "
-- Mutating new variable `picture` to indicate whether text has picture or not?
-- Counting `source` by `picture`
-- Plotting bar chart to compare difference between sources.
+
+1.  Filtering out tweets starting with "
+2.  Mutating new variable `picture` to indicate whether text has picture or not?
+3.  Counting `source` by `picture`
+4.  Plotting bar chart to compare difference between sources.
 
 ```{r}
 library(stringr)
 tweets %>%
-    filter(!str_detect(text, '^"')) %>%
-    mutate(picture = if_else(str_detect(text, "t.co"), "Picture/link", "No Picture/link")) %>%
-    count(source, picture) %>%
+    # YOUR CODE SHOUD BE HERE
+    # 1.Filtering out tweets starting with "
+    
+    # 2. Mutating new var picture/or not? picture
+    
+    # 3. Counting source by picture
+    
+    # 4. Plotting bar chart to compare difference between sources. 
     ggplot() + 
     aes(source, n, fill = picture)  +
     geom_col(position = "dodge") + 
@@ -92,9 +106,13 @@ tweets %>%
 
 ```
 
-
-
 # Comparison of words
+
+1.  Removing all urls by replacement
+2.  Unnesting sentence to words in tidy-form by `unnest_token()`
+3.  Filtering out stop_words by `anti_join()`
+4.  Counting word frequency for plotting
+
 ```{r}
 library(tidytext)	# unnest_tokens()
 library(stringr)	# str_detect(), str_replace_all()
@@ -102,11 +120,14 @@ tidytext::stop_words
 # View(test)
 tweets %>%
     filter(!str_detect(text, '^"')) %>%
-    mutate(text = str_replace_all(text, "https://t.co/[A-Za-z\\d]+|&amp;", "")) %>%
-    unnest_tokens(word, text, drop = F) %>%
-    filter(str_detect(word, "[a-z]")) %>% 
-    # filter(!word %in% stop_words$word) %>%
-    anti_join(stop_words) %>%
+    ## 1. removing urls
+    
+    
+    ## 2. unnesting word tokens
+    
+    ## 3. filter out stopwords
+    
+    ## 4. Counting word frequency
     count(word, sort = T) %>%
     slice(1:30) %>%
     mutate(word = reorder(word, n)) %>%
@@ -126,6 +147,7 @@ tweet_words <- tweets %>%
 ```
 
 # Visualization
+
 ```{r}
 
 tweet_words %>%
@@ -140,7 +162,8 @@ tweet_words %>%
 ```
 
 # Word-level analysis
-- Comparing word frequency
+
+-   Comparing word frequency
 
 ```{r}
 tweet_words %>% 
@@ -160,10 +183,8 @@ tweet_words %>%
                       values = c("royalblue", "gold"))
 ```
 
-
-
-
 # words frequency by different devices
+
 ```{r}
 
 word_by_source <- tweet_words %>%
@@ -174,15 +195,20 @@ word_by_source <- tweet_words %>%
 
 sum(word_by_source$iPhone)
 sum(word_by_source$Android)
+```
 
+## Calculating log-ratio
+
+```{r}
 android_iphone_ratios <- word_by_source %>%
-    mutate(iPhone = (iPhone+1)/sum(iPhone+1)) %>%
-    mutate(Android = (Android+1)/sum(Android+1)) %>%
-    mutate(logratio = log2(Android / iPhone)) %>%
-    arrange(desc(logratio))
+    
+    
+    
+    
 ```
 
 ## visualizing ratio
+
 ```{r}
 
 
@@ -203,4 +229,3 @@ android_iphone_ratios %>%
     scale_fill_manual(name = "", labels = c("Android", "iPhone"),
                       values = c("royalblue", "gold"))
 ```
-

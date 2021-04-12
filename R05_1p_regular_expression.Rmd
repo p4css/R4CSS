@@ -180,6 +180,7 @@ df %>% extract(string3, c("pre", "hit", "tail"), "(.{0,5})(台灣|臺灣)(.{0,5}
 ## Getting the last page of PTT HatePolitics
 ```{r}
 urls <- c("https://www.ptt.cc/bbs/HatePolitics/index4166.html", "https://www.ptt.cc/bbs/HatePolitics/index348.html")
+
 str_extract(urls, "index(\\d+)\\.html")
 str_replace(urls, ".*index(\\d+)\\.html", "\\1") %>% as.numeric()
 data_frame(urls) %>% extract(urls, "last_page", "index(\\d+)\\.html", remove = F)
