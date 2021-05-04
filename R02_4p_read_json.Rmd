@@ -29,6 +29,34 @@ library(httr)
 library(jsonlite)
 ```
 
+# Typical Readings
+
+## JSON as a string
+
+```{r}
+library(jsonlite)
+fromJSON('{"a":1, "b":2}')
+fromJSON('[{"a":1, "b":2}, {"a":1, "b":3}]')
+fromJSON('[{"a":1, "b":2}, {"a":1, "b":3}, {"a":5, "b":7}]')
+```
+
+## JSON as a local file
+
+```{r}
+library(jsonlite)
+raw <- read_json("../../R4CSS/data/url_104.json")
+raw$data$list
+```
+
+## JSON as a web file
+
+```{r}
+raw <- GET("https://tcgbusfs.blob.core.windows.net/blobyoubike/YouBikeTP.json") %>%
+    content("text") %>%
+    fromJSON()
+raw
+```
+
 # Case 1: Well-formatted Air-Quality
 
 Go to <https://data.gov.tw/dataset/40448>, click the json file, and copy the link, e.g., "<https://data.epa.gov.tw/api/v1/aqx_p_432?limit=1000&api_key=9be7b239-557b-4c10-9775-78cadfc555e9&format=json>". (However, the link address, especially the `pi_key=9be7b239-557b-4c10-9775-78cadfc555e9` will change every time).
@@ -128,6 +156,7 @@ df$records %>% knitr::kable()
 下列這些網路文件應該都是json檔，請在以下的練習中，一個一個把他帶入把他抓回來看看。並用`str()`或`dplyr::glimpse()`觀察資料的內容。注意，如果你用了`View()`會沒辦法knit成html檔，導致於你無法繳交。
 
 ```{r}
+url_sc_flu <- "https://od.cdc.gov.tw/eic/Weekly_Age_County_Gender_487a.json"
 url_appledaily <- "https://tw.appledaily.com/pf/api/v3/content/fetch/search-query?query=%7B%22searchTerm%22%3A%22%25E6%259F%25AF%25E6%2596%2587%25E5%2593%25B2%22%2C%22start%22%3A20%7D&d=209&_website=tw-appledaily"
 url_dcard <- "https://www.dcard.tw/_api/forums/girl/posts?popular=true"
 url_pchome <- "http://ecshweb.pchome.com.tw/search/v3.3/all/results?q=X100F&page=1&sort=rnk/dc"
