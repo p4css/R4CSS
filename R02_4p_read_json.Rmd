@@ -59,7 +59,11 @@ raw
 
 # Case 1: Well-formatted Air-Quality
 
-Go to <https://data.gov.tw/dataset/40448>, click the json file, and copy the link, e.g., "<https://data.epa.gov.tw/api/v1/aqx_p_432?limit=1000&api_key=9be7b239-557b-4c10-9775-78cadfc555e9&format=json>". (However, the link address, especially the `pi_key=9be7b239-557b-4c10-9775-78cadfc555e9` will change every time).
+Go to <https://data.gov.tw/dataset/40448>, click the json file, and copy
+the link, e.g.,
+"<https://data.epa.gov.tw/api/v1/aqx_p_432?limit=1000&api_key=9be7b239-557b-4c10-9775-78cadfc555e9&format=json>".
+(However, the link address, especially the
+`pi_key=9be7b239-557b-4c10-9775-78cadfc555e9` will change every time).
 
 ![](images/paste-390F44D8.png)
 
@@ -80,13 +84,21 @@ df$records %>% head() %>% knitr::kable(format = "html")
 
 ## Step-by-step: Parse JSON format string to R objs
 
-`fromJSON(content(GET(url), "text", encoding = "utf-8"))`由內到外有三個函式。 \* `httr::GET()`按照指定的url發出GET request把網頁抓回來，如果是個合乎規定存取，就會順利取回該伺服器發的response。 \* `hrrt::content(response, "text", encoding = "utf-8")` 用`?content`查詢看看`content(response, "text")`的用途。其是把抓回來的檔案，轉為純文字的字串。content()是把抓回來的response解成純文字（JSON本身就是以純文字儲存，只是格式特別而已）。
+`fromJSON(content(GET(url), "text", encoding = "utf-8"))`由內到外有三個函式。
+\* `httr::GET()`按照指定的url發出GET
+request把網頁抓回來，如果是個合乎規定存取，就會順利取回該伺服器發的response。
+\* `hrrt::content(response, "text", encoding = "utf-8")`
+用`?content`查詢看看`content(response, "text")`的用途。其是把抓回來的檔案，轉為純文字的字串。content()是把抓回來的response解成純文字（JSON本身就是以純文字儲存，只是格式特別而已）。
 
--   `jsonlite::fromJSON()` 因為我們用眼睛看就知道他是個JSON格式的檔案，所以用`fromJSON()`這個函式，把用JSON格式編成的字串轉為R的物件，有可能是`data.frame`或`list`。`fromJSON()`預期會把JSON中`[]`的每一個項目轉為一筆筆的資料，然後把`{}`的pair當成column的變數名稱
+-   `jsonlite::fromJSON()`
+    因為我們用眼睛看就知道他是個JSON格式的檔案，所以用`fromJSON()`這個函式，把用JSON格式編成的字串轉為R的物件，有可能是`data.frame`或`list`。`fromJSON()`預期會把JSON中`[]`的每一個項目轉為一筆筆的資料，然後把`{}`的pair當成column的變數名稱
 
 ### `Step 1. GET()` 發送請求
 
-向該URL的伺服器發送`GET()` request以取得該檔案。若成功取得，他會回覆一個[HTML status code](https://developer.mozilla.org/zh-TW/docs/Web/HTTP/Status)（你可上網查詢看看有哪些Status code）。如果成功的話就是2開頭的數字例如`200 OK`代表該伺服器接受該請求並開始傳回檔案。
+向該URL的伺服器發送`GET()`
+request以取得該檔案。若成功取得，他會回覆一個[HTML status
+code](https://developer.mozilla.org/zh-TW/docs/Web/HTTP/Status)（你可上網查詢看看有哪些Status
+code）。如果成功的話就是2開頭的數字例如`200 OK`代表該伺服器接受該請求並開始傳回檔案。
 
 ```{r}
 # Getting url back by GET()
@@ -101,7 +113,8 @@ class(response)
 
 ### `Step 2. httr::content()` 將回應資料的轉純文字
 
-回應的資料看他的`class`是一個`response`，但如果看Global Environment看來是個`list`，裡面裝載很多資料，而主要核心的內容在`content`這個欄位，但看來是用`binary code`裝起來的，而不是純文字。
+回應的資料看他的`class`是一個`response`，但如果看Global
+Environment看來是個`list`，裡面裝載很多資料，而主要核心的內容在`content`這個欄位，但看來是用`binary code`裝起來的，而不是純文字。
 
 因此，對於這個抓回來的檔案，我需要用httr::content()幫忙把純文字給解出來。經查詢`help`可得知`content()`後面的參數有三類，其中可以要轉為純文字的就是`content(response, "text")`。因此偵測轉出來的變數會是長度為1的`character`。
 
@@ -272,11 +285,13 @@ names(safefood.df) <- c('category', 'question', 'answer', 'timestamp')
 
 ## Type I: Well-formatted JSON: UVI, AQI, Hospital_revisits
 
-這類的資料以典型的[{}, {}, {}]形式儲存，以以下方式就可直接轉為data.frame `df <- fromJSON(content(GET(url), "text"))`
+這類的資料以典型的[{}, {}, {}]形式儲存，以以下方式就可直接轉為data.frame
+`df <- fromJSON(content(GET(url), "text"))`
 
 ## Type II: hierarchical JSON: rent591, facebook graph api, google map
 
-這類的json資料為well-formatted，但要的資料儲存在比較深的階層中，代表其並非簡單地二維表格，還有其他更多的詮釋資料被擺在同一個JSON檔案中。解決策略：通常`fromJSON()`轉完後為list，逐一就variable names查看資料在哪裡。`View(res$data$data)`
+這類的json資料為well-formatted，但要的資料儲存在比較深的階層中，代表其並非簡單地二維表格，還有其他更多的詮釋資料被擺在同一個JSON檔案中。解決策略：通常`fromJSON()`轉完後為list，逐一就variable
+names查看資料在哪裡。`View(res$data$data)`
 
 ## Type III: Ill-formatted JSON: food_rumors, ubike
 
