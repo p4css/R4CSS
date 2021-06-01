@@ -44,6 +44,7 @@ library(tidyr) # for unnest()
 library(stringr)
 library(jiebaR)
 library(dplyr)
+options(scipen = 999)
 # " xcode-select --install"
 # install.packages("http://download.r-forge.r-project.org/src/contrib/tmcn_0.2-9.tar.gz", repos = NULL, type = "source")
 # library(tmcn)
