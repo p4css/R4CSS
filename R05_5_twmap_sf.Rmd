@@ -1,0 +1,104 @@
+---
+title: "R06_4_tw_map_sf"
+author: "Jilung Hsieh"
+date: "2019/8/27"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Loading packages
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+options(stringsAsFactors = F)
+library(sf)
+library(tidyverse)
+library(ggplot2)
+```
+
+# Loading county-level president voting rate
+
+```{r}
+president_vote <- readxl::read_xlsx('twdata/president.xlsx') %>% 
+  mutate(total = chu + tsai + song) %>% 
+  mutate(chu_ratio = chu / total,
+         tsai_ratio = tsai / total,
+         song_ratio = song / total,
+         tsai_chu_ratio = tsai / chu)
+```
+
+# sf to load county level shp
+
+<https://fidanalytics.co.uk/blog/simplifying-polygons-r>
+
+```{r}
+# install.packages("sf")
+# install.packages("rmapshaper")
+county_sf <- st_read("shapefiles/COUNTY_MOI_1090820.shp")
+# county_sf <- st_read("shapefiles/county.shp")
+# plot(county_sf) # Taking very long time
+
+```
+
+## Simplfying map polygon
+
+-   Google Earth is in a Geographic coordinate system with the wgs84 datum. (EPSG: 4326)
+-   Google Maps is in a projected coordinate system that is based on the wgs84 datum. (EPSG 3857)
+-   The data in Open Street Map database is stored in a gcs with units decimal degrees & datum of wgs84. (EPSG: 4326)
+-   The Open Street Map tiles and the WMS webservice, are in the projected coordinate system that is based on the wgs84 datum. (EPSG 3857)
+-   <https://epsg.io/3825> for taiwan
+-   27700 for UK
+-   Explaining: <https://gis.stackexchange.com/questions/48949/epsg-3857-or-4326-for-googlemaps-openstreetmap-and-leaflet>
+
+```{r}
+county_sf <- st_read("shapefiles/COUNTY_MOI_1090820.shp")
+# county_msoa <- st_transform(county_sf, 3857)
+county_ms_simp <- rmapshaper::ms_simplify(county_sf,  keep=0.001) 
+plot(county_ms_simp)
+```
+
+```{r}
+
+# install.packages("rmapshaper")
+st_read("shapefiles/county.shp") %>%
+  # st_transform(3825) %>% #3857
+  rmapshaper::ms_simplify(keep=0.01) %>%
+  right_join(president_vote, by=c("COUNTYNAME"="county")) %>%
+  ggplot(aes(fill = chu_ratio)) + 
+  geom_sf(color="white", size=0.2) + 
+  scale_fill_gradient(low = "#FFFFFF", high = "#0000FF") + 
+  theme_void()
+```
+
+# Town level
+
+## Reading income data
+
+```{r}
+taipei_income <- readxl::read_xlsx('twdata/台北各區每人所得.xlsx') 
+```
+
+## Read Taipei zip code
+
+```{r}
+twzipcode_json <- jsonlite::fromJSON("twdata/twzipcode.json")[[1]]
+taipei_zipcode <- twzipcode_json %>% 
+  filter(city == "台北市")
+```
+
+```{r}
+# install.packages("rmapshaper")
+st_read("shapefiles/TOWN_MOI_1100415.shp") %>%
+    filter(COUNTYNAME == "臺北市") %>%
+    # st_transform(3825) %>% #3857
+    rmapshaper::ms_simplify(keep=0.05) %>%
+    left_join(taipei_income, by = c("TOWNNAME" = "district")) %>%
+    left_join(taipei_zipcode, by= c("TOWNNAME" = "district")) %>%
+    ggplot(aes(fill = income)) + 
+    geom_sf() + 
+    scale_fill_gradient2(low = "#FF8888", high = "#0000AA", midpoint = median(taipei_income$income)) +
+    geom_text(aes(x = lng, y = lat, label = TOWNNAME), family = "Heiti TC Light", color = "black", size = 2.5)+
+    theme_void()
+```
