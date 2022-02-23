@@ -1,0 +1,152 @@
+---
+title: "R01_1 loading data"
+author: "Jilung Hsieh"
+date: "2019/9/2"
+output:
+  html_document:
+    highlight: zenburn
+    number_sections: yes
+    theme: cerulean
+    toc: yes
+editor_options:
+  chunk_output_type: inline
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Excuting code in R markdown
+* Using `Cmd+Enter` (`Ctrl+Enter` in Window) to excute the line where your cursor is located.
+* Using `Cmd(Ctrl)+Shift+Enter` to run all code in a cell
+
+* Using mouse to select multiple lines, then `Cmd(Ctrl)+Shift+c` to comment/uncomment multiple lines.
+
+
+```{r}
+a <- c(1, 2, 3, 4, 5)
+b <- 4
+a*b
+```
+
+## Inserting a new code cell
+* Using `Cmd(Ctrl)+Option(Alt)+i` to insert a new cell
+
+
+
+# Installing and loading packages
+- 套件的使用分為**安裝**和**載入**兩個動作。通常安裝好R的時候就已經安裝好基本`base`套件。當執行R時便會將base套件**預載**入程式的執行環境中。
+- 非常多的R使用者會編寫第三方套件，並且將這些套件開放給群眾使用。通常這些套件已經被上載到**R cran**提供下載。而**R cran**上的套件我們可以使用`install.packages("package_name")`來自動安裝到我們的電腦中。
+
+
+##  Install following packages **at home**
+* Remove comment `#` symbol to install new package
+```{r install pkgs}
+# install.packages("jsonlite")
+# install.packages("httr")
+```
+
+```{r install these pkgs at home}
+# install.packages("tidyverse")
+# install.packages("caret")
+# install.packages("jiebaR")
+# install.packages("topicmodels")
+# install.packages("stm")
+```
+
+
+
+## Loading third-party packages
+* 這些第三方套件被安裝好後，還需要被**加載**到程式的執行環境中才可以使用。因此要用`library(package_name)`將其載入。
+```{r}
+# loading jsonlite and httr library
+library(jsonlite)
+library(httr)
+```
+
+
+## 註解
+* 下列程式碼中開頭有`#`符號者為註解，程式在執行時會自動忽略前面有`#`符號的程式碼。
+* 當使用RMarkdown格式撰寫時，因為RMarkdown是在事後才生成文件，所以當遇到要安裝該套件的指令時，便會跳出錯誤訊息。
+```{r}
+# a <- c(1, 2, 3, 4, 5)
+# b <- 4
+# a*b
+```
+
+
+
+
+# Loading dcard data
+* 先不要去管`fromJSON(content(GET(url), "text"))`是什麼意思，先著重在語言的形式。通常一個函式會寫為`func_name()`，所以上述其實是三個函式由內而外一層套一層，從最內層開始往外做。
+* 這其實很make-sense，因為如果你有一個數學式`(1 + (3-3)/2)/8`，也是會從最裡面那層做出來。
+```{r}
+url <- "https://www.dcard.tw/_api/forums/relationship/posts?popular=true"
+res <- fromJSON(content(GET(url), "text"))
+dplyr::glimpse(res)
+head(res)
+# View(res)
+
+```
+
+
+
+
+# Getting Taipei theft report data
+
+## Getting from the web directly
+```{r}
+url <- "http://data.taipei/opendata/datalist/datasetMeta/download?id=68785231-d6c5-47a1-b001-77eec70bec02&rid=34a4a431-f04d-474a-8e72-8d3f586db3df"
+df <- read.csv(url, fileEncoding = "big5")
+head(df)
+dplyr::glimpse(df)
+```
+
+## Loading a csv file in data directory
+```{r}
+# if mac cannot read data
+GET(url, write_disk("data/tptheft.csv", overwrite = TRUE))
+df <- read.csv("data/tptheft.csv", fileEncoding = "big5")
+head(df)
+```
+
+
+# Loading MOI data through API
+```{r}
+library(httr)
+library(jsonlite)
+url <- "https://www.ris.gov.tw/rs-opendata/api/v1/datastore/ODRP024/107?page=1"
+first_page <- fromJSON(content(GET(url), "text"))
+head(first_page$responseData)
+```
+
+
+
+
+# (deprecated) Getting 104 query data
+> deprecated due to blocked by new cookie or referer
+
+```
+url <- "https://www.104.com.tw/jobs/search/list?ro=0&kwop=7&keyword=%E8%B3%87%E6%96%99%E7%A7%91%E5%AD%B8&order=15&asc=0&page=4&mode=s&jobsource=2018indexpoc"
+browseURL(url)
+txt <- content(GET(url), "text")
+res <- fromJSON(content(GET(url), "text"))
+df <- res$data$list
+head(df)
+```
+
+
+
+
+# Getting ubike
+- https://taipeicity.github.io/traffic_realtime/
+```{r}
+url <- "https://tcgbusfs.blob.core.windows.net/blobyoubike/YouBikeTP.json"
+ubike.list <- fromJSON(content(GET(url),"text", encoding = "utf-8"))
+ubike.v <- unlist(ubike.list$retVal)
+ubike.m <- matrix(ubike.v, byrow = T, ncol = 14)
+ubike.df <- as.data.frame(ubike.m)
+names(ubike.df) <- names(ubike.list$retVal$`0001`)
+head(ubike.df)
+```
+
