@@ -1,0 +1,74 @@
+---
+title: "Loading tweets from rda"
+author: "Jilung Hsieh"
+date: "2018/7/3"
+output: 
+  html_document: 
+    number_sections: true
+    highlight: textmate
+    theme: spacelab
+    toc: yes
+editor_options: 
+  chunk_output_type: inline
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Loading tweet data
+
+* **Question** 當現在載入了他人所蒐集且開放的Trump's tweets後，你會形成什麼樣的假設？你會探討什麼問題？嘗試寫寫看，將來會在後面的課程中產生一份長達數百行的程式碼來分析這份資料。你可以試試看，該範例所問的問題，和你現在所問的問題像不像。
+
+* **Question** 除了想像這份資料可以做什麼分析外，請嘗試執行下列程式碼。請問，下列程式碼的執行結果分別可以回答什麼樣的問題？
+
+
+
+```{r}
+load(url("http://varianceexplained.org/files/trump_tweets_df.rda"))
+df <- trump_tweets_df
+```
+
+
+## Filter data
+```{r}
+fliter.df <- df[df$favoriteCount > mean(df$favoriteCount) +2*sd (df$favoriteCount),]
+# View(fliter.df)
+
+fliter.df2 <- df[df$retweetCount > mean(df$retweetCount) + 2* sd (df$retweetCount),]
+# View(fliter.df2)
+
+order.df <- df[order(df$favoriteCount, decreasing = TRUE),]
+# View(order.df[1:10,])
+```
+
+
+## plot histogram
+* What is histogram? What is density function?
+```{r}
+hist(df$favoriteCount, breaks = 1000)
+
+df$nchar <-nchar (df$text)
+hist(df$nchar, breaks= 1000)
+```
+
+
+
+## take a glance on the data
+```{r}
+# View(order.df[ ,c(1,3,5,8,10,12)])
+# View(order.df[, c("text","favoriteCount")])
+
+# View(df)
+head(df)
+class(df)
+str(df)
+
+class(df$text)
+class(df$truncated)
+df$truncated
+class(df$favoriteCount)
+class(df)
+mode(df)
+?mode
+```

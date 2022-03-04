@@ -8,6 +8,7 @@ output:
     number_sections: yes
     theme: cerulean
     toc: yes
+    css: style.css
 editor_options:
   chunk_output_type: inline
 ---

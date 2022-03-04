@@ -28,8 +28,8 @@ options(stringsAsFactors = F)
 將會產生兩個data frames, `posts` and `comments`。你得依照提議自己判斷，你會需要用到哪個data frame。
 
 ```{r}
-load("../data/HatePolitics_Hang_20190101_2019_06_01.rda")
-readr::write_csv(posts, "posts.csv")
+load("data/HatePolitics_Hang_20190101_2019_06_01.rda")
+
 ```
 
 
@@ -43,13 +43,6 @@ comments %>%
 
     
     slice(1:5)
-
-# 參考解答
-# gn02118620	7362			
-# zeumax	5908			
-# ninaman	5237			
-# bottger	5062			
-# bluesunflowe	4421	
 ```
 
 
@@ -64,13 +57,6 @@ posts %>%
     
     # you cade should be here
     slice(1:5)
-
-
-# mark2165	198			
-# kolod546	106			
-# sincsnow	86			
-# c1951	85			
-# fantasy14	82	
 ```
 
 
@@ -90,18 +76,6 @@ comments %>%
     # you cade should be here
     select(tag, commentor, cindex, ctotal) %>%
     head(n=20)
-
-# tag commentor   cindex  ctotal
-# →	tarcowang	1	103	
-# 推	alex8725	2	103	
-# →	lovebxcx	3	103	
-# 推	want150	4	103	
-# →	want150	5	103	
-# →	lovebxcx	6	103	
-# →	dai26	7	103	
-# →	lovebxcx	8	103	
-# →	lovebxcx	9	103	
-# →	lovebxcx	10	103	
 ```
 
 
@@ -134,19 +108,7 @@ comments %>%
     # you cade should be here
     slice(1:10)
 
-
-# 參考答案
-# commentor avg_order sd_order tot_comment
-# jma306	0.05493002	0.07529088	13	
-# ckbdfrst	0.08982297	0.05369776	14	
-# popy8789	0.09612579	0.06651135	15	
-# flavorBZ	0.09687205	0.08332761	18	
-# wangyc	0.10526316	0.06208009	14	
-# GalLe5566	0.12664135	0.05661774	14	
-# WeiYinChen16	0.13256803	0.17645476	16	
-# hachime	0.14190509	0.09977058	20	
-# Rrrxddd	0.15630718	0.20187598	32	
-# jk952840	0.15926640	0.10011586	14	
+    
 ```
 
 # 7. Challenge: Counting how many posts each commentor has responded to 
@@ -174,22 +136,6 @@ comments %>%
 
     # you cade should be here
     slice(1:30)
-# 參考答案
-## # A tibble: 30 x 6
-##    commentor    num_post max_c2p min_c2p mean_c2p sd_c2p
-##    <chr>           <int>   <dbl>   <dbl>    <dbl>  <dbl>
-##  1 aylao            1775      29       1     4.27   5.45
-##  2 bottger          1569     148       1    15.0   27.2
-##  3 ninaman          1497      87       1    16.3   18.1
-##  4 zeumax           1286     110       1    17.4   22.1
-##  5 gn02118620       1206     128       1    36.4   36.7
-##  6 bluesunflowe     1197      86       1    18.3   21.3
-##  7 pupu20317        1190     103       1    15.6   24.6
-##  8 formatted        1114      77       1    15.6   18.6
-##  9 alex8725          984      64       1    12.1   13.9
-## 10 c1951             886      38       1     6.19   7.05
-## # ... with 20 more rows
-
 ```
 
 # 8. Call for idea
