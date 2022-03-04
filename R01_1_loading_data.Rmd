@@ -4,10 +4,12 @@ author: "Jilung Hsieh"
 date: "2019/9/2"
 output:
   html_document:
-    highlight: zenburn
-    number_sections: yes
     theme: cerulean
+    highlight: zenburn
     toc: yes
+    toc_float:
+      collapsed: no
+    df_print: paged
 editor_options:
   chunk_output_type: inline
 ---
@@ -81,6 +83,8 @@ library(httr)
 * 先不要去管`fromJSON(content(GET(url), "text"))`是什麼意思，先著重在語言的形式。通常一個函式會寫為`func_name()`，所以上述其實是三個函式由內而外一層套一層，從最內層開始往外做。
 * 這其實很make-sense，因為如果你有一個數學式`(1 + (3-3)/2)/8`，也是會從最裡面那層做出來。
 ```{r}
+library(jsonlite)
+library(httr)
 url <- "https://www.dcard.tw/_api/forums/relationship/posts?popular=true"
 res <- fromJSON(content(GET(url), "text"))
 dplyr::glimpse(res)
@@ -95,9 +99,14 @@ head(res)
 # Getting Taipei theft report data
 
 ## Getting from the web directly
+- Go to data.taipei
+- Make a query "住宅竊盜"
+- Open "住宅竊盜點位資訊"
+- Click "API"
+- Copy the API address and assign to url
 ```{r}
-url <- "http://data.taipei/opendata/datalist/datasetMeta/download?id=68785231-d6c5-47a1-b001-77eec70bec02&rid=34a4a431-f04d-474a-8e72-8d3f586db3df"
-df <- read.csv(url, fileEncoding = "big5")
+url <- "https://data.taipei/api/v1/dataset/93d9bc2d-af08-4db7-a56b-9f0a49226fa3?scope=resourceAquire"
+df <- read_json(url, simplifyVector = T)
 head(df)
 dplyr::glimpse(df)
 ```
