@@ -1,0 +1,189 @@
+---
+title: "R05_5_ptt_demo_prac"
+author: "Jilung Hsieh"
+date: "2019/6/3"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Loading library
+- dplayr, time, word tokenization, string processing, text mining, and stringAsFactors
+```{r}
+
+```
+
+
+
+# Loading data
+- two rda files in the pttdata directory
+```{r}
+
+```
+
+
+# Loading jieba cutter
+```{r}
+segment_not <- c("韓國瑜")
+cutter <- worker()
+new_user_word(cutter, segment_not)
+stopWords <- readRDS("data/stopWords.rds")
+```
+
+
+# Filtering out posts not in the topic
+
+## Detecting keywords to observe
+`f(x)segment(x, cutter))`
+```{r}
+
+```
+
+## Cleaning and reformatting data
+- converting time stamp `as.POSIXct(strptime(time, pattern))`
+- getting poster id by regular expression str_replace(str, "to replace", "replace-r")
+- filtering out unessential keywords
+- filtering out na
+- filtering out ill-formatted ip address
+```{r}
+
+```
+
+
+## Taking a glance at time span
+```{r}
+
+```
+
+## Taking a glance at time span cutted by week
+- `mutate(week = cut(ptime, breaks = "week"))`
+```{r}
+
+```
+
+
+# Detecting questionable ip
+## Questionable IP and User mapping
+- poster_id1 -> n1 -> ip -> n2 -> poster_id2
+
+```{r}
+
+
+```
+
+## Looking up ip location
+```{r}
+# devtools::install_github("gitronald/IPtoCountry")
+library(IPtoCountry)
+data(IPs)
+```
+
+
+## building ip2country mapping
+```{r}
+
+```
+
+## Joining questionable IP and it location
+```{r}
+
+```
+
+
+## Plotting temporal features: hour by weekdays
+
+```{r}
+
+
+```
+
+
+## Joining comments and post data
+```{r}
+
+```
+
+## Calcultaing responding time as a feature
+```{r}
+
+```
+
+
+# Drawing network
+
+## Getting sub-graph
+```{r}
+toplot <- comment2post.df %>%
+    filter(!is.na(ptime)) %>%
+    count(commentor, poster_id) %>%
+    arrange(-n) %>%
+    slice(1:200)
+```
+
+
+## Drawing network
+```{r}
+library(igraph)
+g <- graph_from_data_frame(toplot, directed = FALSE) 
+Isolated = which(degree(g)==0)
+g = delete.vertices(g, Isolated)
+g <- simplify(g, remove.loops = T, 
+              remove.multiple = F)
+
+?simplify
+E(g)$n
+V(g)$size = centralization.degree(g)$res + 1
+
+E(g)$weight <- E(g)$n
+is.weighted(g)
+
+# E(g)$weight
+
+l <- layout_with_kk(g)
+# l <- layout_with_mds(g)  
+# l <- layout_with_fr(g)
+# l <- layout_with_sugiyama(g)
+# l <-  layout_with_lgl(g)
+# l <- layout_with_circle(g)
+# l <- layout_with_gem(g) # GEM force-directed
+
+
+
+# pdf("plot.pdf",10,10)
+plot(g, vertex.label = V(g)$name,  
+     edge.curved = 0.2,
+     vertex.label.cex = sqrt(V(g)$size)/8,
+     vertex.size  = sqrt(V(g)$size),
+     edge.arrow.size = 0, 
+     layout = l,
+     edge.width = log10(E(g)$n - min(E(g)$n) + 1),
+     vertex.label.family = 'Heiti TC Light',
+     edge.color = rgb(0.5,0.5,0.5,0.5))
+# dev.off()
+```
+
+# Draw network by ggraph
+```{r}
+library(ggraph)
+set.seed(2017)
+
+ggraph(g, layout = "fr") +
+  geom_edge_link() +
+  geom_node_point() +
+  geom_node_text(aes(label = name), vjust = 1, hjust = 1)
+
+
+ggraph(g, layout = "kk") +
+  geom_edge_link(aes(edge_alpha = n), show.legend = FALSE) +
+  geom_node_point(color = "lightblue", size = 5) +
+  geom_node_text(aes(label = name), vjust = 1, hjust = 1, color = "blue", alpha = 0.5) +
+  theme_void()
+
+```
+
+
+
+
+

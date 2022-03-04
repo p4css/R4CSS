@@ -4,24 +4,21 @@ author: "Jilung Hsieh"
 date: "10/9/2019"
 output:
   html_document:
-    theme: cerulean
     highlight: zenburn
+    number_sections: yes
+    theme: cerulean
     toc: yes
-    toc_float:
-      collapsed: no
-    df_print: paged
+    css: style.css
 editor_options:
   chunk_output_type: inline
 ---
 
 # loading packages
 ```{r}
+library(tidyverse)
 library(httr)
 library(rvest)
-library(tidyverse)
 options(stringsAsFactors = F)
-options(verbose = T)
-options(scipen = 999)
 ```
 
 
@@ -29,7 +26,7 @@ options(scipen = 999)
 # Loading post list with links
 ```{r}
 # Reading post link rds -> posts
-posts <- read_rds("data/post_HatePolitics_lin.rds")
+posts <- read_rds("data/post_HatePolitics_link.rds")
 posts %>% glimpse()
 
 ```
@@ -38,7 +35,7 @@ posts %>% glimpse()
 # Getting one post for examining html structure
 ```{r}
 # WLOG, getting the first post link as an example, assign to -> url
-url <- posts$link[150]
+url <- posts$link[1]
 # Getting back the article and parsing as html
 # Remember to send cookie
 doc <- GET(url, config = set_cookies("over18" = "1")) %>%
@@ -48,8 +45,8 @@ doc <- GET(url, config = set_cookies("over18" = "1")) %>%
 
 
 # Verifying the doc by write_html() and browseURL()
-write_html(doc, "test.html")
-browseURL("test.html")
+write_html(doc, "temp/test.html")
+browseURL("temp/test.html")
 
 ```
 
@@ -102,9 +99,6 @@ for(url in posts$link){
         html_text() %>%
         str_c(collapse = "") %>%
         str_replace_all("\n", "")
-    if(pcontent == ""){
-      next
-    }
     
     metadata <- html_nodes(doc, "#main-content > div.article-metaline > .article-meta-value") %>% html_text()
     

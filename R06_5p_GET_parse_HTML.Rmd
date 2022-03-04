@@ -4,12 +4,11 @@ author: "Jilung Hsieh"
 date: "2019/9/2"
 output:
   html_document:
-    theme: cerulean
     highlight: zenburn
+    number_sections: yes
+    theme: cerulean
     toc: yes
-    toc_float:
-      collapsed: no
-    df_print: paged
+    css: style.css
 editor_options:
   chunk_output_type: inline
 ---
@@ -23,8 +22,6 @@ library(httr)
 library(rvest) # for traversing html structure
 library(tidyverse)
 options(stringsAsFactors = F)
-options(verbose = T)
-options(scipen = 999)
 ```
 
 
