@@ -1,92 +1,74 @@
 ---
-title: "R02_2 Pivot on tp theft"
+title: "Reading CSV and Exploring Categorical Data"
 author: "Jilung Hsieh"
-date: "2019/9/2"
-output:
-  html_document:
-    theme: cerulean
-    highlight: zenburn
-    toc: yes
-    toc_float:
-      collapsed: no
-    df_print: paged
-editor_options:
-  chunk_output_type: inline
+date: "`r Sys.Date()`"
+output: html_document
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+# I. 讀取台北市竊盜案資料(CSV)
 
+## (1) 直接依資料網址讀取檔案
 
-# I. Reading TP theft data (CSV)
+現在的程式語言所設計的讀取檔案函式通常會允許使用者直接讀取資料所在的URL。所以，我們可以直接從網路上載入台北市竊盜案資料。首先要至[臺北資料大平台](https://data.taipei/#/)上查詢「住宅竊盜」，可以找到[臺北市住宅竊盜點位資訊](https://data.taipei/#/dataset/detail?id=68785231-d6c5-47a1-b001-77eec70bec02)，點選後對右上方的[下載](https://data.taipei/api/getDatasetInfo/downloadResource?id=68785231-d6c5-47a1-b001-77eec70bec02&rid=93d9bc2d-af08-4db7-a56b-9f0a49226fa3)按右鍵可取得鏈結到該資料的URL（如<https://data.taipei/api/getDatasetInfo/downloadResource?id=68785231-d6c5-47a1-b001-77eec70bec02&rid=93d9bc2d-af08-4db7-a56b-9f0a49226fa3>）。
 
-## Read from the web
-* 直接從網路上載入台北市竊盜案資料（至台北資料大平台上查詢住宅竊盜，對下載處按右鍵取得連結）
-* `df <- read.csv(url, fileEncoding = "big5")` 用`read.csv()`這個函式讀取上面那個`url`。讀取的同時，由於一般EXCEL為中文編碼`BIG5`，所以要跟程式碼講說，這個網址所指到的檔案編碼為`BIG5`。
-    * `fileEncoding = "big5"`稱為`read.csv()`這個函式的**參數(parameter)。
+**用來讀取CSV檔案的函式**有base套件中的`read.csv()`與readr套件中的`read_csv()`。普遍來說，`read_csv()` 的功能和效果都會比`read.csv()`好。有了該url後，便以`df <- read.csv(url)` 來讀取。你所看見的(df \<- read.csv(url))只是為了在讀取和Assign後，將該data.frame印出來。
+
+-   說明：l
+-   除錯：政府開放資料網站經常會以BIG5編碼的方式來儲存（古早味的EXCEL），所以如果要在讀取的時候特別指定該url所指到的資料是以BIG5編碼的話，便會建議以`read.csv(url, fileEncoding = "big5")`來讀取。`fileEncoding = "big5"`稱為`read.csv()`這個函式的**參數(parameter)**\*\*。
+-   嘗試：如果以`df <- readr::read_csv(url)`會得到什麼樣的結果呢？
 
 ```{r}
-library(httr)
-options(stringsAsFactors = F)
-
 url <- "https://data.taipei/api/getDatasetInfo/downloadResource?id=68785231-d6c5-47a1-b001-77eec70bec02&rid=93d9bc2d-af08-4db7-a56b-9f0a49226fa3"
-df <- read.csv(url, fileEncoding = "big5")
+(df <- read.csv(url))
 ```
 
+## (2) 從個人電腦本機端讀取檔案
 
-## Read CSV by read.csv() from local directory
-- reading `tp_theft_.csv` in the subfolder `data`
-- Remember to use the `fileEncoding` argument to `big5`
+也可以將該CSV檔下載至個人本機端，重新命名為`tptheft.csv`後，置如如教學範例`data` 資料夾中的`tptheft.csv`檔，便可以用`read.csv("data/tptheft.csv")`讀取該檔案。`data/tptheft.csv`為指到`tptheft.csv`這個檔案的路徑。相對於`R02_2p_read_csv_pivot_on_tptheft.Rmd`這個程式檔，`tptheft_.csv`位於的同一層的`data` 資料夾底下，所以路徑為`data/tptheft.csv`。
 
 ```{r}
 # read.csv() to read csv and convert it to a data.frame
-df <- read.csv("data/tptheft.csv", fileEncoding = "big5")
+df <- read.csv("data/tptheft.csv")
 
-# Checking the strcutrue of it
-str(df)
-# View(df)
+str(df)         # Checking the strcutrue of it
+# View(df)      # Note: knitr cannot knit a .Rmd with View() function
+library(tidyverse)
+glimpse(df)     # glimpse() is the tibble package's function.
 ```
 
 
-## Setting `stringAsFactors`
+## (參考) 用readr::read_csv()來讀取。
 
-```{r}
-# Add an argument to avoid reading string as factor
-df <- read.csv("data/tptheft.csv", fileEncoding = "big5", stringsAsFactors = FALSE)
+也可以使用`readr`套件的`read_csv()`函式來讀取，該套件屬於tidyverse套件系的其中一個套件，如果已經有用`install.packages("tidyverse")`安裝過，只要用`library(tidyverse)`就可以使用`read_csv()`函式。在此鼓勵各位使用tidyverse系列套件。
 
-# double-check the structure of it
-str(df)
-```
-
-
-## Using `read_csv()` of `readr` library to read the csv
-- remember to specify the `locale` argument to `big5`. `locale = locale(encoding = "Big5")`
+- 除錯：萬一遇到中文檔案會有讀檔編碼問題時，有可能該檔案是用big5來儲存的，可以在`read_csv()`中設定`locale`來指定讀取的編碼方法。如`read_csv(url, locale = locale(encoding = "Big5"))`
 
 ```{r}
 library(readr)
-df <- read_csv(url, locale = locale(encoding = "Big5"))
-
+df <- read_csv(url)
+# df <- read_csv(url, locale = locale(encoding = "Big5"))
 ```
 
+## (參考) 用R程式將該網址的檔案抓回本機端儲存。
 
-## (Option) Geting a file back to local directory
-- 部分Mac電腦無法使用`read.csv()`從網路上取得資料又轉為`data.frame`，一個可行的辦法是先用`GET(url, write_disk("data/tptheft.csv"))`將其取回並命名為`data/tptheft.csv`，之後再用`df <- read.csv("data/tptheft.csv", fileEncoding = "big5", stringsAsFactors = FALSE)`直接讀取該檔案。
+-   部分Mac電腦無法使用`read.csv()`從網路上取得資料又轉為`data.frame`，一個可行的辦法是先用`GET(url,write_disk("data/tptheft.csv"))`將其取回並命名為`data/tptheft.csv`，之後再用`df <- read.csv("data/tptheft.csv")`直接讀取該檔案。
 
 ```{r}
 library(httr)
 GET(url, write_disk("data/tptheft.csv", overwrite = TRUE))
-df <- read.csv("data/tptheft.csv", fileEncoding = "big5", stringsAsFactors = FALSE)
+df <- read.csv("data/tptheft.csv")
 ```
 
+# II. 觀察資料
 
-
-# II. Observing data
-* `View(df)` 用RStudio所提供的GUI直接觀看變數
-* `head(df)` 取前面六筆資料（也就是六列的資料來概觀該資料）
-* `class(df)` 印出該
-* `str(df)`
+-   `View(df)` 用RStudio所提供的GUI直接觀看變數
+-   `head(df)` 取前面六筆資料（也就是六列的資料來概觀該資料）
+-   `class(df)` 印出該
+-   `str(df)`
 
 ```{r}
 # View(df)
@@ -100,9 +82,10 @@ help(summary)
 
 ```
 
+## (1) 觀察資料維度
 
-## Dimension
 e.g., dim(), ncol(), nrow(),length()
+
 ```{r}
 dim(df)
 ncol(df)
@@ -110,12 +93,12 @@ nrow(df)
 length(df)
 ```
 
+## (2) 觀察變數名稱
 
-## Variable names
-* `names(df)`  列出變數名稱
-* `df$發生.現.地點` 顯示該變數內容
-* `df$發生時段` 顯示該變數內容
-* `length(df$發生時段)` 顯示該變數的長度（相當於有幾個）
+-   `names(df)` 列出變數名稱
+-   `df$發生.現.地點` 顯示該變數內容
+-   `df$發生時段` 顯示該變數內容
+-   `length(df$發生時段)` 顯示該變數的長度（相當於有幾個）
 
 ```{r}
 names(df)
@@ -124,13 +107,12 @@ head(df$發生時段)
 length(df$發生時段)
 ```
 
+## (3) 萃取所需新變項
 
-
-# III. Selecting data
-- 中文變數名改英文
-- 從變數`發生地點`，用`substr()`取出行政區（`region`）和縣市（`county`）。
-- 或用`stringr::str_sub()`
-- `?substr`查詢其用法和意義。相當於`getting sub string since x to y`。
+-   中文變數名改英文
+-   從變數`發生地點`，用`substr()`取出行政區（`region`）和縣市（`county`）。
+-   或用`stringr::str_sub()`
+-   `?substr`查詢其用法和意義。相當於`getting sub string since x to y`。
 
 ```{r}
 # Get substring of var "發生時段" and assign to a new time var
@@ -142,12 +124,10 @@ df$county <- substr(df$發生.現.地點, 1, 3)
 df$region <- substr(df$發生.現.地點, 4, 5)
 ```
 
-
-
 # IV. Pivot analysis: Counting and Summarizing
-* to observe variable distribution, and detect outliers or irrelevant data
-* 我們要回答的第一個數據問題通常是，那XXX的案例有幾個？例如大安區有多少竊盜案？買超過10000元訂單的客戶有多少人？男生和女生會修程式課的個別有多少人？這稱為計數。
 
+-   to observe variable distribution, and detect outliers or irrelevant data
+-   我們要回答的第一個數據問題通常是，那XXX的案例有幾個？例如大安區有多少竊盜案？買超過10000元訂單的客戶有多少人？男生和女生會修程式課的個別有多少人？這稱為計數。
 
 ## Method 1. Counting single variable by table()
 
@@ -163,10 +143,9 @@ table(df$time)
 table(df$region)
 ```
 
-
-
 ## Method 2. Counting by tapply()
-* Using `length()` as counting method
+
+-   Using `length()` as counting method
 
 ```{r}
 # tapply() one arbitrary var by var time with length() function
@@ -176,9 +155,9 @@ tapply(df$編號, df$time, length)
 tapply(df$編號, df$region, length)
 ```
 
-
 # V. Filtering data
-- 該項資料整理方法經常不慎用不同的時間區間來標記，或者不慎加入基隆或新北市的資料，需要靠自己觀察篩除。
+
+-   該項資料整理方法經常不慎用不同的時間區間來標記，或者不慎加入基隆或新北市的資料，需要靠自己觀察篩除。
 
 ```{r}
 # filter out irrelevant timestamp
@@ -187,8 +166,6 @@ df <- df[!df$time %in% c("00~03", "06~09", "09~12", "12~15", "15~18", "19~21", "
 # filter out irrelevant region(area)
 df <- df[!df$region %in% c("三重", "中和", "淡水", "板橋"), ]
 ```
-
-
 
 # VI. Pivot analysis on 2 vars
 
@@ -204,7 +181,6 @@ class(res_table)
 res_table
 ```
 
-
 ## 2 by `tapply()` with 2 independent vars
 
 ```{r}
@@ -213,7 +189,6 @@ class(res_tapply)
 res_tapply
 # View(res)
 ```
-
 
 ## 3. Pivot by dplyr::count()
 
@@ -229,8 +204,6 @@ res_count_spread
 # ??dplyr::count
 ```
 
-
-
 # VII. Plotting
 
 ```{r}
@@ -241,14 +214,13 @@ mosaicplot(res_table)
 mosaicplot(res_table, main="mosaic plot")
 ```
 
-
 ## (Option) Cannot show Chinese?
+
 ```{r}
 par(family=('Heiti TC Light'))
 par(family=('STKaiti'))
 mosaicplot(res_table, main="mosaic plot")
 ```
-
 
 ## (Option) Self-defined color?
 
@@ -262,9 +234,8 @@ mosaicplot(res_table, color=colors, border=0, off = 3,
 		   main="Theft rate of Taipei city (region by hour)")
 ```
 
-
-
 # VIII. Clean version
+
 ```{r}
 library(httr)
 options(stringsAsFactors = F)
@@ -286,4 +257,3 @@ par(family=('Heiti TC Light'))
 # par(family=('STKaiti'))
 mosaicplot(res_table, main="mosaic plot")
 ```
-
