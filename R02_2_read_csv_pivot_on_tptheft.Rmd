@@ -1,0 +1,308 @@
+---
+title: "Reading CSV and Exploring Categorical Data"
+author: "Jilung Hsieh"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_depth: 2
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# I. 讀取台北市竊盜案資料(CSV)
+
+## (1) 直接依資料網址讀取檔案
+
+現在的程式語言所設計的讀取檔案函式通常會允許使用者直接讀取資料所在的URL。所以，我們可以直接從網路上載入台北市竊盜案資料。首先要至[臺北資料大平台](https://data.taipei/#/)上查詢「住宅竊盜」，可以找到[臺北市住宅竊盜點位資訊](https://data.taipei/#/dataset/detail?id=68785231-d6c5-47a1-b001-77eec70bec02)，點選後對右上方的[下載](https://data.taipei/api/getDatasetInfo/downloadResource?id=68785231-d6c5-47a1-b001-77eec70bec02&rid=93d9bc2d-af08-4db7-a56b-9f0a49226fa3)按右鍵可取得鏈結到該資料的URL（如<https://data.taipei/api/getDatasetInfo/downloadResource?id=68785231-d6c5-47a1-b001-77eec70bec02&rid=93d9bc2d-af08-4db7-a56b-9f0a49226fa3>）。
+
+**用來讀取CSV檔案的函式**有base套件中的`read.csv()`與readr套件中的`read_csv()`。普遍來說，`read_csv()` 的功能和效果都會比`read.csv()`好。有了該url後，便以`df <- read.csv(url)` 來讀取。你所看見的(df \<- read.csv(url))只是為了在讀取和Assign後，將該data.frame印出來。
+
+-   說明：l
+-   除錯：政府開放資料網站經常會以BIG5編碼的方式來儲存（古早味的EXCEL），所以如果要在讀取的時候特別指定該url所指到的資料是以BIG5編碼的話，便會建議以`read.csv(url, fileEncoding = "big5")`來讀取。`fileEncoding = "big5"`稱為`read.csv()`這個函式的**參數(parameter)**\*\*。
+-   嘗試：如果以`df <- readr::read_csv(url)`會得到什麼樣的結果呢？
+
+```{r}
+library(DT)
+url <- "https://data.taipei/api/getDatasetInfo/downloadResource?id=68785231-d6c5-47a1-b001-77eec70bec02&rid=93d9bc2d-af08-4db7-a56b-9f0a49226fa3"
+(df <- read.csv(url)) %>% datatable()
+```
+
+## (2) 從個人電腦本機端讀取檔案
+
+也可以將該CSV檔下載至個人本機端，重新命名為`tptheft.csv`後，置如如教學範例`data` 資料夾中的`tptheft.csv`檔，便可以用`read.csv("data/tptheft.csv")`讀取該檔案。`data/tptheft.csv`為指到`tptheft.csv`這個檔案的路徑。相對於`R02_2p_read_csv_pivot_on_tptheft.Rmd`這個程式檔，`tptheft_.csv`位於的同一層的`data` 資料夾底下，所以路徑為`data/tptheft.csv`。
+
+```{r}
+# read.csv() to read csv and convert it to a data.frame
+df <- read.csv("data/tptheft.csv")
+
+str(df)         # Checking the strcutrue of it
+# View(df)      # Note: knitr cannot knit a .Rmd with View() function
+library(tidyverse)
+glimpse(df)     # glimpse() is the tibble package's function.
+```
+
+## (參考) 用readr::read_csv()來讀取。
+
+也可以使用`readr`套件的`read_csv()`函式來讀取，該套件屬於tidyverse套件系的其中一個套件，如果已經有用`install.packages("tidyverse")`安裝過，只要用`library(tidyverse)`就可以使用`read_csv()`函式。在此鼓勵各位使用tidyverse系列套件。
+
+-   除錯：萬一遇到中文檔案會有讀檔編碼問題時，有可能該檔案是用big5來儲存的，可以在`read_csv()`中設定`locale`來指定讀取的編碼方法。如`read_csv(url, locale = locale(encoding = "Big5"))`
+
+```{r}
+library(readr)
+df <- read_csv(url)
+# df <- read_csv(url, locale = locale(encoding = "Big5"))
+```
+
+## (參考) 用R程式將該網址的檔案抓回本機端儲存。
+
+-   部分Mac電腦無法使用`read.csv()`從網路上取得資料又轉為`data.frame`，一個可行的辦法是先用`GET(url,write_disk("data/tptheft.csv"))`將其取回並命名為`data/tptheft.csv`，之後再用`df <- read.csv("data/tptheft.csv")`直接讀取該檔案。
+
+```{r}
+library(httr)
+GET(url, write_disk("data/tptheft.csv", overwrite = TRUE))
+df <- read.csv("data/tptheft.csv")
+```
+
+# II. 觀察資料
+
+-   `View(df)` 用RStudio所提供的GUI直接觀看變數
+-   `head(df)` 取前面六筆資料（也就是六列的資料來概觀該資料）
+-   `class(df)` 印出該
+-   `str(df)`
+
+```{r}
+# View(df)
+head(df)	# get first part of the data.frame
+class(df)
+str(df)
+summary(df)
+# look up help
+help(summary)
+?summary
+
+```
+
+## (1) 觀察資料維度
+
+e.g., dim(), ncol(), nrow(),length()
+
+```{r}
+dim(df)
+ncol(df)
+nrow(df)
+length(df)
+```
+
+## (2) 觀察變數名稱
+
+-   `names(df)` 列出變數名稱
+-   `df$發生地點` 顯示該變數內容
+-   `df$發生時段` 顯示該變數內容
+-   `length(df$發生時段)` 顯示該變數的長度（相當於有幾個）
+
+```{r}
+names(df)
+head(df$發生地點)
+head(df$發生時段)
+length(df$發生時段)
+```
+
+## (3) 萃取所需新變項
+
+該data.frame包含編號、案類、發生日期、發生時段、發生地點五個變項。其中比較有意義的應該是發生日期、發生時段和發生地點。然而，發生地點幾乎是完整地址，除非要繪製發生的地圖點位地圖，才會需要近乎完整的地址。假設我們的目標是抽取出台北市的「行政區」，發生地點的格式還蠻一致的如「臺北市中正區廈門街91~120號」。因此，我們只要抽出發生地點的第4到第5個字，或者第4~6個字即可。
+
+從一個字串中抽取出第n個字到第m個字，要用`substr()`或`stringr`套件的`str_sub()`。可以用`?substr`或`?str_sub`查詢help中的相關用法。在此
+
+-   我將中文變數`現在時間`的資料指給一個新的英文變項`time`。
+-   從變數`發生地點`，用`substr()`取出行政區（`region`）
+-   或用`stringr::str_sub()`
+-   `?substr`查詢其用法和意義。相當於`getting sub string since x to y`。
+
+```{r}
+# Get substring of var "發生時段" and assign to a new time var
+df$time <- df$發生時段
+
+# Get substring of var "發生地點" and assign to a new region var
+df$region <- substr(df$發生地點, 4, 5)
+df %>% datatable()
+```
+
+## (Practice) 萃取month變項
+
+除了時間和地區可能會有差別外，那月份會不會竊盜案的數量也有差異呢？會不會冬天小偷也都在家休息了，夏天多呢？請嘗試從發生日期萃取出竊盜案發生的月份，並儲存為一個新的變項`month`。
+
+```{r}
+# YOUR CODE SHOULD BE HERE
+```
+
+# IV. 樞紐分析：計數、加總與彙整。
+
+Pivot analysis: Counting and Summarizing 清理完資料後，我們要回答的第一個數據問題通常是「那XXX的案例有幾個？」例如：大安區有多少竊盜案？10\~12這個時段有多少案例。
+
+## 方法一：Counting by `table()`
+
+`table()`函式可以對Vector中的值進行計數（Counting）。`table(df$time)` 相當於去計數不同的時間區間出現多少起案例；`table(df$region)` 相當於去計數不同地區各出現多少起案例。
+
+提示：可以用`class(tb_1)` 觀察用`table()` 計數後所產生的資料型態（`table`）。
+
+```{r}
+# counting the frequency of time variable
+(tb_1 <- table(df$time)) 
+class(tb_1)       # table
+# counting the frequency of region variable
+table(df$region)
+```
+
+## 方法二：Counting by `tapply()`
+
+我們也可用`tapply()` 函式來達到一樣的目的。Apply家族的函式都是，針對某個資料，將某個函式套用到某個物件上。`tapply()` 即是用來做計數的，`tapply(df$編號, df$time, length)`有三個輸入，第一個輸入為整體物件，第二個輸入為要據以彙整的變項，在此為`df$time`，第三個是要用來彙整的函式，因為這裡要做計數，所以要用`length`函式。
+
+註：同樣用`class()`來觀察彙整後的資料型態為`array`，和前者的`table`資料型態不同。
+
+```{r}
+# tapply() one arbitrary var by var time with length() function
+(tb_2 <- tapply(df$編號, df$time, length))
+class(tb_2)
+# tapply() one arbitrary var by var region with length() function
+tapply(df$編號, df$region, length)
+```
+
+# V. 依照變數值篩選資料
+
+該項竊盜案資料整理時經常不慎用不同的時間區間來標記，有時候也會不小心把新北市的資料給那進來，所以需要做資料篩選。從各個時間區間的竊盜案出現次數來觀察，有少數的案件出現在奇數的時間區間如`09~11`或`12~15`等等需要篩除；從各個行政區的竊盜案出現次數來觀察，確實都是台北市的竊盜案。
+
+接下來要用base套件的R，根據某個變數值（例如上述的時間）來篩出符合條件的資料，或者篩去不符合條件的資料。其語法是要在`df[ , ]`逗號前加上篩選的條件，也就是對資料列進行篩選，篩出或篩除都是以整列為單位。在此的條件是`df$time`[在]{style="color:hotpink"}`00~02`、`02~04`、...之間；或者是`df$time`[不在]{style="color:hotpink"}`03~05`、`05~07`、...之間。表示法分別如下：
+
+    df$time %in% c("00~02", "02~04", "04~6",...)
+    !df$time %in% c("03~05", "05~07", ...)
+
+-   `%in%` 表示的是左方`df$time`的值是否是右方Vector中的其中一個
+
+-   如果要表示不包含，就在`df%time`加一個NOT，也就是[`!`]{style="color:hotpink"}。
+
+依照各組時間的案例個數統計後，篩除資料未足100的時間區間如下，最後再用`table(df$time)` 計算一次，發現每個時段都兩三、百個案例，且涵蓋整日的時間。清理後沒有重疊的時間區間，做類別資料分析會比較準確。
+
+```{r}
+# filter out irrelevant timestamp
+df <- df[!df$time %in% c("03~05", "05~07", "09~11", "11~13", "12~15", "15~17", "15~18", "17~19", "18~21", "19~21", "21~23", "21~24", "23~01"), ]
+
+table(df$time)
+# filter out irrelevant region(area)
+# df <- df[!df$region %in% c("三重", "中和", "淡水", "板橋"), ]
+```
+
+# VI. 雙變數樞紐分析
+
+類別變項分析通常是要考驗兩個變項間的關係，從上述的計數中，我可以看見不同行政區或者不同時間的竊盜案數量，但我進一步想知道，那不同行政區的竊盜案常發生時間是否不同？這時後就要做時間和行政區的交叉分析。我們同樣可以用`table()`和`tapply()`來做兩個變項的交叉分析，寫法如下。
+
+## (1) by `table()`
+
+用`table()`來交叉分析的結果如下，所得到的結果之變數型態仍是`table`型態。
+
+```{r}
+
+# Tabulating time and region variables
+(res_table <- table(df$time, df$region))
+
+# Checking it class and its content
+class(res_table)
+```
+
+## (2) by `tapply()`
+
+用`tapply()`來做兩個變數交叉分析的語法如下，必須要把兩個Vector包在一個`list()`中。其他不變。兩個變項用`tapply()`交叉分析後的結果，變數型態會變成`matrix`。前者用`table()`來交叉分析的仍是`table`型態。
+
+```{r}
+res_tapply <- tapply(df$編號, list(df$time, df$region), length)
+class(res_tapply)
+res_tapply
+# View(res)
+```
+
+## (3) by dplyr::count()
+
+這邊多介紹一個用dplyr套件的`count()`函式來做交叉分析的方法（未來會常用這個方法，因為dplyr是tidyverse系列套件的核心套件。dplyr的函式第一個參數永遠是該data.frame， 例如`count()`；後面`time`與`region`則是這個data.frame中的兩個變項。不像`tapply()`或`table()`的結果一樣，欄與列分別為`time`與`region`，count()出來的結果會有兩個變項分別是指定要計數的`time`與`region` ，且會新增一個變項`n`，代表這組數據（`time` x `region`）共有幾個。這種表達型態通常稱為long-table（長表）、而`tapply()`或`table()` 的結果通常稱為wide-table（寬表）為典型的交叉分析表。
+
+目前大部分的類別資料分析還是會採用交叉分析表的型態，但未來我們要用tidyverse系列套件做大量的數據彙整或視覺化時，都會盡可能想辦法轉為Long-table型態，讓每一欄剛好就是一個變項。只要是tidyverse系列套件所計算出來的資料型態幾乎都是[類似]{style="color:hotpink"}data.frame的型態，例如觀察`count`的結果便是`"tbl_df"     "tbl"        "data.frame"`。
+
+```{r}
+# counting by dplyr::count()
+library(dplyr)
+(res_count <- count(df, time, region)) %>% datatable()
+class(res_count)    # "tbl_df"     "tbl"        "data.frame"
+```
+
+那長表列可以轉為寬表嗎？可以，tidyverse系列套件中的tidyr套件有個函式`spread()`可以接著把某個變項展開為欄。例如原本上述的列是時間與行政區的交叉組合，但我可以把行政區展開為欄、或者把時間展開為欄。`spread(res_count, region, n, fill = 0)` 有四個參數，遵循tidyverse系列套件的規則，第一個位置為data.frame，第二個參數則是要被展開至欄的變項這裡為`region`，第三個參數則是因應`region`被展開後，那中間交叉分析的數值就是n，最後一個參數是避免spread時有些交叉組是沒有資料的，因此`fill=0`可以指定，如果某個`time` x `region`的交叉組別是沒資料的，就填上`0`，也有可能是用`fill=NA`填上`NA`。以下的例子中也提供了將`time` 展開至欄的寫法供參考。
+
+展開後的資料型態和前者計數後的資料型態一樣，都是`"tbl_df"     "tbl"        "data.frame"`。這是為什麼tidyverse系列的套件逐漸變成R的顯學的原因之一。
+
+```{r}
+library(tidyr)
+# spreading the region into columns
+(res_count_spread <- spread(res_count, region, n, fill = 0))
+class(res_count_spread)
+# spreading the time into columns
+# res_count_spread <- spread(res_count, time, n, fill = 0)
+res_count_spread
+# ??dplyr::count
+```
+
+## (Practice) `count()`
+
+請練習看看如果用`count()`來計數單一變項，如前述的`region`、`time`或前面練習中新產生的`month`。
+
+```{r}
+# YOUR CODE SHOULD BE HERE
+```
+
+# VII. 繪圖 Plotting
+
+通常這種類別資料交叉分析最常用的圖表型態之一便是Mosaic Plot（但事實上Mosaic Plot不見能夠被一眼就了解）。我們可以把交叉分析後的變項`res_table`直接用MosaicPlot來繪圖。
+
+```{r}
+# mosaicplot() to plot 2-dim categorical vars.
+mosaicplot(res_table)
+
+# Add argument main (figure title)
+mosaicplot(res_table, main="mosaic plot")
+```
+
+## (1) 無法顯示中文
+
+大部分的視覺化套件都無法順利顯示中文，除非特別指定所要用的中文字型。這方面網路上可以找到很多的說明，但非常討厭的是，幾乎每換一套視覺化工具，換一套語言，就有不同的中文字體指定方式。例如用base的`plot()`來繪圖或用`ggplot()`的中文字型指定方法便不同，且軸上面有中文、圖標有中文、或者圖內有中文都要分開指定，非常討人厭。
+
+Mosaic Plot屬於base R的`plot()`，其中文指定方法要指定在繪圖前的`par()`函式中（`par`為parameter的意思），指定方法為`par(family=('Heiti TC Light'))`，Heiti TC Light為字體名稱，為OSX上在用的黑體細字，STKaiti則為標楷體。然後，`par()`和`mosaicplot()`兩個函式要「同時執行」，也就是請你直接用shift-cmd(ctrl)-Enter執行整個code-cell，或者將該兩個函式選起來一次執行。
+
+```{r}
+
+par(family=('STKaiti'))
+# par(family=('Heiti TC Light'))
+mosaicplot(res_table, main="mosaic plot", color=T)
+```
+
+## (2) 自訂顏色
+
+目前顏色實在過醜，你可以自訂顏色指給`mosaicplot()`。例如我底下便產製了12種顏色後，將其作為`mosaicplot()`的參數
+
+```{r}
+# Set up color by yourself.
+colors <- c('#D0104C', '#DB4D6D', '#E83015',  '#F75C2F',
+            '#E79460', '#E98B2A', '#9B6E23', '#F7C242',
+            '#BEC23F', '#90B44B', '#66BAB7', '#1E88A8')
+# par(family=('STKaiti'))
+par(family=('Heiti TC Light'))
+mosaicplot(res_table, color=colors, border=0, off = 3,
+		   main="Theft rate of Taipei city (region by hour)")
+```
+
+## (Option) 視覺化殘差分
+
+```{r}
+# par(family=('STKaiti'))
+par(family=('Heiti TC Light'))
+mosaicplot(res_table, color=T, shade = T, border=0, off = 3,
+		   main="Theft rate of Taipei city (region by hour)")
+```
