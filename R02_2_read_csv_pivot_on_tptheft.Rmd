@@ -58,7 +58,7 @@ df <- read_csv(url)
 
 ## (參考) 用R程式將該網址的檔案抓回本機端儲存。
 
--   部分Mac電腦無法使用`read.csv()`從網路上取得資料又轉為`data.frame`，一個可行的辦法是先用`GET(url,write_disk("data/tptheft.csv"))`將其取回並命名為`data/tptheft.csv`，之後再用`df <- read.csv("data/tptheft.csv")`直接讀取該檔案。
+部分Mac電腦無法使用`read.csv()`從網路上取得資料又轉為`data.frame`，一個可行的辦法是先用`GET(url,write_disk("data/tptheft.csv"))`將其取回並命名為`data/tptheft.csv`，之後再用`df <- read.csv("data/tptheft.csv")`直接讀取該檔案。
 
 ```{r}
 library(httr)
@@ -68,7 +68,7 @@ df <- read.csv("data/tptheft.csv")
 
 # II. 觀察資料
 
--   `View(df)` 用RStudio所提供的GUI直接觀看變數
+-   `View(df)` 用RStudio所提供的GUI直接觀看變數。自行移去#註解符號來測試，因為knit成html檔時，有`View()`的指令都會造成knit程序中斷。
 -   `head(df)` 取前面六筆資料（也就是六列的資料來概觀該資料）
 -   `class(df)` 印出該
 -   `str(df)`
