@@ -1,0 +1,58 @@
+---
+title: "R02_3_Categorical_Data_Anaysis"
+author: "Jilung Hsieh"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Loading packages
+
+```{r}
+library(tidyverse)
+options(stringsAsFactors = F)
+```
+
+## Loading tp-theft Data
+
+```{r}
+df <- read.csv("data/tptheft.csv")
+df$time <- df$發生時段
+df$region <- substr(df$發生地點, 4, 5)
+df <- df[!df$time %in% c("03~05", "05~07", "09~11", "11~13", "12~15", "15~17", "15~18", "17~19", " 18~21", "19~21", "21~23", "21~24", "23~01"), ]
+(tbl <- count(df, time, region)) %>% head  %>% knitr::kable()
+```
+
+### Reorder
+
+```{r}
+table(df$time)
+df$time <- ordered(df$time, levels = c("00~02", "02~04", "04~06", "06~08", "08~10", "10~12", "12~14", "14~16", "16~18", "18~20", "20~22", "22~24"))
+```
+
+### Relable
+
+```{r}
+df$time <- ordered(df$time, 
+                   levels = c("00~02", "02~04", "04~06", "06~08", 
+                              "08~10", "10~12", "12~14", "14~16", 
+                              "16~18", "18~20", "20~22", "22~24"), 
+                   labels = c("midnight", "midnight", "midnight", "morning",
+                              "morning", "working", "working", "working", 
+                              "working", "night", "night","night"))
+tbl2 <- table(df$time, df$region)
+par(family=('Heiti TC Light'))
+mosaicplot(tbl2, shade = T, 
+		   main="Theft rate of Taipei city (region by hour)")
+```
+
+### Replacement
+
+`case_when`: This function allows you to vectorise multiple [`if_else()`](http://127.0.0.1:12918/help/library/dplyr/help/if_else) statements. It is an R equivalent of the SQL `CASE WHEN` statement. If no cases match, `NA` is returned.
+
+```{r}
+
+```

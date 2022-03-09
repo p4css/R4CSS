@@ -24,10 +24,21 @@ knitr::opts_chunk$set(echo = TRUE)
 -   除錯：政府開放資料網站經常會以BIG5編碼的方式來儲存（古早味的EXCEL），所以如果要在讀取的時候特別指定該url所指到的資料是以BIG5編碼的話，便會建議以`read.csv(url, fileEncoding = "big5")`來讀取。`fileEncoding = "big5"`稱為`read.csv()`這個函式的**參數(parameter)**\*\*。
 -   嘗試：如果以`df <- readr::read_csv(url)`會得到什麼樣的結果呢？
 
+```{r Testing of new line break}
+string1 <- "row1\nrow2"
+string2 <- "col1\tcol2"
+string3 <- "col12\tcol22"
+print(string2)
+message(string2)
+cat(string3)
+```
+
 ```{r}
-library(DT)
 url <- "https://data.taipei/api/getDatasetInfo/downloadResource?id=68785231-d6c5-47a1-b001-77eec70bec02&rid=93d9bc2d-af08-4db7-a56b-9f0a49226fa3"
-(df <- read.csv(url)) %>% datatable()
+
+# read url by read.csv()
+
+
 ```
 
 ## (2) 從個人電腦本機端讀取檔案
@@ -35,11 +46,17 @@ url <- "https://data.taipei/api/getDatasetInfo/downloadResource?id=68785231-d6c5
 也可以將該CSV檔下載至個人本機端，重新命名為`tptheft.csv`後，置如如教學範例`data` 資料夾中的`tptheft.csv`檔，便可以用`read.csv("data/tptheft.csv")`讀取該檔案。`data/tptheft.csv`為指到`tptheft.csv`這個檔案的路徑。相對於`R02_2p_read_csv_pivot_on_tptheft.Rmd`這個程式檔，`tptheft_.csv`位於的同一層的`data` 資料夾底下，所以路徑為`data/tptheft.csv`。
 
 ```{r}
-# read.csv() to read csv and convert it to a data.frame
-df <- read.csv("data/tptheft.csv")
+# read.csv() to read local csv and convert it to a data.frame
+
+
+# Setting a global option to force stringAsFactor to FALSE by options()
+
+
 
 str(df)         # Checking the strcutrue of it
 # View(df)      # Note: knitr cannot knit a .Rmd with View() function
+
+# install.packages("tidyverse")
 library(tidyverse)
 glimpse(df)     # glimpse() is the tibble package's function.
 ```
@@ -51,7 +68,7 @@ glimpse(df)     # glimpse() is the tibble package's function.
 -   除錯：萬一遇到中文檔案會有讀檔編碼問題時，有可能該檔案是用big5來儲存的，可以在`read_csv()`中設定`locale`來指定讀取的編碼方法。如`read_csv(url, locale = locale(encoding = "Big5"))`
 
 ```{r}
-library(readr)
+# library(readr)
 df <- read_csv(url)
 # df <- read_csv(url, locale = locale(encoding = "Big5"))
 ```
@@ -62,8 +79,8 @@ df <- read_csv(url)
 
 ```{r}
 library(httr)
-GET(url, write_disk("data/tptheft.csv", overwrite = TRUE))
-df <- read.csv("data/tptheft.csv")
+GET(url, write_disk("temp.csv", overwrite = TRUE))
+df <- read_csv("temp.csv")
 ```
 
 # II. 觀察資料
@@ -82,18 +99,18 @@ summary(df)
 # look up help
 help(summary)
 ?summary
-
 ```
 
 ## (1) 觀察資料維度
 
-e.g., dim(), ncol(), nrow(),length()
+e.g., `dim()`, `ncol()`, `nrow()`,`length()`
 
 ```{r}
-dim(df)
-ncol(df)
-nrow(df)
-length(df)
+
+
+
+
+
 ```
 
 ## (2) 觀察變數名稱
@@ -104,10 +121,11 @@ length(df)
 -   `length(df$發生時段)` 顯示該變數的長度（相當於有幾個）
 
 ```{r}
-names(df)
-head(df$發生地點)
-head(df$發生時段)
-length(df$發生時段)
+
+
+
+
+
 ```
 
 ## (3) 萃取所需新變項
@@ -123,11 +141,13 @@ length(df$發生時段)
 
 ```{r}
 # Get substring of var "發生時段" and assign to a new time var
-df$time <- df$發生時段
+df$time <- 
 
 # Get substring of var "發生地點" and assign to a new region var
-df$region <- substr(df$發生地點, 4, 5)
-df %>% datatable()
+df$region <- 
+
+# View the data.frame
+
 ```
 
 ## (Practice) 萃取month變項
@@ -149,25 +169,33 @@ Pivot analysis: Counting and Summarizing 清理完資料後，我們要回答的
 提示：可以用`class(tb_1)` 觀察用`table()` 計數後所產生的資料型態（`table`）。
 
 ```{r}
-# counting the frequency of time variable
-(tb_1 <- table(df$time)) 
+# counting(table) the frequency of the variable "time" 
+
+
+# Checking the class of the counting result
 class(tb_1)       # table
-# counting the frequency of region variable
-table(df$region)
+
+# counting(table) the frequency of the variable "region"
+
+
 ```
 
 ## 方法二：Counting by `tapply()`
 
-我們也可用`tapply()` 函式來達到一樣的目的。Apply家族的函式都是，針對某個資料，將某個函式套用到某個物件上。`tapply()` 即是用來做計數的，`tapply(df$編號, df$time, length)`有三個輸入，第一個輸入為整體物件，第二個輸入為要據以彙整的變項，在此為`df$time`，第三個是要用來彙整的函式，因為這裡要做計數，所以要用`length`函式。
+我們也可用`tapply()` 函式來達到一樣的目的。Apply家族的函式都是，針對某個資料，將某個函式套用到某個變項上。`tapply()` 即是用來做計數的，`tapply(df$編號, df$time, length)`有三個輸入，第一個輸入為整體物件，第二個輸入為要據以彙整的變項，在此為`df$time`，第三個是要用來彙整的函式，因為這裡要做計數，所以要用`length`函式。
 
 註：同樣用`class()`來觀察彙整後的資料型態為`array`，和前者的`table`資料型態不同。
 
 ```{r}
-# tapply() one arbitrary var by var time with length() function
-(tb_2 <- tapply(df$編號, df$time, length))
+# tapply() one arbitrary var by var "time" with length() function
+
+
+# Check data type
 class(tb_2)
-# tapply() one arbitrary var by var region with length() function
-tapply(df$編號, df$region, length)
+
+# tapply() one arbitrary var by var "region" with length() function
+
+
 ```
 
 # V. 依照變數值篩選資料
@@ -186,10 +214,14 @@ tapply(df$編號, df$region, length)
 依照各組時間的案例個數統計後，篩除資料未足100的時間區間如下，最後再用`table(df$time)` 計算一次，發現每個時段都兩三、百個案例，且涵蓋整日的時間。清理後沒有重疊的時間區間，做類別資料分析會比較準確。
 
 ```{r}
-# filter out irrelevant timestamp
-df <- df[!df$time %in% c("03~05", "05~07", "09~11", "11~13", "12~15", "15~17", "15~18", "17~19", "18~21", "19~21", "21~23", "21~24", "23~01"), ]
+# filter in irrelevant timestamp
+df <- df[ , ]
 
+
+# df <- df[!df$time %in% c("03~05", "05~07", ...), ]
+# Counting again
 table(df$time)
+
 # filter out irrelevant region(area)
 # df <- df[!df$region %in% c("三重", "中和", "淡水", "板橋"), ]
 ```
@@ -203,9 +235,8 @@ table(df$time)
 用`table()`來交叉分析的結果如下，所得到的結果之變數型態仍是`table`型態。
 
 ```{r}
-
 # Tabulating time and region variables
-(res_table <- table(df$time, df$region))
+res_table <- 
 
 # Checking it class and its content
 class(res_table)
@@ -218,7 +249,6 @@ class(res_table)
 ```{r}
 res_tapply <- tapply(df$編號, list(df$time, df$region), length)
 class(res_tapply)
-res_tapply
 # View(res)
 ```
 
@@ -231,7 +261,10 @@ res_tapply
 ```{r}
 # counting by dplyr::count()
 library(dplyr)
-(res_count <- count(df, time, region)) %>% datatable()
+
+
+
+
 class(res_count)    # "tbl_df"     "tbl"        "data.frame"
 ```
 
@@ -242,12 +275,21 @@ class(res_count)    # "tbl_df"     "tbl"        "data.frame"
 ```{r}
 library(tidyr)
 # spreading the region into columns
-(res_count_spread <- spread(res_count, region, n, fill = 0))
+# ?spread
+res_count_spread <- 
 class(res_count_spread)
 # spreading the time into columns
 # res_count_spread <- spread(res_count, time, n, fill = 0)
 res_count_spread
 # ??dplyr::count
+```
+
+## (Option) wide to long table
+
+寬表格亦可用tidyr的`gather()`函式轉回長表格型態：
+
+```{r}
+(long_table <- tidyr::gather(res_count_spread, region, n, -time))
 ```
 
 ## (Practice) `count()`
@@ -298,7 +340,7 @@ mosaicplot(res_table, color=colors, border=0, off = 3,
 		   main="Theft rate of Taipei city (region by hour)")
 ```
 
-## (Option) 視覺化殘差分
+## (Option) 視覺化殘差
 
 ```{r}
 # par(family=('STKaiti'))
