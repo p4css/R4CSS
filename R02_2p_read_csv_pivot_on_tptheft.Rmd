@@ -327,7 +327,7 @@ mosaicplot(res_table, main="mosaic plot", color=T)
 
 ## (2) 自訂顏色
 
-目前顏色實在過醜，你可以自訂顏色指給`mosaicplot()`。例如我底下便產製了12種顏色後，將其作為`mosaicplot()`的參數
+你可以自訂顏色指給`mosaicplot()`。例如我底下便產製了12種顏色後，將其作為`mosaicplot()`的參數
 
 ```{r}
 # Set up color by yourself.
