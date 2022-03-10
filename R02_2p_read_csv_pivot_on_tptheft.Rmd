@@ -24,15 +24,6 @@ knitr::opts_chunk$set(echo = TRUE)
 -   除錯：政府開放資料網站經常會以BIG5編碼的方式來儲存（古早味的EXCEL），所以如果要在讀取的時候特別指定該url所指到的資料是以BIG5編碼的話，便會建議以`read.csv(url, fileEncoding = "big5")`來讀取。`fileEncoding = "big5"`稱為`read.csv()`這個函式的**參數(parameter)**\*\*。
 -   嘗試：如果以`df <- readr::read_csv(url)`會得到什麼樣的結果呢？
 
-```{r Testing of new line break}
-string1 <- "row1\nrow2"
-string2 <- "col1\tcol2"
-string3 <- "col12\tcol22"
-print(string2)
-message(string2)
-cat(string3)
-```
-
 ```{r}
 url <- "https://data.taipei/api/getDatasetInfo/downloadResource?id=68785231-d6c5-47a1-b001-77eec70bec02&rid=93d9bc2d-af08-4db7-a56b-9f0a49226fa3"
 

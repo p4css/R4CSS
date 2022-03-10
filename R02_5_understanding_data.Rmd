@@ -14,6 +14,19 @@ library(tidyverse)
 options(stringsAsFactors = F)
 ```
 
+# New line mark \n
+
+```{r}
+string1 <- "row1\nrow2"
+string2 <- "col1\tcol2"
+string3 <- "col12\tcol22"
+print(string2)
+message(string2)
+cat(string3)
+```
+
+# Read weather data
+
 ```{r}
 
 url <- "http://61.216.185.17/466920.txt"
