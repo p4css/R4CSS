@@ -300,7 +300,7 @@ res_count_spread
 mosaicplot(res_table)
 
 # Add argument main (figure title)
-mosaicplot(res_table, main="mosaic plot")
+mosaicplot(res_table, main="TP Theft (Time X Region)")
 ```
 
 ## (1) 無法顯示中文
@@ -311,8 +311,8 @@ Mosaic Plot屬於base R的`plot()`，其中文指定方法要指定在繪圖前�
 
 ```{r}
 
-par(family=('STKaiti'))
-# par(family=('Heiti TC Light'))
+# par(family=('STKaiti'))
+par(family=('Heiti TC Light'))
 mosaicplot(res_table, main="mosaic plot", color=T)
 ```
 
@@ -336,6 +336,7 @@ mosaicplot(res_table, color=colors, border=0, off = 3,
 ```{r}
 # par(family=('STKaiti'))
 par(family=('Heiti TC Light'))
-mosaicplot(res_table, color=T, shade = T, border=0, off = 3,
+mosaicplot(res_table, shade = T,
 		   main="Theft rate of Taipei city (region by hour)")
+?mosaicplot
 ```

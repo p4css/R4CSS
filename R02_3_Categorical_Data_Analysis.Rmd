@@ -24,6 +24,13 @@ df$time <- df$發生時段
 df$region <- substr(df$發生地點, 4, 5)
 df <- df[!df$time %in% c("03~05", "05~07", "09~11", "11~13", "12~15", "15~17", "15~18", "17~19", " 18~21", "19~21", "21~23", "21~24", "23~01"), ]
 (tbl <- count(df, time, region)) %>% head  %>% knitr::kable()
+
+table(df$time, df$region)
+```
+
+```{r}
+par(family=('Heiti TC Light'))
+mosaicplot(res_table, off = 10, shade = T)
 ```
 
 ### Reorder
@@ -36,16 +43,30 @@ df$time <- ordered(df$time, levels = c("00~02", "02~04", "04~06", "06~08", "08~1
 ### Relable
 
 ```{r}
+
+df <- read.csv("data/tptheft.csv")
+df$time <- df$發生時段
+df$region <- substr(df$發生地點, 4, 5)
+df <- df[!df$time %in% c("03~05", "05~07", "09~11", "11~13", "12~15", "15~17", "15~18", "17~19", " 18~21", "19~21", "21~23", "21~24", "23~01"), ]
+
 df$time <- ordered(df$time, 
                    levels = c("00~02", "02~04", "04~06", "06~08", 
                               "08~10", "10~12", "12~14", "14~16", 
                               "16~18", "18~20", "20~22", "22~24"), 
-                   labels = c("midnight", "midnight", "midnight", "morning",
-                              "morning", "working", "working", "working", 
-                              "working", "night", "night","night"))
+                   labels = c("午夜", "午夜", "午夜", "通勤",
+                              "工作", "工作", "工作", "工作", 
+                              "工作", "晚上", "晚上","晚上"))
+df$region <- ordered(df$region, 
+                   levels = c("北投", "大安", "大同", "南港", 
+                              "內湖", "士林", "松山", "萬華",
+                              "文山", "信義", "中山", "中正"), 
+                   labels = c("住宅", "住商", "商業", "商業",
+                              "住商", "住宅", "住商", "住宅", 
+                              "住宅", "商業", "商業", "商業"))
 tbl2 <- table(df$time, df$region)
+# tbl2 <- table(df$region, df$time)
 par(family=('Heiti TC Light'))
-mosaicplot(tbl2, shade = T, 
+mosaicplot(tbl2, shade = T,
 		   main="Theft rate of Taipei city (region by hour)")
 ```
 
