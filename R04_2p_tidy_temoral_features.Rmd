@@ -1,0 +1,73 @@
+---
+title: "datetime plotting"
+author: "Jilung Hsieh"
+date: "2020/10/12"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+options(stringsAsFactors = F)
+```
+
+# Loading data
+```{r}
+
+
+```
+
+
+# parsing time
+- Convert "character time"  to R date.time object (POSIXct)
+```{r}
+
+
+    
+```
+
+
+# Data coverage over time
+```{r}
+
+
+
+```
+
+
+# Data coverage over time by month
+```{r}
+
+
+
+
+```
+
+```{r}
+
+
+
+
+
+```
+
+
+
+# Data coverage overt time by hour, grouped by day
+```{r}
+
+
+
+
+
+
+
+```
+
+
+
+
+
