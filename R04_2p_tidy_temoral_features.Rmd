@@ -58,7 +58,8 @@ options(stringsAsFactors = F)
 
 # Data coverage overt time by hour, grouped by day
 ```{r}
-
+clean %>%
+    filter(ptime >= as_datetime("2019-03-25") & ptime < as_datetime("2019-04-01")) %>% ...
 
 
 
