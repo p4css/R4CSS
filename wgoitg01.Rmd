@@ -81,9 +81,6 @@ toplot <- read_csv("data/nyt_data/unicef-changing-childhood-data.csv") %>%
 
 
 
-
-
-
 ```
 
 ```{r}
