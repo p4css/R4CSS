@@ -1,0 +1,57 @@
+---
+title: "R04_4_tidy_tw_edu"
+author: "Jilung Hsieh"
+date: "2019/4/21"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+options(stringsAsFactors = F)
+```
+
+
+```{r}
+raw <- read.csv("../data/opendata107Y020.csv")
+load("../data/town_ref_stat.rda")
+
+```
+
+```{r}
+
+town_edu_clean <- raw %>%
+    slice(-1) %>% 
+    select(1:15) %>%
+    mutate(site_id = str_replace_all(site_id, "高雄市鳳山.+", "高雄市鳳山區")) %>%
+    mutate(site_id = str_replace_all(site_id, "高雄市三民.+", "高雄市三民區")) %>%
+    mutate(site_id = str_replace_all(site_id, "　", "")) %>%
+    mutate_at(vars(matches("doctor|master|university")), as.numeric)
+
+town_edu_people <- town_edu_clean %>%
+    group_by(site_id) %>%
+    summarise(eduPeople = sum(as.numeric(edu_age_15up_total))) %>%
+    ungroup()
+
+town_edu_stat <- town_edu_clean %>%
+    gather("key", "value", 6:ncol(.)) %>%
+    group_by(site_id) %>%
+    summarize(univ = sum(value)) %>%
+    ungroup() %>%
+    left_join(town_edu_people) %>%
+    mutate(univPerc = univ/eduPeople)
+
+town_ref_stat <- town_ref_stat %>% left_join(town_edu_stat %>% select(site_id, univPerc), by = c("countytown" = "site_id"))
+    # separate(key, c("edu", "degree", "status", "gender"))
+```
+
+```{r}
+town_ref_stat %>%
+    ggplot() + aes(ref10, univPerc)  + 
+    geom_point(color="skyblue", alpha=0.5) + 
+    theme_minimal()
+```
+
