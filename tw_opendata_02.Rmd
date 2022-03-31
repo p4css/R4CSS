@@ -42,6 +42,10 @@ save(all_data, file="AQI潮州.rda")
 ```
 
 ```{r}
+load("https://github.com/p4css/R4CSS/blob/master/data/twdata/AQI%E6%BD%AE%E5%B7%9E.rda")
+```
+
+```{r}
 toplot <- all_data %>%
     arrange(日期)%>%
     filter(測項=="PM2.5") %>%
