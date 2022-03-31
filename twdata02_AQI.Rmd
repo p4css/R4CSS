@@ -38,8 +38,8 @@ for(fname in csv_files){
 
 all_data <- bind_rows(all_data, all_data2)
 
-# save(all_data, file="AQI潮州.rda")
-# write_rds(all_data, "AQI_Chaozhou.rds")
+save(all_data, file="AQI潮州.rda")
+write_rds(all_data, "AQI_Chaozhou.rds")
 ```
 
 ```{r load-data-from-github}
