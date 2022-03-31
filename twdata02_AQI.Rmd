@@ -38,14 +38,17 @@ for(fname in csv_files){
 
 all_data <- bind_rows(all_data, all_data2)
 
-save(all_data, file="AQI潮州.rda")
+# save(all_data, file="AQI潮州.rda")
+# write_rds(all_data, "AQI_Chaozhou.rds")
 ```
 
-```{r}
-load("https://github.com/p4css/R4CSS/blob/master/data/twdata/AQI%E6%BD%AE%E5%B7%9E.rda")
+```{r load-data-from-github}
+all_data <- read_rds("https://github.com/p4css/R4CSS/raw/master/data/twdata/AQI_Chaozhou.rds")
 ```
 
-```{r}
+## Trending: Central tendency
+
+```{r clean-data}
 toplot <- all_data %>%
     arrange(日期)%>%
     filter(測項=="PM2.5") %>%
@@ -62,14 +65,18 @@ toplot <- all_data %>%
     
 ```
 
-```{r}
+-   [科普小學堂-空氣中的懸浮粒子](https://fphsa.org.tw/eh/%E7%A7%91%E6%99%AE%E5%B0%8F%E5%AD%B8%E5%A0%82%EF%BD%9C%E7%A9%BA%E6%B0%A3%E4%B8%AD%E7%9A%84%E5%8D%B1%E5%AE%B3%EF%BC%8D%E7%B4%B0%E6%87%B8%E6%B5%AE%E5%BE%AE%E7%B2%92pm2-5/?gclid=Cj0KCQjw_4-SBhCgARIsAAlegrXyT47_JTqzwuZ93EiEaerVLEwwIR03XgBkMVIvQKFvLQ9GNeMQh9kaAh3vEALw_wcB)
+-   [台灣PM2.5三大面向：空汙現況多嚴重？要怪中國還是怪自己？ - 第 1 頁 - The News Lens 關鍵評論網](https://www.thenewslens.com/article/115229)
+
+```{r central-trend, fig.asp=0.4, fig.width=2}
 library(gghighlight)
 toplot %>%
+    mutate(month = as.character(month)) %>%
     group_by(month) %>%
     arrange(year) %>%
-    mutate(diff = avg -first(avg),
-           month = as.character(month)) %>%
-    ungroup() %>%
+    # mutate(diff = avg -first(avg),
+    #        month = as.character(month)) %>%
+    # ungroup() %>%
     ggplot() + aes(year, avg, color = month) + 
     geom_line() + 
     # geom_point() + 
@@ -77,7 +84,9 @@ toplot %>%
     theme_minimal()
 ```
 
-```{r}
+## Trending: Extreme value
+
+```{r boxplot, fig.asp=0.4, fig.width=2}
 toplot2 <- all_data %>%
     arrange(日期)%>%
     filter(測項=="PM2.5") %>%
@@ -103,5 +112,25 @@ toplot2 %>%
     # geom_point() + 
     gghighlight(month %in% c("11", "12", "1", "2", "3")) + 
     ylab("Days (PM25 > 35) in one month") + 
+    theme_minimal()
+```
+
+```{r}
+toplot3 <- all_data %>%
+    arrange(日期)%>%
+    filter(測項=="PM2.5") %>%
+    gather("hour", "PM25", 4:28) %>%
+    mutate(PM25 = as.numeric(PM25)) %>%
+    drop_na() %>%
+    mutate(year = lubridate::year(日期), month = lubridate::month(日期)) %>%
+    filter(month %in% c(11, 12, 1, 2, 3))
+```
+
+```{r fig.asp=0.4, fig.cap=, fig.width=2, message=FALSE, warning=FALSE}
+toplot3 %>%
+    mutate(year = as.character(year)) %>%
+    ggplot() + aes(y=year, x=PM25)  + 
+    geom_boxplot(fill="skyblue", alpha=0.2) + 
+    xlim(0, 200) + 
     theme_minimal()
 ```
