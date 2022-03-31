@@ -1,0 +1,103 @@
+---
+title: "tw_opendata_02"
+author: "Jilung Hsieh"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(readxl)
+options(stringsAsFactors = F)
+```
+
+```{r}
+xls_files <- list.files("data/twdata/AQI/", pattern = ".xls", full.names = T)
+
+csv_files <- list.files("data/twdata/AQI/", pattern = ".csv", full.names = T)
+```
+
+```{r}
+all_data <- tibble()
+for(fname in xls_files){
+    tmp <- readxl::read_excel(fname) %>% type_convert()
+    all_data <- bind_rows(all_data, tmp)
+}
+all_data2 <- tibble()
+for(fname in csv_files){
+    tmp <- read_csv(fname, locale = locale(encoding = "Big5")) %>%
+        filter(測站=="潮州") %>%
+        mutate(日期 = lubridate::as_date(日期)) %>%
+        type_convert() 
+    all_data2 <- bind_rows(all_data2, tmp)
+}
+
+all_data <- bind_rows(all_data, all_data2)
+
+save(all_data, file="AQI潮州.rda")
+```
+
+```{r}
+toplot <- all_data %>%
+    arrange(日期)%>%
+    filter(測項=="PM2.5") %>%
+    gather("hour", "PM25", 4:28) %>%
+    mutate(PM25 = as.numeric(PM25)) %>%
+    drop_na() %>%
+    group_by(日期) %>%
+    summarize(avg = sum(PM25)/24) %>% 
+    ungroup() %>%
+    mutate(year = lubridate::year(日期), month = lubridate::month(日期)) %>%
+    group_by(year, month) %>%
+    summarize(avg = mean(avg)) %>%
+    ungroup()
+    
+```
+
+```{r}
+library(gghighlight)
+toplot %>%
+    group_by(month) %>%
+    arrange(year) %>%
+    mutate(diff = avg -first(avg),
+           month = as.character(month)) %>%
+    ungroup() %>%
+    ggplot() + aes(year, avg, color = month) + 
+    geom_line() + 
+    # geom_point() + 
+    gghighlight(month %in% c("11", "12", "1", "2", "3")) + 
+    theme_minimal()
+```
+
+```{r}
+toplot2 <- all_data %>%
+    arrange(日期)%>%
+    filter(測項=="PM2.5") %>%
+    gather("hour", "PM25", 4:28) %>%
+    mutate(PM25 = as.numeric(PM25)) %>%
+    drop_na() %>%
+    group_by(日期) %>%
+    summarize(avg = sum(PM25)/24) %>% 
+    ungroup() %>%
+    mutate(year = lubridate::year(日期), month = lubridate::month(日期)) %>%
+    group_by(year, month) %>%
+    summarize(purple = sum(avg>150),
+              red = sum(avg>54),
+              orange = sum(avg>35)) %>%
+    ungroup()
+
+toplot2 %>%
+    mutate(month = as.character(month)) %>%
+    group_by(month) %>%
+    arrange(year) %>%
+    ggplot() + aes(year, orange, color = month) + 
+    geom_line() + 
+    # geom_point() + 
+    gghighlight(month %in% c("11", "12", "1", "2", "3")) + 
+    ylab("Days (PM25 > 35) in one month") + 
+    theme_minimal()
+```
