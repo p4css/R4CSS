@@ -11,7 +11,7 @@ editor_options:
 # Set up
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, fig.width = 4, fig.asp = 0.4)
 ```
 
 ```{r loading-libs}
@@ -69,7 +69,7 @@ toplot %>%
 4.  `rename` columns
 5.  then plotting
 
-```{r young-people-optimistic-scatter fig.width = 4, fig.asp = 0.4, fig.cap = '(ref:young-people-optimistic)'}
+```{r young-people-optimistic-scatter, fig.cap = '(ref:young-people-optimistic)'}
 
 toplot <- read_csv("data/nyt_data/unicef-changing-childhood-data.csv") %>% 
     select(country = WP5, age = WP22140, bw = WP22092) %>%
