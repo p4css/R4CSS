@@ -37,7 +37,7 @@ The news:
 4.  ungroup() then plotting
 
 ```{r}
-toplot <- read_csv("data/nyt_data/interactive_bulletin_charts_agecl_median.csv")
+toplot <- read_csv("data/nytdata/interactive_bulletin_charts_agecl_median.csv")
 # YOUR CODE SHOULD PIPELINE BEGINING HERE 
 
 
@@ -71,7 +71,7 @@ toplot %>%
 
 ```{r young-people-optimistic-scatter, fig.cap = '(ref:young-people-optimistic)'}
 
-toplot <- read_csv("data/nyt_data/unicef-changing-childhood-data.csv") %>% 
+toplot <- read_csv("data/nytdata/unicef-changing-childhood-data.csv") %>% 
     select(country = WP5, age = WP22140, bw = WP22092) %>%
     mutate(country = ordered(country, 
                              levels=c(1, 3, 4, 10, 11, 12, 13, 14, 17, 29, 

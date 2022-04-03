@@ -28,7 +28,7 @@ options(scipen = 999)
 ggplot是以變數為基礎的視覺化套件，也就是說，當準備好dataframe後，就可以在ggplot中指定要用哪些變數來繪圖。也因此，務必把dataframe整理為tidy型態，也就是長表格（long-form）的型態。整理完資料後，我會習慣地用`names(plot)`或`glimpse(plot)`來看一下該資料所有的變項，好可以在下一階段的繪圖做參考。
 
 ```{r preparing-data}
-NW <- read_csv("data/nyt_data/interactive_bulletin_charts_agecl_median.csv") %>%
+NW <- read_csv("data/nytdata/interactive_bulletin_charts_agecl_median.csv") %>%
     select(Category, year, Net_Worth)  %>%
     group_by(Category) %>%
     arrange(year) %>%
