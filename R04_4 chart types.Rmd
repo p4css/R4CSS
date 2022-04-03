@@ -7,6 +7,8 @@ output: html_document
 如果指定中文字型，無法採用斜體（`face="italic"`）
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+options(scipen = 999)
 th <- theme_minimal() + 
   theme(
     title = element_text(family="Noto Sans CJK TC"), #all title elements
@@ -96,24 +98,22 @@ county %>%
 
 # Boxplot
 ```{r}
-library(gghighlight)
-income <- read_csv("data/twdata/tw_income107.csv", ) %>%
-    filter(!`村里` %in% c("合計", "其他", "福住里")) %>%
-    filter(鄉鎮市區 %in% c("信義區")) %>%
-    mutate(村里 = reorder(村里, desc(中位數)))
+aqi.toplot <- read_rds("https://github.com/p4css/R4CSS/raw/master/data/twdata/AQI_Chaozhou.rds") %>%
+    arrange(日期)%>%
+    filter(測項=="PM2.5") %>%
+    gather("hour", "PM25", 4:28) %>%
+    mutate(PM25 = as.numeric(PM25)) %>%
+    drop_na() %>%
+    mutate(year = lubridate::year(日期), month = lubridate::month(日期)) %>%
+    filter(month %in% c(11, 12, 1, 2, 3))
 
-income %>% 
-    mutate(group = if_else((平均數>第三分位數), "highlight", "none")) %>%
-    ggplot() + aes(y = 村里, 
-                   xlower=第一分位數, xmiddle=中位數, xupper=第三分位數, 
-                   xmin= min(第一分位數), xmax=max(第三分位數), fill=group) +
-    geom_boxplot(stat = "identity", color="white") +
-    scale_fill_manual(values = c("highlight"="orangered", "none"="skyblue")) + guides(fill="none") + 
-    geom_point(aes(x = 平均數)) + 
-    xlab("年所得（單位：千元）") + 
-    th + 
-    theme(panel.grid.minor = element_blank(), 
-          panel.grid.major = element_blank())
+aqi.toplot %>%
+    mutate(year = as.character(year)) %>%
+    ggplot() + aes(y=year, x=PM25)  + 
+    geom_boxplot(fill="skyblue", alpha=0.2) + 
+    xlim(0, 200) + 
+    theme_minimal()
+
 ```
 
 
