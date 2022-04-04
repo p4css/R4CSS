@@ -18,6 +18,7 @@ options(stringsAsFactors = F)
 ```{r}
 xls_files <- list.files("data/twdata/AQI/", pattern = ".xls", full.names = T)
 
+
 csv_files <- list.files("data/twdata/AQI/", pattern = ".csv", full.names = T)
 ```
 
@@ -41,6 +42,26 @@ all_data <- bind_rows(all_data, all_data2)
 save(all_data, file="data/twdata/AQI潮州.rda")
 write_rds(all_data, "data/twdata/AQI_Chaozhou.rds")
 ```
+
+```{r load-by-purrr}
+
+xlsdata <- list.files("data/twdata/AQI/", pattern = ".xls", full.names = T) %>%
+    purrr::map(function(x){readxl::read_excel(x) %>% type_convert()}) %>%
+    bind_rows()
+
+csvdata <- list.files("data/twdata/AQI/", pattern = ".csv", full.names = T) %>%
+    purrr::map(function(x){read_csv(x, locale=locale(encoding = "Big5")) %>%
+            filter(測站=="潮州") %>%
+            mutate(日期 = lubridate::as_date(日期)) %>%
+            type_convert() }) %>%
+    bind_rows()
+
+
+all_data <- bind_rows(xlsdata, csvdata)
+
+```
+
+
 
 ```{r load-data-from-github}
 all_data <- read_rds("https://github.com/p4css/R4CSS/raw/master/data/twdata/AQI_Chaozhou.rds")
