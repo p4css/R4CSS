@@ -66,14 +66,15 @@ bw <- read_csv("data/nytdata/unicef-changing-childhood-data.csv") %>%
 
 ```{r}
 bw %>%
-    ggplot() + aes(`40+y`, `15-24y`, label = country) + 
-    geom_point(color = "skyblue", size = 2) + 
-    xlim(0.2, 0.85) + ylim(0.2, 0.85) + 
-    geom_text(hjust = -0.1, vjust = -0.5) + 
-    geom_abline(intercept = 0, slop = 1, 
-                color="lightgrey", alpha=0.5, linetype="dashed") + 
-    th + 
-    theme(aspect.ratio=1)
+  ggplot() + aes(`40+y`, `15-24y`, label = country) + 
+  geom_point(color = "skyblue", size = 2) + 
+  geom_smooth(method = lm, se=FALSE, linetype="dotdash", size=0.3) + 
+  xlim(0.2, 0.85) + ylim(0.2, 0.85) + 
+  geom_text(hjust = -0.1, vjust = -0.5) + 
+  geom_abline(intercept = 0, slop = 1, 
+              color="DeepPink", alpha=0.5, linetype="dashed") + 
+  th + 
+  theme(aspect.ratio=1)
 ```
 
 # Barplot

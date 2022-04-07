@@ -10,7 +10,7 @@ output:
 
 # 用ggplot視覺化(I)
 
-本節著重在介紹`ggplot`的基本概念與設定。不同類型的圖表則在下一節「ggplot圖表類型(II)」
+> 本節著重在介紹`ggplot`的基本概念與設定。不同類型的圖表則在下一節「ggplot圖表類型(II)」
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE) 
@@ -24,6 +24,18 @@ options(scipen = 999)
 [^1]: 參考資料：[5.4 Control the size of plots/images \| R Markdown Cookbook (bookdown.org)](https://bookdown.org/yihui/rmarkdown-cookbook/figure-size.html)
 
 # Basic: Line chart
+
+使用案例：[Teach About Inequality With These 28 New York Times Graphs - The New York Times (nytimes.com)](https://www.nytimes.com/2021/05/11/learning/lesson-plans/teach-about-inequality-with-these-28-new-york-times-graphs.html)
+
+資料維度：
+
+1.  年齡組（Less than 35, 35-44, 45-54, 55-64, 65-74, 75 or order）
+2.  年（1989, 1992, 1995, 1998, 2001, 2004, 2007, 2010, 2013, 2016, 2019）
+3.  淨資產中位數（千美元）
+
+預期結果：
+
+![](images/paste-BD63D4DC.png)
 
 ggplot是以變數為基礎的視覺化套件，也就是說，當準備好dataframe後，就可以在ggplot中指定要用哪些變數來繪圖。也因此，務必把dataframe整理為tidy型態，也就是長表格（long-form）的型態。整理完資料後，我會習慣地用`names(plot)`或`glimpse(plot)`來看一下該資料所有的變項，好可以在下一階段的繪圖做參考。
 
@@ -52,10 +64,42 @@ NW %>% glimpse()
 **不同的圖表類型是可以疊加在同一張圖上的**。我們也可以把`geom_point()` 另一種圖表型態加入，也是可以的，兩者的X與Y不相衝突。`geom_line()`、`geom_point()`、`geom_text()`三者會經常伴隨出現。
 
 ```{r select-vars-and-plot-type}
-NW %>%    
-    ggplot() + aes(year, Net_Worth) + 
+
+
+NW %>%
+    ggplot() + 
+    aes(x=year, y=Net_Worth)
+
+
+NW %>%
+    ggplot() + 
+    aes(x=year, y=Net_Worth) + 
+    geom_line()
+
+
+
+NW %>%
+    ggplot() + 
+    aes(x=year, y=Net_Worth, group=Category) + 
     geom_line() + 
-    geom_point()
+    geom_point(stat="identity")
+
+NW %>%
+    ggplot() + 
+    aes(x=year, y=Net_Worth, color=Category) + 
+    geom_line() + 
+    geom_point(stat="identity")
+
+NW %>%
+    ggplot() + 
+    aes(x=year, y=Net_Worth, fill=Category, color=Category) + 
+    geom_line() + 
+    geom_point() + 
+    geom_area(position = "dodge", alpha=0.2)
+
+  
+  
+  
 ```
 
 ## Grouping
@@ -63,17 +107,17 @@ NW %>%
 上圖是我們把多個年齡層的逐年資料畫在同一條折線上，所以會呈現鋸齒狀折現的狀況。但這些年齡層並非在同一條線上呀？因此，我們要根據`Category`這個變數來做分組。ggplot的設計是以`color`或`fill`來做分組，所以我指定`color=Category`，就可以將該條折線依照變數`Category`拆分為數條線。
 
 ```{r grouping}
-NW %>%    
-    ggplot() + aes(year, Net_Worth, color=Category) + 
-    geom_line()
+NW %>%
+  
+  
 ```
 
 那為什麼是用`color`來指定呢？因為`geom_line()`的色彩是在**線**，而不是在**面**上。如果是用`geom_area()`來視覺化的話，因為顏色填的是**面**，所以要用`fill=Category`如以下的範例。甚至可以同時指定`color=Category, fill=Category`。但折線圖如果要用`geom_area()`來視覺化的話，最好要上顏色的不要超過二個，不然就會像底下這個例子一樣，即使設定`alpha=0.2`的半透明，仍然會看不懂哪些顏色疊在一起。
 
 ```{r grouping-2}
 NW %>%    
-    ggplot() + aes(year, Net_Worth, color=Category, fill=Category) + 
-    geom_area(position="dodge", alpha=0.2)
+
+  
 ```
 
 # 圖表調整
@@ -87,8 +131,8 @@ NW %>%
 ```{r linetype-thickness-alpha}
 NW %>%    
     ggplot() + aes(year, Net_Worth, color=Category) + 
-    geom_line(size=1, linetype = "dashed", alpha=0.5) + 
-    geom_point(size=2, color="dimgrey", alpha=0.5)
+    geom_line() + 
+    geom_point()
 ```
 
 ## 調整圖表主題色調
@@ -125,11 +169,11 @@ NW %>%
 NW %>%    
     ggplot() + aes(year, Net_Worth, color=Category) + 
     geom_line() +  
-    theme_minimal() + 
-    labs(title = "Net Worth by year grouped by age groups",
-         subtitle = "Source from: ...",
-         x = "Year",
-         y = "Net Worth")
+    theme_minimal()
+
+
+
+
 ```
 
 **調整X軸與Y軸標題位置的**：必須要透過`theme()`來設定`axis.title.x = element_text(hjust=1)`。
@@ -221,6 +265,10 @@ Python和R這些程式語言的預設視覺化套件都沒辦法顯示中文，�
 
 ![](images/paste-A259BC75.png)
 
+本案例的目標輸出如下：
+
+![](images/paste-CED2EA42.png)
+
 ```{r}
 county <- read_csv("data/twdata/tw_population_opendata110N010.csv") %>%
     slice(-1, -(370:375)) %>%
@@ -233,6 +281,7 @@ county <- read_csv("data/twdata/tw_population_opendata110N010.csv") %>%
     ) %>%
     ungroup()
 ```
+
 下面這是一個長條圖的範例（barplot，不是histogram）。Barplot可以直接指定X軸為縣市（county）和Y軸為總人口數（people_total），但是要用`geom_col()`而非`geom_bar()`。除此之外，Bar的顏色有「面」的特徵，所以若要自訂整條bar的顏色，要用`fill`而非`color`，`color`只會是每條Bar的外框。
 
 ```{r barplot}
@@ -272,7 +321,7 @@ county %>%
   theme(axis.text.x = element_text(angle = 45))
 ```
 
-通常`coord_flip()`後往往會希望這些bar會是由上而下排序好的，但用`arrange(desc(people_total)`是無法解決問題的，因為Y軸原本會是照Y軸的刻度排列，而不是Y軸的數值。所以，要被排序的應該是Y軸的「文字」也就是那些縣市。因此，我們需要將該縣市轉為factor（1~n），並且讓這些縣市被安排的factor數值照`people_total`排列，因此要用`mutate(county = reorder(county, people_total))`。`reorder()`是一個將文字轉factor的函式，但在此特別指定照`people_total`的編排。
+通常`coord_flip()`後往往會希望這些bar會是由上而下排序好的，但用`arrange(desc(people_total)`是無法解決問題的，因為Y軸原本會是照Y軸的刻度排列，而不是Y軸的數值。所以，要被排序的應該是Y軸的「文字」也就是那些縣市。因此，我們需要將該縣市轉為factor（1\~n），並且讓這些縣市被安排的factor數值照`people_total`排列，因此要用`mutate(county = reorder(county, people_total))`。`reorder()`是一個將文字轉factor的函式，但在此特別指定照`people_total`的編排。
 
 ```{r coord_flip-with-reorder}
 county %>%
