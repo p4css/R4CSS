@@ -13,7 +13,7 @@ output:
 本節著重在介紹`ggplot`的基本概念與設定。不同類型的圖表則在下一節「ggplot圖表類型(II)」
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE) 
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE) 
 # knitr::opts_chunk$set(echo = TRUE, fig.asp = 0.4, fig.width=8)
 
 library(tidyverse)
@@ -319,7 +319,7 @@ county %>%
 
 「說故事」才是整則資料新聞的核心，在運用圖表來輔助敘事時，應搭配說理說服的內容來突顯（highlight）圖面上的特徵，而不是留待讀者自己觀察。以下有三種highlight圖表部分資料的方法。第一個方法是在繪圖時用`+ scale_color_manual()`或`+ scale_fill_manual()`指定顏色給不同群組；方法二是利用`gghighlight`這個套件來指定要上色的群組，而且`gghighlight`可以和`fill`與`color`相互搭配，仍然可以用`scale_fill_manual`和`scale_color_manual`來指定顏色。但會有個狀況是，如果原本沒群組那怎麼辦？就自己用`mutate()`打造群組就好。方法各有利弊與使用時機。
 
-## 方法一：繪圖時指定顏色給不同群組  `scale_color_manual()` 與`scale_fill_manual()`
+## 方法一：繪圖時指定顏色給不同群組 `scale_color_manual()` 與`scale_fill_manual()`
 
 ```{r}
 NW %>% 

@@ -1,15 +1,11 @@
 ---
 title: "Trump tweet analysis by dplyr"
-output:
-  html_document:
-    theme: cerulean
-    highlight: zenburn
+author: "Jilung Hsieh"
+date: "`r Sys.Date()`"
+output: 
+  html_document: 
     toc: yes
-    toc_float:
-      collapsed: no
-    df_print: paged
-editor_options:
-  chunk_output_type: inline
+    fig_caption: yes
 ---
 
 # Source
@@ -22,8 +18,7 @@ editor_options:
 
 ```{r}
 library(tidyverse)
-options(stringsAsFactors = F)
-options(verbose = T)
+# options(stringsAsFactors = F) # default opotion in R > 4.0
 options(scipen = 999)
 ```
 
@@ -33,6 +28,7 @@ options(scipen = 999)
 load(url("http://varianceexplained.org/files/trump_tweets_df.rda"))
 dim(trump_tweets_df)
 names(trump_tweets_df)
+# save(trump_tweets_df, file="data/trump_tweets_df.rda")
 ```
 
 # Cleaning data
@@ -168,7 +164,9 @@ tweet_words %>%
 ```{r}
 tweet_words %>% 
     count(word, source) %>%
-    spread(source, n, fill = 0) %>%
+    pivot_wider(names_from = source, 
+            values_from = n, 
+            values_fill = 0) %>%
     mutate(iPhone = (iPhone+1) / (sum(iPhone)+1),
            Android = (Android+1) / (sum(Android)+1)) %>%
     mutate(diff = log2(Android / iPhone)) %>%
@@ -190,7 +188,9 @@ tweet_words %>%
 word_by_source <- tweet_words %>%
     count(word, source) %>%
     filter(n >= 5) %>%
-    spread(source, n, fill = 0) %>%
+    pivot_wider(names_from = source, 
+            values_from = n, 
+            values_fill = 0) %>%
     ungroup()
 
 sum(word_by_source$iPhone)
@@ -226,6 +226,7 @@ android_iphone_ratios %>%
     geom_col() +
     coord_flip() +
     ylab("Android / iPhone log ratio") +
-    scale_fill_manual(name = "", labels = c("Android", "iPhone"),
+    scale_fill_manual(name = "", 
+                      labels = c("Android", "iPhone"),
                       values = c("royalblue", "gold"))
 ```
