@@ -41,6 +41,13 @@ names(trump_tweets_df)
     1   Android 762     
     2   iPhone  628 
 
+![](images/paste-19A2D513.png)
+
+[RegExr: Learn, Build, & Test RegEx](https://regexr.com/)
+
+-   `<a href=\"http://twitter.com/download/android\" rel=\"nofollow\">Twitter for Android</a>`
+-   `Twitter for (\\w+?)<`
+
 ```{r}
 trump_tweets_df$statusSource[1]
 
