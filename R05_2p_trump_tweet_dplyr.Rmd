@@ -13,6 +13,7 @@ output:
 -   Author: The case is written by David Robinson, author of the book "R for text mining", author of library tidytext, data scientist at StackOverFlow.
 -   Link of github: <https://github.com/dgrtwo/dgrtwo.github.com/blob/master/_R/2016-08-09-trump-tweets.Rmd>
 -   Link of the article: <http://varianceexplained.org/r/trump-tweets/>
+-   Slide: [R05_2 Text data maniputation trump_tweets](https://docs.google.com/presentation/d/1XObGWzjldqcXuPQ8o4GyUkHAPSaujuBUyjhE5aYI8vQ/edit?usp=sharing)
 
 # Load and clean data
 
