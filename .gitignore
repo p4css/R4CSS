@@ -4,6 +4,7 @@
 .Ruserdata
 .DS_Store
 private/
+data/private_data/
 AS/
 AS_ans/
 *_cache/
