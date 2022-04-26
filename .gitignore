@@ -6,6 +6,7 @@
 private/
 AS/
 AS_ans/
-images/
+*_cache/
+*_files/
 WGOITG/
 *-private.Rmd

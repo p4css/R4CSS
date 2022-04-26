@@ -1,32 +1,20 @@
 ---
-title: "R03_1 Crawling 104"
+title: "R06_2 Crawling 104"
+title: "Trump tweet analysis by dplyr"
 author: "Jilung Hsieh"
-date: "2020/10/25"
-output:
-  html_document:
-    highlight: zenburn
-    number_sections: yes
-    theme: cerulean
+date: "`r Sys.Date()`"
+output: 
+  html_document: 
     toc: yes
-    css: style.css
-editor_options:
-  chunk_output_type: inline
+    fig_caption: yes
 ---
 
-```{r setup, include=FALSE}
+
+```{r setup-load-pkgs, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-```
-
-
-# Loading essential packages
-```{r}
 library(tidyverse)
-options(stringsAsFactors = F)
-
-
-
+# options(stringsAsFactors = F) # by default in R > 4.0
 ```
-
 
 
 # Get the first page

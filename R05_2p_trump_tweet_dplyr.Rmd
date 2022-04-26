@@ -46,19 +46,25 @@ names(trump_tweets_df)
 [RegExr: Learn, Build, & Test RegEx](https://regexr.com/)
 
 -   `<a href=\"http://twitter.com/download/android\" rel=\"nofollow\">Twitter for Android</a>`
+-   `<a href=\"http://twitter.com/download/iphone\" rel=\"nofollow\">Twitter for iPhone</a>`
 -   `Twitter for (\\w+?)<`
 
 ```{r}
-trump_tweets_df$statusSource[1]
+trump_tweets_df$statusSource[2]
 
 ## Extract source/user-agent
 
 tweets <- trump_tweets_df %>%
-    select(id, created, text, statusSource) %>% 
+    select(id, created, text, statusSource) %>%
     extract(statusSource, "source", "Twitter for (\\w+?)<") %>%
     filter(source %in% c("iPhone", "Android"))
 
 tweets %>% count(source)
+
+tweets %>%
+    ggplot() + aes(created, color=source) + 
+    geom_density()
+
 ```
 
 # Vis: Hour by tweet percentage
@@ -69,11 +75,11 @@ tweets %>% count(source)
 ```{r}
 library(lubridate)
 tweets %>%
-    mutate(hour = hour(with_tz(created, "EST"))) %>%
+    mutate(hour = hour(with_tz(created, "EST"))) %>% 
     count(source, hour) %>%
     group_by(source) %>%
     mutate(percent = n / sum(n)) %>%
-    ungroup() %>%
+    ungroup() %>% 
     ggplot() + aes(hour, percent, color = source) + 
     scale_color_manual(labels = c("Adroid", "iPhone"), 
                        values = c("royalblue", "gold")) + 
