@@ -1,7 +1,7 @@
 ---
-title: "datetime plotting"
+title: "Visualizing by Time"
 author: "Jilung Hsieh"
-date: "2020/10/12"
+date: "`r Sys.Date()`"
 output: html_document
 ---
 

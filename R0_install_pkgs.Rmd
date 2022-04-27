@@ -1,0 +1,69 @@
+---
+title: "0_pre_install_packages"
+author: "Jilung Hsieh"
+date: "2018/7/1"
+output:
+  html_document:
+    theme: cerulean
+    highlight: zenburn
+    toc: yes
+    toc_float:
+      collapsed: no
+    df_print: paged
+editor_options:
+  chunk_output_type: inline
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# 安裝並匯入相關套件(package)
+* 套件的使用分為**安裝**和**載入**兩個動作。通常安裝好R的時候就已經安裝好基本`base`套件。當執行R時便會預設將基本套件的內容給匯入程式的執行環境中。
+* 第三方套件安裝：但非常多的R使用者會編寫第三方套件，並且將這些套件開放給群眾使用。通常這些套件已經被上載到**R cran**提供下載。而**R cran**上的套件我們可以使用`install.packages("package_name")`來自動安裝到我們的電腦中。
+* 第三方套件載入：這些第三方套件被安裝好後，還需要被**載入**到程式的執行環境中才可以使用。因此要用`library(package_name)`將其載入。
+
+
+# 利用tidyverse系列套件寫R
+* 強大的R程式開發者們開發了數個便於進行資料分析的套件。這些套件有著不同於以往的R程式編寫風格，且這些套件的物件間多可以互通使用。先用`install.packages("tidyverse")`安裝之，然後用`library(tidyverse)`將其載入。
+* `tidyverse`套件包含許多資料分析常用的套件如下：
+	* `readxl`	for .xls and .xlsx sheets.
+	* `haven` 	for SPSS, Stata, and SAS data.
+	* `jsonlite` 	for JSON.
+	* `xml2` 		for XML.
+	* `httr` 		for web APIs.
+	* `rvest` 	for web scraping.
+	* `stringr` 	for strings.
+	* `lubridate`	for dates and date-times.
+	* `forcats`	for categorical variables (factors).
+	* `hms`		for time-of-day values.
+	* `blob`		for storing blob (binary) data.
+
+# 本課程會用到的第三方套件
+```{r}
+pkgs <- c("tidyverse", "jiebaR", "data.table", "text2vec", 
+		  "fmsb", "rpart", "randomForest", "ggmap", 
+		  "zoo", "rtweet", "tidytext", "tm", "wordcloud", 
+		  "igraph", "rgexf", "topicmodels", "RTextTools", 
+		  "tidyr", "DT")
+```
+
+# 安裝第三方套件
+* 偵測第三方套件是否已經安裝，否的話就安裝之。
+* `pkgs <- pkgs[!(pkgs %in% installed.packages()[,"Package"])]`先偵測看看你指定要安裝的pkgs是否已經被安裝在電腦上。這邊是從原本的pkgs找出沒有安裝在電腦上的有哪些。所以有一個NOT`!`符號。
+* `if(length(pkgs)) install.packages(pkgs)`先偵測pkgs的長度，如果還有任何需要安裝的pkgs，那麼該長度就會大於0，所以如果該長度大於0，那代表還有套件需要被安裝，就安裝在pkgs中尚未被安裝的所有套件。
+* 註：`installed.packages()`會列出所有安裝在你電腦上的套件。
+
+```
+pkgs <- pkgs[!(pkgs %in% installed.packages()[,"Package"])] 
+if(length(pkgs)) install.packages(pkgs)
+```
+
+* 註：`sessionInfo()`會列出已經被載入目前程式環境中的所有套件。
+* `sessionInfo()`也列出被載入的基本套件`base packages`包含`stats`、`graphics`、`grDevices`、`utils`、`datasets`、`methods`、`base`等。
+
+```{r}
+sessionInfo()
+```
+
+

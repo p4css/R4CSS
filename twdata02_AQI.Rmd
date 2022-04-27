@@ -61,8 +61,6 @@ all_data <- bind_rows(xlsdata, csvdata)
 
 ```
 
-
-
 ```{r load-data-from-github}
 all_data <- read_rds("https://github.com/p4css/R4CSS/raw/master/data/twdata/AQI_Chaozhou.rds")
 ```
