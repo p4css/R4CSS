@@ -29,7 +29,12 @@ NW <- read_csv("data/nytdata/interactive_bulletin_charts_agecl_median.csv") %>%
     group_by(Category) %>%
     arrange(year) %>%
     ungroup()
+```
 
+## plotting
+一共有三個變項，X軸為年、Y軸為淨資產。難的是要去習慣，如果要畫多條線，就要有個用來做因子（分組）的變量，每一條線就是一個分組。以下例而言就是依照年齡層來分組。
+
+```{r}
 NW %>%    
     ggplot() + aes(year, Net_Worth, color=Category) + 
     geom_line() + 
@@ -38,6 +43,7 @@ NW %>%
          x = "Year",
          y = "Net Worth") + th
 ```
+
 # Scatter
 
 ```{r}
@@ -80,7 +86,7 @@ bw %>%
 
 # Barplot
 ```{r}
-county <- read_csv("data/twdata/tw_population_opendata110N010.csv") %>%
+county <- read_csv("data/tw_population_opendata110N010.csv") %>%
     slice(-1, -(370:375)) %>%
     type_convert() %>%
     mutate(county = str_sub(site_id, 1, 3)) %>%
@@ -100,7 +106,7 @@ county %>%
 
 # Boxplot
 ```{r}
-aqi.toplot <- read_rds("https://github.com/p4css/R4CSS/raw/master/data/twdata/AQI_Chaozhou.rds") %>%
+aqi.toplot <- read_rds("https://github.com/p4css/R4CSS/raw/master/data/AQI_Chaozhou.rds") %>%
     arrange(日期)%>%
     filter(測項=="PM2.5") %>%
     gather("hour", "PM25", 4:28) %>%

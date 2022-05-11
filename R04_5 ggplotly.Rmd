@@ -5,15 +5,11 @@ date: "`r Sys.Date()`"
 output: html_document
 ---
 
-# ggplotly
-
-[Scatter plots with ggplot2 (plotly.com)](https://plotly.com/ggplot2/line-and-scatter/)
-
-```{r setup, include=FALSE}
+```{r echo=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 library(tidyverse)
-library(plotly)
 options(scipen = 999)
+
 th <- theme_minimal() + 
   theme(
     title = element_text(family="Noto Sans CJK TC"), #all title elements
@@ -25,9 +21,43 @@ th <- theme_minimal() +
 
 ```
 
+# ggplotly
+
+[Scatter plots with ggplot2 (plotly.com)](https://plotly.com/ggplot2/line-and-scatter/)
+
+```{r include=FALSE}
+
+# install.packages("plotly")
+library(plotly)
+```
+
 # LINE CHART
 
 [Line plots with R (plotly.com)](https://plotly.com/r/line-charts/)
+
+## Basic
+
+事實上要產生互動式的圖表非常簡單。除了在一開始要載入`plotly`套件外，只需要把`ggplot()`的結果指給一個變項（如下方的`NW.plot`，然後用`ggplotly(NW.plot)`繪圖即可。多加一個`config(displayModeBar = FALSE)`是為了不要顯示`plotly`的控制列。
+
+```{r}
+NW <- read_csv("data/nytdata/interactive_bulletin_charts_agecl_median.csv") %>%
+    select(Category, year, Net_Worth)  %>%
+    group_by(Category) %>%
+    arrange(year) %>%
+    ungroup()
+
+NW.plot <- NW %>%    
+    ggplot() + 
+    aes(year, Net_Worth, color=Category) + 
+    geom_line() + 
+    theme_minimal() + 
+    labs(title = "Net Worth by year grouped by age groups",
+         x = "Year",
+         y = "Net Worth") + th
+
+ggplotly(NW.plot) %>%
+  config(displayModeBar = FALSE)
+```
 
 可以在`aes()`設定要帶入圖的變數時，新增一個`text`變數，手動設定要呈現的動態呈現方塊。但要注意的是，要多加入一個`group=1`才能夠作用（WHY？）
 
@@ -51,9 +81,7 @@ NW.plot <- NW %>%
     labs(title = "Net Worth by year grouped by age groups",
          x = "Year",
          y = "Net Worth") + th
-```
 
-```{r ggplotly1}
 ggplotly(NW.plot, tooltip = "text") %>%
   config(displayModeBar = FALSE)
 ```
