@@ -134,6 +134,7 @@ totreemap <- read_csv("data/nytdata/GCB2021v34_MtCO2_flat.csv") %>%
     arrange(desc(`Total`)) %>%
     mutate(perc = Total/sum(Total)) %>%
     slice(1:20)
+
 library(treemapify)
 totreemap %>%
     ggplot() + aes(area = perc, fill=`Per Capita`, label=Country) +
