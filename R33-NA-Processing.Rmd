@@ -14,18 +14,19 @@ options(scipen = 999)
 3.  開放資料在開放時已經被整理成階層化、易於展示、一般人易懂的表格型態。此時，若將其讀入也會產生非常大量的`NA`。例如本章節所要提到的政府各部會預算比例。
 4.  紀錄資料筆數非常龐大、來源眾多、紀錄時間不一時，雖然有很多紀錄，但這些紀錄必須要被對齊、刪減，才能夠獲得有意義的可計算資料。例如本章節會提到的世界各國疫苗注射資料。
 
-
 ### 表格重整：政府預算
+
 ```{r}
 raw <- readxl::read_excel("data/111B歲出政事別預算表.xls", skip=3, col_names = F)
 raw %>% head(10)
 ```
+
 #### 基本清理
 
-1. 重新命名欄位名稱
-2. 刪去被當成表格標題的多於列（通常是前兩三列）`slice(-(1:2))`。
-3. 觀察資料，「款」可以說是支出大類的代號，例如總統府、行政支出、立法支出、軍事支出、教育支出等。「科」為該單位底下的部門或者項目，例如「行政支出」下有行政院、主計總處支出等。更底下的細類「目」並非本例的分析對象，所以可以刪除。所以，如果款、科均為空值的話，代表其為更細的「目」。因此篩去款科為空值的所有項目。`filter(!is.na(款) | !is.na(科))`
-4. 將機構id和機構名稱切分開來，視覺化的時候只會用到機構名稱。`separate(機構, c("oid", "org"), sep="\n")`
+1.  重新命名欄位名稱
+2.  刪去被當成表格標題的多於列（通常是前兩三列）`slice(-(1:2))`。
+3.  觀察資料，「款」可以說是支出大類的代號，例如總統府、行政支出、立法支出、軍事支出、教育支出等。「科」為該單位底下的部門或者項目，例如「行政支出」下有行政院、主計總處支出等。更底下的細類「目」並非本例的分析對象，所以可以刪除。所以，如果款、科均為空值的話，代表其為更細的「目」。因此篩去款科為空值的所有項目。`filter(!is.na(款) | !is.na(科))`
+4.  將機構id和機構名稱切分開來，視覺化的時候只會用到機構名稱。`separate(機構, c("oid", "org"), sep="\n")`
 
 ```{r}
 names(raw) <- c("款", "科", "目", "節", "機構", "本年度預算", "上年度預算", "上年度決算", "預算差")
@@ -37,29 +38,30 @@ cleaned <- raw %>%
     separate(機構, c("oid", "org"), sep="\n")
 cleaned %>% head(10)
 ```
+
 #### NA處理
 
 觀察一下現在的資料，發現，行政院、主計總處等均屬於行政支出，但行政支出卻自有一列。依照長表格的格式來說，應嘗試把「款」作為機構的變項。所以將款的數字取代為「行政支出」等支出類別的名稱。
 
 ```{r}
-cleaned %>% mutate(款 = ifelse(!is.na(款), org, 款)) %>%
+cleaned %>% mutate(款 = ifelse(!is.na(款), org, 款)) %>% View
     head(10)
 ```
+
 接下來，希望能夠在「款==`NA`」的地方填入該欄的「前一個值」例如行政支出。查詢一下（關鍵字如「Fill in NA column values with the last value that was not NA」）還真的有這樣的函式可以操作。
 
 ```{r}
 library(zoo)
 cleaned %>% 
     mutate(款 = ifelse(!is.na(款), org, 款)) %>%
-    mutate(款 = zoo::na.locf(款)) %>%
+    mutate(款 = zoo::na.locf(款)) %>% View
     head(10)
 ```
 
 太神奇了！看見沒！接下來只要把「科 is `NA`」的那些該大類支出總數的紀錄給刪除，資料就乾淨了。最後就只會剩下一些資料清理的功伕。完整程式碼可以看下一節。
 
-
-
 #### 完整程式碼
+
 ```{r}
 library(zoo)
 # raw <- readxl::read_excel("data/111B歲出政事別預算總表.xls")
@@ -85,6 +87,7 @@ cleaned <- raw %>%
 ```
 
 ### 對齊資料。世界各國疫苗接種比例
+
 <https://ourworldindata.org/covid-vaccinations> - <https://github.com/owid/covid-19-data/tree/master/public/data/vaccinations>
 
 評估資料概況後可發現這個資料集每一列就是某一個國家某一天所上傳的紀錄。所以，一個國家會有很多列。乍聽之下不難處理，但事實上每個國家不會每天上傳、也不會固定某一天上傳、哪一週、哪一個月開始上傳也不一定，也有可能會漏掉一些月份或週次。所以，制定出一個時間單位（例如週、月）、然後延著時間軸將資料「對齊」，讓每個國家在每個時間單位都有資料。但每個國家疫情發展程度不一，所以也不可能有一個完美的對齊，所以通常會建議就所要觀察的國家進行對齊即可。至於想刪除的那些資料列，幾乎都可以當成是所謂的缺失值。
@@ -107,8 +110,9 @@ raw %>% head(20)
 
 ```{r}
 library(lubridate)
-fullvaccinated <- raw %>% select(country = location, date, 
-                                people_fully_vaccinated_per_hundred) %>%
+fullvaccinated <- raw %>% select(country = location, 
+                                 date,
+                                 people_fully_vaccinated_per_hundred) %>%
   drop_na(people_fully_vaccinated_per_hundred) %>%
   mutate(m = floor_date(date, unit = "month")) %>%
   group_by(country, m) %>%
@@ -128,7 +132,7 @@ fullvaccinated %>% head(10)
 
 ```{r}
 fullvaccinated %>%
-  spread(m, people_fully_vaccinated_per_hundred, fill=NA) %>%
+  spread(m, people_fully_vaccinated_per_hundred, fill=NA) %>% View
     head(10)
 ```
 
@@ -137,13 +141,15 @@ fullvaccinated %>%
 ```{r}
 fullvaccinated %>%
     spread(m, people_fully_vaccinated_per_hundred, fill=NA) %>%
-    gather(month, perc, -country) %>% 
+    gather(month, perc, -country) %>%
     arrange(country, month) %>% head(20)
 ```
+
 接下來是最技巧性的部分。就接種比例而言是個遞增數列，所以如果這個月有紀錄，但下個月沒紀錄（`NA`），那下個月的資料應以這個月的資料來替代。此時可以用`zoo`套件的`na.locf()`來填`NA`值，其填`NA`值的規則是用最後一筆非`NA`值的資料來替代`NA`值。但要注意的是，因為資料紀錄可能到第六個月或第七個月才開始紀錄，但在前面的月份都沒資料紀錄，也就是說那些`NA`值沒有更早的資料紀錄權充填充值。原本`na.locf()`會把這些找不到參考對象的`NA`值直接刪除，但我們可以在裡面加一個參數使其不會被刪除（`na.locf(perc, na.rm = F)`）。
 
 最後，就把這些沒被刪除也沒得參考的早期資料項，用`replace_na()`填上0即可。
-```{r}
+
+```{r echo=FALSE}
 fullvaccinated %>%
     spread(m, people_fully_vaccinated_per_hundred, fill=NA) %>%
     gather(month, perc, -country) %>%
@@ -154,7 +160,9 @@ fullvaccinated %>%
     ungroup() %>%
     arrange(country, month) %>% head(10)
 ```
+
 最後，就把這些沒被刪除也沒得參考的早期資料項，用`replace_na()`填上0即可。大功告成。
+
 ```{r}
 fullvaccinated %>%
     spread(m, people_fully_vaccinated_per_hundred, fill=NA) %>%
@@ -165,11 +173,9 @@ fullvaccinated %>%
     mutate(perc = zoo::na.locf(perc, na.rm = F)) %>%
     ungroup() %>%
     arrange(country, month) %>%
-    replace_na(list(perc=0)) %>%
+    replace_na(list(perc=0)) %>% View
     arrange(country, month) %>% head(10)
 ```
-
-
 
 #### 完整程式碼
 
@@ -198,4 +204,3 @@ vperc_by_month <- fullvaccinated %>%
   arrange(country, month) %>%
   replace_na(list(perc=0))
 ```
-
