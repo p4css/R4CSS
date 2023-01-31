@@ -1,0 +1,149 @@
+---
+title: "R02_Prac01_dplyr_ptt"
+author: "Jilung Hsieh"
+date: "9/22/2019"
+output:
+  html_document:
+    highlight: zenburn
+    theme: cerulean
+    toc: yes
+editor_options:
+  chunk_output_type: inline
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# 1. Loading pkgs and options
+```{r}
+# add essential pkgs here
+library(tidyverse)
+options(stringsAsFactors = F)
+```
+
+
+# 2. Loading rda data
+
+將會產生兩個data frames, `posts` and `comments`。你得依照提議自己判斷，你會需要用到哪個data frame。
+
+```{r}
+load("data/HatePolitics_Hang_20190101_2019_06_01.rda")
+
+```
+
+
+# 3. Counting the top 5 commentors
+
+找出回文數最高的五個人。做`count()`時要帶入一個參數，讓他可以降冪排序。
+
+```{r}
+comments %>%
+    # you cade should be here
+
+    
+    slice(1:5)
+```
+
+
+# 4. Counting the top 5 posters
+
+找出發文數最高的五個人。
+
+```{r}
+posts %>%
+    # you cade should be here
+
+    
+    # you cade should be here
+    slice(1:5)
+```
+
+
+# 5. Enumerating comment order for each posts
+
+這個練習的目的是為了找出誰總是回應「韓國瑜」的相關貼文非常快。請在這個步驟產生兩個新的變項，`cindex`指出該則回文為該篇貼文的第幾則回文（也就是PTT的黑話「幾樓」），`ctotal`指出該則回文所在的貼文共有幾則回文。
+
+由於每則貼文的回文數都不同，所以計算`cindex`和`ctotal`的時候必須要根據每則貼文的資料來操作（使用`group_by()`），然後用`mutate()`來產生這兩個變數。你若要為幾樓編號的話，會需要用到`row_number()`這個函式。
+
+```{r}
+comments %>%
+    # you cade should be here
+
+    
+    
+    
+    # you cade should be here
+    select(tag, commentor, cindex, ctotal) %>%
+    head(n=20)
+```
+
+
+# 6. Calculating the average response order for each commentor
+
+延續上題，計算出每一個人回應的平均先後比例（可說是「樓層百分比」）`avg_order`。比方說，某人在四篇貼文都有回文。這四篇分別有10、10、20、100則回文，而他的回文分別在第2、4、4、20則，那麼就是(2/10 + 4/10 + 4/20 + 20/100) / 4 = 0.25 。那麼他的平均回應先後比例就是0.25； 。另外順便計算標準差（`sd_order`）以及每個人的總回文數量`tot_comment`。
+
+在計算的時候，請滿足以下條件：
+- 不列計少於5則回文的貼文
+- 不列計在資料中回文總數少於10則的回文者
+
+最後，請呈現回應速度最快的10位回文者
+
+```{r}
+comments %>%
+    # you cade should be here
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+
+
+    # you cade should be here
+    slice(1:10)
+
+    
+```
+
+# 7. Challenge: Counting how many posts each commentor has responded to 
+
+針對每一個回文者，計算出下列數值
+1. 一共回過多少則post，一個post多個回文仍只算一次
+2. 針對每篇post，最多曾回應一篇post幾次
+3. 針對每篇post，最少曾回應一篇post幾次
+4. 針對每篇post，平均回應過幾次
+5. 針對每篇post，回應次數的標準差
+
+```{r}
+comments %>%
+    # you cade should be here
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+    # you cade should be here
+    slice(1:30)
+```
+
+# 8. Call for idea
+
+Except the above methods, try to propose your idea to show questionable users, possible big fans, and high frequency enthusiasts.
+
+```{r}
+# your idea here
+# your code here
+```
+

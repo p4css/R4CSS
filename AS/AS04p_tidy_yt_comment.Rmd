@@ -1,0 +1,104 @@
+---
+title: "yt_comment_demo"
+output: 
+  html_document:
+    code_folding: "none"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(lubridate)
+options(stringsAsFactors = F)
+```
+
+
+
+# Loading data
+
+```{r echo=TRUE}
+data_url <- "https://github.com/P4CSS/R4CSSData/raw/main/newswawawa_yt_comments.rds"
+raw <- read_rds(url(data_url))
+```
+
+
+
+# 1. Data Coverage: density plot
+
+```{r}
+```
+
+# 2. Data Converage: weekly or monthly
+- Hint: using `floor_date()`
+
+
+```{r}
+
+```
+
+# 3. Demographic
+- Add more demographic features here, at least more 2 features
+
+```{r}
+message("Number of videos: ", length(unique(raw$videoId)))
+
+```
+
+
+# 4. Number of comment distribution per video: density plot
+Hint: using ggplot2 `xlab()` to label the x-axis
+
+```{r}
+
+```
+
+
+
+# 5. Number of comments distribution
+- Hint: Using `scale_y_log10()` and `scale_x_log10()` to adjust y-axis scale
+- Using `geom_jitter()` to plot scatter
+
+```{r}
+    
+```
+
+
+# 6. Comment patterns each month
+- Filter comments after 2019-09-30, before 2020-02-01 
+- density plot per month
+- subplot by `facet_wrap()` with argument `scales = "free"`
+
+```{r}
+
+```
+
+
+
+# 7. Comments patters by week
+- Filter comments after 2019-12-01, before 2020-02-01 
+
+
+```{r}
+
+```
+
+
+# 8. Comments pattern by hour per day
+- Filter comments after 2019-12-30, before 2020-01-20 
+- may using `ifelse()` ternary operation to divide plot into two parts: after and before 2020-01-11
+
+
+```{r}
+
+```
+
+# 9. Challenge: Growth of unique member
+
+```{r}
+
+
+```
+

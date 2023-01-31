@@ -1,0 +1,38 @@
+---
+title: "AS08 Stance Detection"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Research designs simplified
+
+## Subject
+
+## dependent variable design
+
+
+# Import pkgs and reading data
+
+```{r}
+
+```
+
+
+# Count and show labeling results
+
+```{r}
+
+```
+
+
+# Designing your features (independent variables)
+
+```{r}
+
+```
+
+
+# Discussion
