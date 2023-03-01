@@ -4,11 +4,10 @@
 .Ruserdata
 .DS_Store
 private/
-data/private_data/
+private_data/
 AS_ans/
 *_cache/
 *_files/
-WGOITG/
 *-private.Rmd
 cache/
 .DS_Store
