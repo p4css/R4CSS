@@ -18,21 +18,24 @@ editor_options:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-
 # Case: Paid Maternal Leave
 
-* 本案例將利用R來重製華盛頓郵報在2016/08/13的一篇談論美國婦女產假支薪情形的報導。這個案例中將會應用到data.frame和基本的繪圖與資料摘要方法。The case adaped Washington Post's paid maternity leave as an exmaple to introduce basic skill of data.frame, plotting, and data mamipulation.
+-   本案例將利用R來重製華盛頓郵報在2016/08/13的一篇談論世界各國「婦女產假支薪」情形的報導。這個案例中將會應用到data.frame和基本的繪圖與資料摘要方法。
 
-* 原始新聞來源：https://www.washingtonpost.com/news/worldviews/wp/2016/08/13/the-world-is-getting-better-at-paid-maternity-leave-the-u-s-is-not/?tid=sm_tw&utm_term=.f8cd50280326#comments
+-   原始新聞來源：[The world is getting better at paid maternity leave.
+    The U.S. is not. - The Washington
+    Post](https://www.washingtonpost.com/news/worldviews/wp/2016/08/13/the-world-is-getting-better-at-paid-maternity-leave-the-u-s-is-not/)
 
+-   簡報說明可見[R02_1 Paid maternal
+    Leave](https://docs.google.com/presentation/d/1evDPBwA9UJ2ubhwiQWK0XYZiaCzUWLKIeRftwMPd-EI/edit?usp=sharing)
 
 # Read .xlsx by readxl package
 
-* readxl也包含在tidyverse的套件集中，所以應該已經在前次安裝過，不用特別安裝。
- 
+-   `readxl`也包含在tidyverse的套件集中，所以應該已經在前次安裝過，實際上不用特別安裝。
+-   但由於他不會被預先載入到城市的執行環境中，所以需要將其載入至執行環境。
+
 ```{r}
 # Loading the pkg to read excel
-# install.packages("tidyverse")
 # install.packages("tidyverse")
 library(readxl)
 
@@ -40,13 +43,10 @@ library(readxl)
 
 ```
 
-
-
-
-# 0. Learner ver.
-
-* Use `?read_excel` to see function, inputs and ouput of `readxl::read_excel()` 
-* `read_excel()` can convert a sheet to a data.frame
+-   使用 `?read_excel` 來查看 `readxl::read_excel()`
+    函數的說明、輸入和輸出
+-   `read_excel()` 函數可以將 Excel 檔案中的一個工作表轉換為一個資料框
+    (data.frame) 物件
 
 ```{r}
 # use ?read_excel or help(read_exel) to check out the function
@@ -54,15 +54,14 @@ library(readxl)
 # read_excel(path, sheet = NULL, range = NULL, col_names = TRUE, col_types = NULL, na = "", trim_ws = TRUE, skip = 0, n_max = Inf, guess_max = min(1000, n_max))
 ```
 
-
-
-
-# 1. Read and inspect data
+# 1. Read excel sheet
 
 ```{r read excel}
 # Import readxl package
 
+
 # Use read_excel() to convert excel sheet to data.frame
+
 
 ```
 
@@ -72,33 +71,29 @@ library(readxl)
 # View(df)
 
 
-
 # Show names of variables (vectors, columns) by names()
+
 
 ```
 
-
-
-# 3. Select essential variables
+# 3. Select essential variables(Column)
 
 ```{r}
 # Select the 3rd and 6th to 24th columns
 
 
-# Use class(), dim(), and str() to inspect the data
+# Again, use class(), dim(), and str() to inspect the data
 
 
 
 ```
 
-
-
 # 3. Replace NAs
 
-* `NA: Not Available`
-* `v[is.na(v)]` will select all NA cells
-* 以0取代NA的資料格。避免繪圖產生錯誤
-* `sum(is.na(matleave))`的目的是檢測還有沒有NA值。如果有的話`is.na()`就會是`TRUE`，那麼加總後，如果不是0，那就代表還有NA。
+-   `NA: Not Available`
+-   `v[is.na(v)]` will select all NA cells
+-   以0取代NA的資料格。避免繪圖產生錯誤
+-   `sum(is.na(matleave))`的目的是檢測還有沒有NA值。如果有的話`is.na()`就會是`TRUE`，那麼加總後，如果不是0，那就代表還有NA。
 
 ```{r}
 # Use is.na() to detect NA element (TRUE/FALSE)
@@ -116,8 +111,6 @@ library(readxl)
 
 ```
 
-
-
 # 4.1 Filter data by the last year value
 
 ```{r}
@@ -134,9 +127,6 @@ library(readxl)
 # length(matleave$'matleave_13'==5)
 ```
 
-
-
-
 # 4.2 Filter data by the first year value
 
 ```{r}
@@ -148,13 +138,12 @@ library(readxl)
 
 ```
 
-
-
 # 5. Plotting
 
-* Plotting the second rows and all columns except 1st column
-* **Question** 為何要`unlist()`？請試著執行`barplot(matleave[2, -1])`這個沒有`unlist()`的版本，看看會有什麼錯誤訊息。資料結構有何差異呢？
-* 嘗試用`class()`或`str()`嘗試觀察沒有`unlist()`版本的資料，看看資料型態和有`unlist()`的會有何不同？
+-   Plotting the second rows and all columns except 1st column
+-   **Question**
+    為何要`unlist()`？請試著執行`barplot(matleave[2, -1])`這個沒有`unlist()`的版本，看看會有什麼錯誤訊息。資料結構有何差異呢？
+-   嘗試用`class()`或`str()`嘗試觀察沒有`unlist()`版本的資料，看看資料型態和有`unlist()`的會有何不同？
 
 ## 5.1 Plotting one line
 
@@ -176,7 +165,8 @@ class(unlist(matleave[2, -1]))
 barplot(unlist(m55[2, -1]))
 ```
 
-* Testing
+-   Testing
+
 ```{r}
 # View(matleave[1]) # select the 1st variable
 # View(matleave[ ,1]) # select the 1st column
@@ -189,10 +179,8 @@ class(m55$iso3)	# character (vector)
 
 ```
 
-
-
-
 ## 5.2 More arguments (args)
+
 ```{r}
 # barplot() the unlisted second row (neglecting the first col)
 
@@ -207,10 +195,9 @@ class(m55$iso3)	# character (vector)
 
 ```
 
-
 ## 5.3 Plotting multiple lines
 
-* 底下可以看見每一行非常相似且一致的特徵，僅有`matleave`內的索引由1被列出至6。因此，最好的方法是用迴圈（for-loop）的方式將相同的程式碼，從1~6之間做六次。
+-   底下可以看見每一行非常相似且一致的特徵，僅有`matleave`內的索引由1被列出至6。因此，最好的方法是用迴圈（for-loop）的方式將相同的程式碼，從1\~6之間做六次。
 
 ```{r}
 # plot the 1st row
@@ -221,9 +208,7 @@ class(m55$iso3)	# character (vector)
 
 ```
 
-
-
-## 5.4 for-loop to plot multiple lines 
+## 5.4 for-loop to plot multiple lines
 
 ```{r}
 # use for loop and use i as index to barplot multiple subgraphs
@@ -231,15 +216,16 @@ class(m55$iso3)	# character (vector)
 
 ```
 
-
 ## 5.5 Sub-plots
 
-* Check `?par` to get paremeters of plotting
+-   Check `?par` to get paremeters of plotting
 
-* `**mai**`: A numerical vector of the form c(bottom, left, top, right) which gives the margin size specified in inches.
+-   `**mai**`: A numerical vector of the form c(bottom, left, top,
+    right) which gives the margin size specified in inches.
 
-* `**mfcol, mfrow**`:A vector of the form c(nr, nc). Subsequent figures will be drawn in an nr-by-nc array on the device by columns (mfcol), or rows (mfrow), respectively.
-
+-   `**mfcol, mfrow**`:A vector of the form c(nr, nc). Subsequent
+    figures will be drawn in an nr-by-nc array on the device by columns
+    (mfcol), or rows (mfrow), respectively.
 
 ```{r}
 # use ?par to get more plotting parameters
@@ -254,7 +240,6 @@ for(i in 1:6){
 
 ```
 
-
 ## 5.5 Testing
 
 ```{r}
@@ -268,11 +253,8 @@ for(i in 1:10){
 
 ```
 
-
-
-
-
 ## 5.6 Plotting m55
+
 ```{r}
 # nrow() to check number of row of m55.
 nrow(m55)
@@ -287,9 +269,8 @@ for (i in 1:nrow(m55)){
 
 ```
 
-
-
 ## 5.7 Adding title to each sub-plot
+
 ```{r}
 par(mfrow=c(4,6), mai= c(0.2, 0.2, 0.2, 0.2))
 for (i in 1:nrow(m55)){
@@ -298,11 +279,8 @@ for (i in 1:nrow(m55)){
 }
 ```
 
+# Practice02_1\_1 Plotting more
 
-
-
-
-# Practice02_1_1 Plotting more
 ```{r}
 # plotting matleave_95 != 5 but matleve_13 == 5
 
@@ -310,9 +288,8 @@ for (i in 1:nrow(m55)){
 
 ```
 
+# Practice02_2\_2 selecting and filtering by dplyr I
 
-
-# Practice02_2_2 selecting and filtering by dplyr I
 ```{r}
 df <- read_excel("data/WORLD-MACHE_Gender_6.8.15.xls", "Sheet1", col_names=T)
 
@@ -341,11 +318,8 @@ for (i in c(1:nrow(m55))){
 }
 ```
 
-
-
-
-
 # (More) Clean version
+
 ```{r}
 # readxl::read_excel() to import the xls file
 df <- read_excel("data/WORLD-MACHE_Gender_6.8.15.xls", "Sheet1", col_names=T)
@@ -374,9 +348,8 @@ for (i in c(1:nrow(m55))){
 }
 ```
 
-
-
 # (More) The fittest version to compute staySame
+
 ```{r}
 # staySame version
 # staySame <- apply(m5[,2:20], 1, function(x) length(unique(x[!is.na(x)]))) 
@@ -384,11 +357,3 @@ for (i in c(1:nrow(m55))){
 # m50 <- m5[!staySame, ]
 
 ```
-
-
-
-
-
-
-
-
