@@ -12,6 +12,8 @@ output:
     df_print: paged
 editor_options:
   chunk_output_type: inline
+  markdown: 
+    wrap: 72
 ---
 
 ```{r setup, include=FALSE}
@@ -56,6 +58,8 @@ library(readxl)
 
 # 1. Read excel sheet
 
+用`read_excel()`函式從`data`資料夾中的`WORLD-MACHE_Gender_6.8.15.xls`檔案中的`Sheet1`工作表讀取資料。其中，可加入`col_names=T`的參數，表示將讀入資料的第一列做為欄位名稱（也就是變數名稱）。經`read_excel()`讀取後的資料通常會是`data.frame`的格式，用Assignment符號"`<-`"將其指給變數`df`。
+
 ```{r read excel}
 # Import readxl package
 
@@ -65,7 +69,10 @@ library(readxl)
 
 ```
 
-# 2. Preview data by `View()`, `class()`, `dim()`, `str()`, `summary()` and `names()`
+# 2. Preview data
+
+嘗試用以下函式來觀察所讀入的資料`View()`, `class()`, `dim()`, `str()`,
+`summary()` and `names()。`
 
 ```{r preview data}
 # View(df)
@@ -78,6 +85,8 @@ library(readxl)
 
 # 3. Select essential variables(Column)
 
+這邊將取出`iso3`與`matleave_95`\~`matleave_13`，分別是第3、6至24欄。可用`df[, c(3, 6:24)]`的方式選取這些欄。選取後Assign給一個新變數`matleave`。
+
 ```{r}
 # Select the 3rd and 6th to 24th columns
 
@@ -88,12 +97,15 @@ library(readxl)
 
 ```
 
-# 3. Replace NAs
+# 3. Detect and replace NAs
+
+通常這種讀入的政府開放資料或調查資料往往會有很多空值，也就是應填數值而未填之處。R的`is.na()`函式會回傳一個T/F真偽向量，可以篩出哪些位置有空值。可以透過這些位置，把`0`或所欲替代的值，取代原本的空值處，讓後續的運算更為順暢。
 
 -   `NA: Not Available`
 -   `v[is.na(v)]` will select all NA cells
 -   以0取代NA的資料格。避免繪圖產生錯誤
--   `sum(is.na(matleave))`的目的是檢測還有沒有NA值。如果有的話`is.na()`就會是`TRUE`，那麼加總後，如果不是0，那就代表還有NA。
+
+一個檢測整個data.frame是否還有空值的方法是運用`sum(is.na(matleave))`。如果有任一個位置有空值的話，該位置`is.na()`就會是`TRUE`，加總時`TRUE`就會被當為`1`加總。所以，如果整體`is.na(matleave)`如果不是0，那就代表還有NA。
 
 ```{r}
 # Use is.na() to detect NA element (TRUE/FALSE)
@@ -113,6 +125,8 @@ library(readxl)
 
 # 4.1 Filter data by the last year value
 
+接下來是因應視覺化的思考來繪圖。首先要篩出哪些國家最後一年`matleave_13`的數值是最高等級`5`。
+
 ```{r}
 # Use logical comparison to see if the last year equals to 5
 # Assign matching row to var m5 when 2013 data(matleave_13 equals to 5
@@ -128,6 +142,8 @@ library(readxl)
 ```
 
 # 4.2 Filter data by the first year value
+
+從上述`matleave_13`那年是5的資料中，再篩出哪些國家資料紀錄第一年`matleave_95`的數值是最高等級`5`。這些被篩出來的國家，早在1995年的給付等級就是5，至今也是5，可說是世界上最願意支付產假薪水的國家。
 
 ```{r}
 # filter rows whose 'matleave_95' is 5, and assign to var m55
@@ -321,6 +337,8 @@ for (i in c(1:nrow(m55))){
 # (More) Clean version
 
 ```{r}
+library(readxl)
+
 # readxl::read_excel() to import the xls file
 df <- read_excel("data/WORLD-MACHE_Gender_6.8.15.xls", "Sheet1", col_names=T)
 
@@ -343,7 +361,7 @@ m55<- m5[m5$'matleave_95' == 5,]
 par(mfrow=c(4,6), mai= c(0.2, 0.2, 0.2, 0.2))
 for (i in c(1:nrow(m55))){
 	barplot(unlist(m55[i,-1]),
-			border=NA, space=0,xaxt="n", yaxt="n", ylim = c(0,5))
+			border=NA, space=0, xaxt="n", yaxt="n", ylim = c(0,5))
 	title(m55[i,1], line = -4, cex.main=3)
 }
 ```
