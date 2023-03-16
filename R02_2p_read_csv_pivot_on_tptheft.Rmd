@@ -12,15 +12,34 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+我會建議本門課的學生習慣在一開始就載入`tidyverse`這個套件集。這個套件集會啟動以下幾個我們將來會常用的套件，包含：`readr`是用來讀取各種檔案的套件、`stringr`是用來處理文字、本次教學會用到的`pivot_longer()`和`pivot_wider()`是`tidyr`的套件，專用來轉換`Data.Frame`型態、`lubridate`是用來處理時間的、`ggplot2`是用來繪圖的。
+
+```{r}
+library(tidyverse)
+# ── Attaching core tidyverse packages ─ tidyverse 2.0.0 ─
+# ✔ dplyr     1.1.0     ✔ readr     2.1.4
+# ✔ forcats   1.0.0     ✔ stringr   1.5.0
+# ✔ ggplot2   3.4.1     ✔ tibble    3.2.0
+# ✔ lubridate 1.9.2     ✔ tidyr     1.3.0
+# ✔ purrr     1.0.1     ── Conflicts 
+```
+
 # I. 讀取台北市竊盜案資料(CSV)
+
+現在的程式語言所設計的讀取檔案函式通常會允許使用者直接讀取資料所在的URL。所以，我們可以直接從網路上載入台北市竊盜案資料。首先要至[臺北資料大平台](https://data.taipei/#/)上查詢「住宅竊盜」，可以找到[臺北市住宅竊盜點位資訊](https://data.taipei/#/dataset/detail?id=68785231-d6c5-47a1-b001-77eec70bec02)。取得方法有二：
+
+1.  點選後可下改該資料的CSV檔，練習的話推薦你這麼做。
+2.  若對右上方的[下載](https://data.taipei/api/getDatasetInfo/downloadResource?id=68785231-d6c5-47a1-b001-77eec70bec02&rid=93d9bc2d-af08-4db7-a56b-9f0a49226fa3)按右鍵可取得鏈結到該資料的URL（如<https://data.taipei/api/getDatasetInfo/downloadResource?id=68785231-d6c5-47a1-b001-77eec70bec02&rid=93d9bc2d-af08-4db7-a56b-9f0a49226fa3>）。
 
 ## (1) 直接依資料網址讀取檔案
 
-現在的程式語言所設計的讀取檔案函式通常會允許使用者直接讀取資料所在的URL。所以，我們可以直接從網路上載入台北市竊盜案資料。首先要至[臺北資料大平台](https://data.taipei/#/)上查詢「住宅竊盜」，可以找到[臺北市住宅竊盜點位資訊](https://data.taipei/#/dataset/detail?id=68785231-d6c5-47a1-b001-77eec70bec02)，點選後對右上方的[下載](https://data.taipei/api/getDatasetInfo/downloadResource?id=68785231-d6c5-47a1-b001-77eec70bec02&rid=93d9bc2d-af08-4db7-a56b-9f0a49226fa3)按右鍵可取得鏈結到該資料的URL（如<https://data.taipei/api/getDatasetInfo/downloadResource?id=68785231-d6c5-47a1-b001-77eec70bec02&rid=93d9bc2d-af08-4db7-a56b-9f0a49226fa3>）。
+獲得上述網址後，就要用一個函式從該網址把資料抓下來，再用一個函式把該資料從原本我們看得到的CSV檔，剖析為R的Data.Frame。但有些函式可以一次做到這兩件事，例如`read_csv()`和`read.csv()`便是。
 
-**用來讀取CSV檔案的函式**有base套件中的`read.csv()`與readr套件中的`read_csv()`。普遍來說，`read_csv()` 的功能和效果都會比`read.csv()`好。有了該url後，便以`df <- read.csv(url)` 來讀取。你所看見的(df \<- read.csv(url))只是為了在讀取和Assign後，將該data.frame印出來。
+用來讀取CSV檔案的函式有base套件中的`read.csv()`與readr套件中的`read_csv()`。普遍來說，`read_csv()`
+的功能和效果都會比`read.csv()`好。有了該url後，便以`df <- read.csv(url)`
+來讀取。
 
--   說明：l
+-   說明：老師的程式碼中`(df <- read.csv(url))`外方多了一個括號，這只是為了教學方便，為了在讀取和Assign後，將該data.frame印出來。實際上不用最外層的括號。如果你做完一次Assignment後，他應該不會印出任何東西，但如果你希望他印出來一些東西給你看，那就多加一層括號即可。
 -   除錯：政府開放資料網站經常會以BIG5編碼的方式來儲存（古早味的EXCEL），所以如果要在讀取的時候特別指定該url所指到的資料是以BIG5編碼的話，便會建議以`read.csv(url, fileEncoding = "big5")`來讀取。`fileEncoding = "big5"`稱為`read.csv()`這個函式的**參數(parameter)**\*\*。
 -   嘗試：如果以`df <- readr::read_csv(url)`會得到什麼樣的結果呢？
 
@@ -34,7 +53,11 @@ url <- "https://data.taipei/api/getDatasetInfo/downloadResource?id=68785231-d6c5
 
 ## (2) 從個人電腦本機端讀取檔案
 
-也可以將該CSV檔下載至個人本機端，重新命名為`tptheft.csv`後，置如如教學範例`data` 資料夾中的`tptheft.csv`檔，便可以用`read.csv("data/tptheft.csv")`讀取該檔案。`data/tptheft.csv`為指到`tptheft.csv`這個檔案的路徑。相對於`R02_2p_read_csv_pivot_on_tptheft.Rmd`這個程式檔，`tptheft_.csv`位於的同一層的`data` 資料夾底下，所以路徑為`data/tptheft.csv`。
+也可以將該CSV檔下載至個人本機端直接讀取。或重新命名為`tptheft.csv`後，置如教學範例`data`
+資料夾中的`tptheft.csv`檔，便可以用`read.csv("data/tptheft.csv")`讀取該檔案。
+
+**檔案路徑的觀念**：`data/tptheft.csv`為指到`tptheft.csv`這個檔案的路徑。相對於`R02_2p_read_csv_pivot_on_tptheft.Rmd`這個程式檔，`tptheft_.csv`位於的同一層的`data`
+資料夾底下，所以路徑為`data/tptheft.csv`。
 
 ```{r}
 # read.csv() to read local csv and convert it to a data.frame
@@ -52,31 +75,26 @@ library(tidyverse)
 glimpse(df)     # glimpse() is the tibble package's function.
 ```
 
-## (參考) 用readr::read_csv()來讀取。
+### 1.2.1 用readr::read_csv()來讀取。
 
 也可以使用`readr`套件的`read_csv()`函式來讀取，該套件屬於tidyverse套件系的其中一個套件，如果已經有用`install.packages("tidyverse")`安裝過，只要用`library(tidyverse)`就可以使用`read_csv()`函式。在此鼓勵各位使用tidyverse系列套件。
 
+-   如果在前面已經用`librayr(tidyverse)`匯入`tidyverse`這個套件集，裏面就帶有`readr`，就不用再匯入了。
 -   除錯：萬一遇到中文檔案會有讀檔編碼問題時，有可能該檔案是用big5來儲存的，可以在`read_csv()`中設定`locale`來指定讀取的編碼方法。如`read_csv(url, locale = locale(encoding = "Big5"))`
 
 ```{r}
 # library(readr)
 df <- read_csv(url)
-# df <- read_csv(url, locale = locale(encoding = "Big5"))
-```
+# df <- read_csv(url)  may raise error in some computers. But as a beginner, you should try it.
+# Error in nchar(x, "width") : invalid multibyte string, element 1
 
-## (參考) 用R程式將該網址的檔案抓回本機端儲存。
-
-部分Mac電腦無法使用`read.csv()`從網路上取得資料又轉為`data.frame`，一個可行的辦法是先用`GET(url,write_disk("data/tptheft.csv"))`將其取回並命名為`data/tptheft.csv`，之後再用`df <- read.csv("data/tptheft.csv")`直接讀取該檔案。
-
-```{r}
-library(httr)
-GET(url, write_disk("temp.csv", overwrite = TRUE))
-df <- read_csv("temp.csv")
+df <- read_csv(url, locale = locale(encoding = "Big5"))
 ```
 
 # II. 觀察資料
 
--   `View(df)` 用RStudio所提供的GUI直接觀看變數。自行移去#註解符號來測試，因為knit成html檔時，有`View()`的指令都會造成knit程序中斷。
+-   `View(df)`
+    用RStudio所提供的GUI直接觀看變數。自行移去#註解符號來測試，因為knit成html檔時，有`View()`的指令都會造成knit程序中斷。
 -   `head(df)` 取前面六筆資料（也就是六列的資料來概觀該資料）
 -   `class(df)` 印出該
 -   `str(df)`
@@ -147,17 +165,22 @@ df$region <-
 
 ```{r}
 # YOUR CODE SHOULD BE HERE
+
 ```
 
 # IV. 樞紐分析：計數、加總與彙整。
 
-Pivot analysis: Counting and Summarizing 清理完資料後，我們要回答的第一個數據問題通常是「那XXX的案例有幾個？」例如：大安區有多少竊盜案？10\~12這個時段有多少案例。
+Pivot analysis: Counting and Summarizing
+清理完資料後，我們要回答的第一個數據問題通常是「那XXX的案例有幾個？」例如：大安區有多少竊盜案？10\~12這個時段有多少案例。
 
 ## 方法一：Counting by `table()`
 
-`table()`函式可以對Vector中的值進行計數（Counting）。`table(df$time)` 相當於去計數不同的時間區間出現多少起案例；`table(df$region)` 相當於去計數不同地區各出現多少起案例。
+`table()`函式可以對Vector中的值進行計數（Counting）。`table(df$time)`
+相當於去計數不同的時間區間出現多少起案例；`table(df$region)`
+相當於去計數不同地區各出現多少起案例。
 
-提示：可以用`class(tb_1)` 觀察用`table()` 計數後所產生的資料型態（`table`）。
+提示：可以用`class(tb_1)` 觀察用`table()`
+計數後所產生的資料型態（`table`）。
 
 ```{r}
 # counting(table) the frequency of the variable "time" 
@@ -173,7 +196,9 @@ class(tb_1)       # table
 
 ## 方法二：Counting by `tapply()`
 
-我們也可用`tapply()` 函式來達到一樣的目的。Apply家族的函式都是，針對某個資料，將某個函式套用到某個變項上。`tapply()` 即是用來做計數的，`tapply(df$編號, df$time, length)`有三個輸入，第一個輸入為整體物件，第二個輸入為要據以彙整的變項，在此為`df$time`，第三個是要用來彙整的函式，因為這裡要做計數，所以要用`length`函式。
+我們也可用`tapply()`
+函式來達到一樣的目的。Apply家族的函式都是，針對某個資料，將某個函式套用到某個變項上。`tapply()`
+即是用來做計數的，`tapply(df$編號, df$time, length)`有三個輸入，第一個輸入為整體物件，第二個輸入為要據以彙整的變項，在此為`df$time`，第三個是要用來彙整的函式，因為這裡要做計數，所以要用`length`函式。
 
 註：同樣用`class()`來觀察彙整後的資料型態為`array`，和前者的`table`資料型態不同。
 
@@ -202,7 +227,8 @@ class(tb_2)
 
 -   如果要表示不包含，就在`df%time`加一個NOT，也就是[`!`]{style="color:hotpink"}。
 
-依照各組時間的案例個數統計後，篩除資料未足100的時間區間如下，最後再用`table(df$time)` 計算一次，發現每個時段都兩三、百個案例，且涵蓋整日的時間。清理後沒有重疊的時間區間，做類別資料分析會比較準確。
+依照各組時間的案例個數統計後，篩除資料未足100的時間區間如下，最後再用`table(df$time)`
+計算一次，發現每個時段都兩三、百個案例，且涵蓋整日的時間。清理後沒有重疊的時間區間，做類別資料分析會比較準確。
 
 ```{r}
 # filter in irrelevant timestamp
@@ -245,7 +271,13 @@ class(res_tapply)
 
 ## (3) by dplyr::count()
 
-這邊多介紹一個用dplyr套件的`count()`函式來做交叉分析的方法（未來會常用這個方法，因為dplyr是tidyverse系列套件的核心套件。dplyr的函式第一個參數永遠是該data.frame， 例如`count()`；後面`time`與`region`則是這個data.frame中的兩個變項。不像`tapply()`或`table()`的結果一樣，欄與列分別為`time`與`region`，count()出來的結果會有兩個變項分別是指定要計數的`time`與`region` ，且會新增一個變項`n`，代表這組數據（`time` x `region`）共有幾個。這種表達型態通常稱為long-table（長表）、而`tapply()`或`table()` 的結果通常稱為wide-table（寬表）為典型的交叉分析表。
+註：若看見老師打`dplyr::count()`是為了提示你`count()`這個函式是`dplyr`這個套件的。其功能是，如果你沒載入該套件的話，你也可以透過這種方法，使用未載入套件中的函式。但如果你已經匯入過`dplyr`或`tidyverse`，你就不用再這麼打。
+
+這邊多介紹一個用dplyr套件的`count()`函式來做交叉分析的方法（未來會常用這個方法，因為dplyr是tidyverse系列套件的核心套件。dplyr的函式第一個參數永遠是該data.frame，
+例如`count()`；後面`time`與`region`則是這個data.frame中的兩個變項。不像`tapply()`或`table()`的結果一樣，欄與列分別為`time`與`region`，count()出來的結果會有兩個變項分別是指定要計數的`time`與`region`
+，且會新增一個變項`n`，代表這組數據（`time` x
+`region`）共有幾個。這種表達型態通常稱為long-table（長表）、而`tapply()`或`table()`
+的結果通常稱為wide-table（寬表）為典型的交叉分析表。
 
 目前大部分的類別資料分析還是會採用交叉分析表的型態，但未來我們要用tidyverse系列套件做大量的數據彙整或視覺化時，都會盡可能想辦法轉為Long-table型態，讓每一欄剛好就是一個變項。只要是tidyverse系列套件所計算出來的資料型態幾乎都是[類似]{style="color:hotpink"}data.frame的型態，例如觀察`count`的結果便是`"tbl_df"     "tbl"        "data.frame"`。
 
@@ -259,7 +291,14 @@ library(dplyr)
 class(res_count)    # "tbl_df"     "tbl"        "data.frame"
 ```
 
-那長表列可以轉為寬表嗎？可以，tidyverse系列套件中的tidyr套件有個函式`spread()`可以接著把某個變項展開為欄。例如原本上述的列是時間與行政區的交叉組合，但我可以把行政區展開為欄、或者把時間展開為欄。`spread(res_count, region, n, fill = 0)` 有四個參數，遵循tidyverse系列套件的規則，第一個位置為data.frame，第二個參數則是要被展開至欄的變項這裡為`region`，第三個參數則是因應`region`被展開後，那中間交叉分析的數值就是n，最後一個參數是避免spread時有些交叉組是沒有資料的，因此`fill=0`可以指定，如果某個`time` x `region`的交叉組別是沒資料的，就填上`0`，也有可能是用`fill=NA`填上`NA`。以下的例子中也提供了將`time` 展開至欄的寫法供參考。
+那長表列可以轉為寬表嗎？可以，tidyverse系列套件中的tidyr套件有個函式`spread()`可以接著把某個變項展開為欄。例如原本上述的列是時間與行政區的交叉組合，但我可以把行政區展開為欄、或者把時間展開為欄。`spread(res_count, region, n, fill = 0)`
+有四個參數，遵循tidyverse系列套件的規則，第一個位置為data.frame，第二個參數則是要被展開至欄的變項這裡為`region`，第三個參數則是因應`region`被展開後，那中間交叉分析的數值就是n，最後一個參數是避免spread時有些交叉組是沒有資料的，因此`fill=0`可以指定，如果某個`time`
+x
+`region`的交叉組別是沒資料的，就填上`0`，也有可能是用`fill=NA`填上`NA`。以下的例子中也提供了將`time`
+展開至欄的寫法供參考。
+
+現在`spread()`函式已經被新的函式取代，為`pivot_wider()`。`spread(res_count, region, n, fill = 0)`
+在此需要改寫為`pivot_wider(res_count, names_from = region, values_from = n, values_fill = 0)`。大致上和`spread()`用法是一樣的，只是要寫清楚，哪個變數要給哪一個參數。
 
 展開後的資料型態和前者計數後的資料型態一樣，都是`"tbl_df"     "tbl"        "data.frame"`。這是為什麼tidyverse系列的套件逐漸變成R的顯學的原因之一。
 
@@ -277,7 +316,9 @@ res_count_spread
 
 ## (Option) wide to long table
 
-寬表格亦可用tidyr的`gather()`函式轉回長表格型態：
+寬表格亦可用tidyr的`gather()`函式轉回長表格型態。
+
+寬表格亦可用tidyr的`gather()`函式轉回長表格型態。但`gather()`近期也已經被新的函式`pivot_longer()`取代。原先的`gather(res_count_spread, region, n, -time)`應取代為`pivot_longer(res_count_spread, -time, names_to = "region", values_to = "n")`。
 
 ```{r}
 (long_table <- tidyr::gather(res_count_spread, region, n, -time))
@@ -293,7 +334,9 @@ res_count_spread
 
 # VII. 繪圖 Plotting
 
-通常這種類別資料交叉分析最常用的圖表型態之一便是Mosaic Plot（但事實上Mosaic Plot不見能夠被一眼就了解）。我們可以把交叉分析後的變項`res_table`直接用MosaicPlot來繪圖。
+通常這種類別資料交叉分析最常用的圖表型態之一便是Mosaic
+Plot（但事實上Mosaic
+Plot不見能夠被一眼就了解）。我們可以把交叉分析後的變項`res_table`直接用MosaicPlot來繪圖。
 
 ```{r}
 # mosaicplot() to plot 2-dim categorical vars.
@@ -307,7 +350,10 @@ mosaicplot(res_table, main="TP Theft (Time X Region)")
 
 大部分的視覺化套件都無法順利顯示中文，除非特別指定所要用的中文字型。這方面網路上可以找到很多的說明，但非常討厭的是，幾乎每換一套視覺化工具，換一套語言，就有不同的中文字體指定方式。例如用base的`plot()`來繪圖或用`ggplot()`的中文字型指定方法便不同，且軸上面有中文、圖標有中文、或者圖內有中文都要分開指定，非常討人厭。
 
-Mosaic Plot屬於base R的`plot()`，其中文指定方法要指定在繪圖前的`par()`函式中（`par`為parameter的意思），指定方法為`par(family=('Heiti TC Light'))`，Heiti TC Light為字體名稱，為OSX上在用的黑體細字，STKaiti則為標楷體。然後，`par()`和`mosaicplot()`兩個函式要「同時執行」，也就是請你直接用shift-cmd(ctrl)-Enter執行整個code-cell，或者將該兩個函式選起來一次執行。
+Mosaic Plot屬於base
+R的`plot()`，其中文指定方法要指定在繪圖前的`par()`函式中（`par`為parameter的意思），指定方法為`par(family=('Heiti TC Light'))`，Heiti
+TC
+Light為字體名稱，為OSX上在用的黑體細字，STKaiti則為標楷體。然後，`par()`和`mosaicplot()`兩個函式要「同時執行」，也就是請你直接用shift-cmd(ctrl)-Enter執行整個code-cell，或者將該兩個函式選起來一次執行。
 
 ```{r}
 
