@@ -1,0 +1,249 @@
+1--- title: "R03_1\_base_to_dplyr_maternal_leave" author: "Jilung Hsieh" date: "3/4/2022" output: html_document ---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Loading library
+
+當第一次載入`tidyverse`時所印出的資訊即為載入`tidyverse`所會自動載入的套件，所以不用再額外載入這些套件。例如：`ggplot`、`readr`、`stringr`、`lubridate`等。
+
+```{r}
+library(tidyverse)
+# ── Attaching core tidyverse packages ────────────── tidyverse 2.0.0 ──
+# ✔ dplyr     1.1.0     ✔ readr     2.1.4
+# ✔ forcats   1.0.0     ✔ stringr   1.5.0
+# ✔ ggplot2   3.4.1     ✔ tibble    3.1.8
+# ✔ lubridate 1.9.2     ✔ tidyr     1.3.0
+# ✔ purrr     1.0.1     ── Conflicts ────────── tidyverse_conflicts() ──
+# ✖ dplyr::filter() masks stats::filter()
+# ✖ dplyr::lag()    masks stats::lag()
+# ℹ Use the conflicted package to force all conflicts to become errors
+```
+
+過去的R會預設將字串（string）轉為factor，但現在的R 4.0版本已經預設保留字串格式。如果使用比較低的R版本，通常會為了避免預設轉為factor，會加上`options(stringsAsFactors = F)`，這是一個全域（global）的預設設定，凡是任何函式有`stringsAsFactors`的都會預設為`F`。
+
+```{r}
+library(readxl)
+# options(stringsAsFactors = F)
+```
+
+# Original Version
+
+```{r}
+# readxl::read_excel() to import the xls file
+df <- read_excel("data/WORLD-MACHE_Gender_6.8.15.xls", "Sheet1", col_names=T)
+
+# select iso3, and matleave columns by index
+matleave <- df[ , c(3, 6:24)]
+
+# select all NA cells and assign 0 to them
+matleave[is.na(matleave)] <- 0
+
+# filter rows by condition
+m5 <- matleave[matleave$'matleave_13' == 5, ]
+
+# filter rows by condition
+m55<- m5[m5$'matleave_95' == 5,]
+
+# plot
+par(mfrow=c(4,6), mai= c(0.2, 0.2, 0.2, 0.2))
+for (i in c(1:nrow(m55))){
+    barplot(unlist(m55[i,-1]),
+            border=NA, space=0,xaxt="n", yaxt="n", ylim = c(0,5))
+    title(m55[i,1], line = -4, cex.main=3)
+}
+```
+
+# Tidyverse version
+
+## Loading data
+
+```{r}
+raw <- read_excel("data/WORLD-MACHE_Gender_6.8.15.xls", "Sheet1", col_names=T)
+```
+
+## Select and filter data
+
+```{r}
+
+# Select the iso3 variable and 6th to 24th variables
+matleave <- 
+    
+# filter matleave_13==5
+m5 <- 
+
+# filter matleave_95==5
+m55 <- 
+    
+```
+
+## Using pipeline
+
+```{r}
+# Rewrite by pipeline and assign to m55
+read_excel("data/WORLD-MACHE_Gender_6.8.15.xls", "Sheet1", col_names=T)
+```
+
+
+## Now ask chatgpt
+Q: "I have a data frame with iso3 codes in the first column and year values ranging from 1995 to 2013 in the second to twentieth columns. I would like to convert this wide-format table to a long-format table with three columns: iso3, year, and corresponding value from the original wide-format table. How can I accomplish this?"
+
+ChatGPT "You can use the pivot_longer() function from the tidyr package to convert a wide table to a long table in R. Here's an example code that shows how to do this with your data:"
+
+```{r}
+library(tidyr)
+
+# Create a sample data frame
+df <- data.frame(
+  iso3 = c("USA", "CAN", "MEX"),
+  `1995` = c(10, 20, 30),
+  `1996` = c(15, 25, 35),
+  `1997` = c(20, 30, 40)
+)
+
+# Convert the data frame from wide to long format
+df_long <- pivot_longer(
+  data = df, 
+  cols = starts_with("19"), 
+  names_to = "year", 
+  values_to = "value"
+)
+
+# View the converted data frame
+df_long
+```
+
+```{r}
+read_excel("data/WORLD-MACHE_Gender_6.8.15.xls", "Sheet1", col_names=T) %>%
+	select(iso3, contains("matleave"), -contains("wrr")) %>%
+	filter(matleave_13==5, matleave_95!=5) %>%
+	pivot_longer(names_to = "year", cols = 2:20, values_to = "degree")
+```
+
+# ChatGPT practice
+
+The following is your ChatGPT task. Here is the complete working code. After understanding the code, how would you ask ChatGPT to explain the following three lines of code? Please try to write your questions to ChatGPT in this RMD document. Perhaps you can start by asking what the meaning of these three lines of code is.
+
+## Question1
+Q: 
+ChatGPT: 
+Q: 
+ChatGPT: 
+
+## Question2
+Q: 
+ChatGPT: 
+
+## Question3
+Q: 
+ChatGPT: 
+
+
+# Working tidyverse version
+
+```{r}
+library(readxl)
+
+read_excel("data/WORLD-MACHE_Gender_6.8.15.xls", "Sheet1", col_names=T) %>%
+	select(iso3, contains("matleave"), -contains("wrr")) %>%
+	filter(matleave_13==5, matleave_95!=5) %>%
+	pivot_longer(names_to = "year", cols = 2:20, values_to = "degree") %>%
+	replace_na(list(degree=0)) %>%
+	mutate(year2=as.POSIXct(strptime(year, "matleave_%y"))) %>%
+	mutate(year3 = strftime(year2, "%Y")) %>%
+	ggplot() +
+	aes(year3, degree) +
+    geom_col(color="royalblue", fill="royalblue") + 
+	facet_wrap(~ iso3) + 
+    theme_void()
+```
+
+# Run following code chunks to see what you get
+
+## 1. Read EXCEL
+
+```{r}
+read_excel("data/WORLD-MACHE_Gender_6.8.15.xls", "Sheet1", col_names=T) %>%
+    View
+```
+
+## 2. Select data
+
+### Select one column
+
+```{r}
+read_excel("data/WORLD-MACHE_Gender_6.8.15.xls", "Sheet1", col_names=T) %>%
+	select(iso3)
+```
+
+### Select by index
+
+```{r}
+read_excel("data/WORLD-MACHE_Gender_6.8.15.xls", "Sheet1", col_names=T) %>% 
+	select(3, 6:24)
+```
+
+### Select by `contains()`
+
+```{r}
+read_excel("data/WORLD-MACHE_Gender_6.8.15.xls", "Sheet1", col_names=T) %>%
+	select(iso3, contains("matleave"), -contains("wrr")) %>% View
+```
+
+## 3. Filter data
+
+```{r}
+read_excel("data/WORLD-MACHE_Gender_6.8.15.xls", "Sheet1", col_names=T) %>%
+	select(iso3, contains("matleave"), -contains("wrr")) %>%
+	filter(matleave_13==5, matleave_95!=5)
+```
+
+## 4. Convert wide- to long-table
+
+```{r}
+read_excel("data/WORLD-MACHE_Gender_6.8.15.xls", "Sheet1", col_names=T) %>%
+	select(iso3, contains("matleave"), -contains("wrr")) %>%
+	filter(matleave_13==5, matleave_95!=5) %>%
+	gather("year", "degree", 2:20)
+
+```
+
+## 5. Cleaning: replace `NA`
+
+```{r}
+read_excel("data/WORLD-MACHE_Gender_6.8.15.xls", "Sheet1", col_names=T) %>%
+	select(iso3, contains("matleave"), -contains("wrr")) %>%
+	filter(matleave_13==5, matleave_95!=5) %>%
+	pivot_longer(names_to = "year", cols = 2:20, values_to = "degree") %>%
+	replace_na(list(degree=0))
+```
+
+## 6. Mutate new variable: Year
+
+```{r}
+read_excel("data/WORLD-MACHE_Gender_6.8.15.xls", "Sheet1", col_names=T) %>%
+	select(iso3, contains("matleave"), -contains("wrr")) %>%
+	filter(matleave_13==5, matleave_95!=5) %>%
+	pivot_longer(names_to = "year", cols = 2:20, values_to = "degree") %>%
+	replace_na(list(degree=0)) %>%
+	mutate(year2=as.POSIXct(strptime(year, "matleave_%y"))) %>%
+	mutate(year3 = strftime(year2, "%Y")) %>% View
+```
+
+## 7. Plotting: bar chart
+
+```{r}
+read_excel("data/WORLD-MACHE_Gender_6.8.15.xls", "Sheet1", col_names=T) %>%
+	select(iso3, contains("matleave"), -contains("wrr")) %>%
+	filter(matleave_13==5, matleave_95!=5) %>%
+	pivot_longer(names_to = "year", cols = 2:20, values_to = "degree") %>%
+	replace_na(list(degree=0)) %>%
+	mutate(year2=as.POSIXct(strptime(year, "matleave_%y"))) %>%
+	mutate(year3 = strftime(year2, "%Y")) %>%
+	ggplot() +
+	aes(year3, degree) +
+    geom_col(color="royalblue", fill="royalblue") + 
+	facet_wrap(~ iso3) + 
+    theme_void()
+```
