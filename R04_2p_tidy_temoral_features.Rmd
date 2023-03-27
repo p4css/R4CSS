@@ -1,0 +1,74 @@
+---
+title: "Visualizing by Time"
+author: "Jilung Hsieh"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+options(stringsAsFactors = F)
+```
+
+# Loading data
+```{r}
+
+
+```
+
+
+# parsing time
+- Convert "character time"  to R date.time object (POSIXct)
+```{r}
+
+
+    
+```
+
+
+# Data coverage over time
+```{r}
+
+
+
+```
+
+
+# Data coverage over time by month
+```{r}
+
+
+
+
+```
+
+```{r}
+
+
+
+
+
+```
+
+
+
+# Data coverage overt time by hour, grouped by day
+```{r}
+clean %>%
+    filter(ptime >= as_datetime("2019-03-25") & ptime < as_datetime("2019-04-01")) %>% ...
+
+
+
+
+
+
+```
+
+
+
+
+
