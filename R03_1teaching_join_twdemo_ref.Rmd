@@ -1,0 +1,75 @@
+---
+title: "Untitled"
+output: html_document
+date: "2023-03-30"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+```{r}
+raw <- read_csv("data/opendata107Y030.csv") %>% 
+    slice(-1) %>% 
+    mutate(vname = str_c(site_id, village)) %>% 
+    select(vname, everything()) 
+```
+```{r}
+tidy_data <- raw %>%
+    pivot_longer(names_to = "key", cols = 6:ncol(.), values_to = "value") %>%
+    mutate(key = str_replace(key, "_age", "")) %>%
+    mutate(key = str_replace(key, "15down", "0_15")) %>%
+    mutate(key = str_replace(key, "100up", "100_105")) %>%
+    separate(key, c("married", "ageLower", "ageUpper", "gender")) %>% 
+    mutate(ageGroup = str_c(ageLower, "_", ageUpper))
+
+??str_c
+
+??separate
+```
+
+
+
+```{r}
+town_stat <- tidy_data %>%
+    mutate(value = as.numeric(value)) %>% 
+    mutate(ageLower = as.numeric(ageLower)) %>%
+    filter(ageLower >= 20) %>%
+    mutate(site_id = str_replace(site_id, "三民一|三民二", "三民區")) %>%
+    mutate(site_id = str_replace(site_id, "鳳山一|鳳山二", "鳳山區")) %>%
+    group_by(site_id) %>%
+    summarise(legalPoluation = sum(value),
+              womenSum = sum(value[gender=="f"]),
+              elderSum = sum(value[ageLower >= 65]),
+              # marriedSum = sum(value[married=="widowed" | married=="married" | married=="divorced"])
+              marriedSum = sum(value[married %in% c("widowed", "married", "divorced")])
+              # marriedSum = sum(value[married!="single"])
+              ) %>%
+    ungroup()
+    
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

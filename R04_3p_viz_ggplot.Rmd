@@ -10,7 +10,7 @@ output:
 
 # 用ggplot視覺化(I)
 
-本節著重在介紹`ggplot`的基本概念與設定。不同類型的圖表則在下一節「ggplot圖表類型(II)」
+本節著重在介紹`ggplot`的基本概念與設定，如果想要了解各類圖表及其適用情形，可參考後續章節。
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, cache = TRUE) 
@@ -20,13 +20,13 @@ library(tidyverse)
 options(scipen = 999)
 ```
 
-可在一開始便透過`knitr::opts_chunk$set(echo = TRUE, fig.width = 2, fig.asp = 0.4)`來一次設定所有圖片。`fig.width = 8`與`fig.height = 6` 是以英吋（inches）為單位，或用`fig.dim = c(8, 6)`一次設定長寬[^1]。`echo = TRUE`是設定knit出輸出格式（如html）時，也要包含程式碼。如果`echo = FALSE`的話，就只會輸出文字和圖形。
+**小秘訣：**可在一開始便透過`knitr::opts_chunk$set(echo = TRUE, fig.width = 2, fig.asp = 0.4)`來一次設定所有圖片。`fig.width = 8`與`fig.height = 6` 是以英吋（inches）為單位，或用`fig.dim = c(8, 6)`一次設定長寬[^1]。`echo = TRUE`是設定knit出輸出格式（如html）時，也要包含程式碼。如果`echo = FALSE`的話，就只會輸出文字和圖形。
 
 [^1]: 參考資料：[5.4 Control the size of plots/images \| R Markdown Cookbook (bookdown.org)](https://bookdown.org/yihui/rmarkdown-cookbook/figure-size.html)
 
-# Basic: Line chart
+# Line Plot
 
-## Essential elements of a plot
+## ggplot繪圖的基本步驟
 
 用ggplot來繪製圖形有三個基本函式`ggplot()` + `aes()` + `geom_圖表類型`。
 
