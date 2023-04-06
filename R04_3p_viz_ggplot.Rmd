@@ -30,8 +30,9 @@ options(scipen = 999)
 
 用ggplot來繪製圖形有三個基本函式`ggplot()` + `aes()` + `geom_圖表類型`。
 
-1.  **指定要進行繪圖`ggplot()`**：用`%>%`將資料（dataframe）pipe給`ggplot()`後，底下各增添的繪圖選項都用`+`的符號，類似不斷修正繪圖結果的意思。
-2.  **指定X／Y軸與群組因子`aes()`**：指定圖表的X/Y軸分別是什麼變數，有些圖表只需要單一個變數（例如Density-chart和Histogram），有些需要X/Y兩個變數（例如Scatter-chart）什麼的變數要做視覺化，Boxplot甚至可以直接指定最大、最小、Q1、Q3和Median等多個變數。
+1.  **指定要進行繪圖`ggplot()`**：用`%>%`將資料（dataframe）pipe給`ggplot()`後，\
+    底下各增添的繪圖選項都用**`+`**的符號，類似不斷修正繪圖結果的意思。
+2.  **`aes()`**：指定X／Y軸與Grouping factor。指定圖表的X/Y軸分別是什麼變數，有些圖表只需要單一個變數（例如Density-chart和Histogram），有些需要X/Y兩個變數（例如Scatter-chart）什麼的變數要做視覺化，Boxplot甚至可以直接指定最大、最小、Q1、Q3和Median等多個變數。
 3.  **指定要繪製的圖表類型**。例如Line-chart為`geom_line()`、Scatter-chart為`geom_point()`、Bar-chart為`geom_col()`或`geom_bar()`。查閱[ggplot cheat sheet](https://www.maths.usyd.edu.au/u/UG/SM/STAT3022/r/current/Misc/data-visualization-2.1.pdf)可以快速翻閱有哪些圖表類型。
 
 ```{r ggplot()}
@@ -54,14 +55,14 @@ ggplot是以變數為基礎的視覺化套件，也就是說，當準備好dataf
 
 ![](images/paste-3C0D00B9.png)
 
-```{r preparing-data}
-NW <- read_csv("data/nytdata/interactive_bulletin_charts_agecl_median.csv") %>%
+```{r preparing-data, warning=FALSE}
+NW <- read_csv("data/interactive_bulletin_charts_agecl_median.csv") %>%
     select(Category, year, Net_Worth)  %>%
     group_by(Category) %>%
     arrange(year) %>%
     ungroup()
 
-NW %>% glimpse()
+NW %>% head() %>% knitr::kable()
 ```
 
 在以下`geom_line()`的圖表中呈現鋸齒狀的折線，看似有問題，但其實是合理的。因為`year`是一個離散變數，而我們希望每個年齡層一條線的話，那就要照年齡層來分組。也因此，每一年都有有每個年齡層的資料，當我們把「年」作為X軸時，自然同一年就會有數筆不同年齡層的資料，因此才會是鋸齒狀的。
