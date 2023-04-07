@@ -36,7 +36,14 @@ options(scipen = 999)
 3.  **指定要繪製的圖表類型**。例如Line-chart為`geom_line()`、Scatter-chart為`geom_point()`、Bar-chart為`geom_col()`或`geom_bar()`。查閱[ggplot cheat sheet](https://www.maths.usyd.edu.au/u/UG/SM/STAT3022/r/current/Misc/data-visualization-2.1.pdf)可以快速翻閱有哪些圖表類型。
 
 ```{r ggplot()}
-tibble(a=1:5, b=5:1)
+
+tibble(a=1:5, b=5:1) %>% 
+    ggplot() + 
+    # aes(a, b) +
+    aes(a, b, label = str_c("(", a, ", ", b, ")")) + 
+    geom_line() + 
+    geom_point() + 
+    geom_text() + geom_
 # YOUR CODE SHOULD BE HERE
 
 
@@ -57,7 +64,7 @@ ggplot是以變數為基礎的視覺化套件，也就是說，當準備好dataf
 
 ```{r preparing-data, warning=FALSE}
 NW <- read_csv("data/interactive_bulletin_charts_agecl_median.csv") %>%
-    select(Category, year, Net_Worth)  %>%
+    select(Category, year, Net_Worth)  %>% 
     group_by(Category) %>%
     arrange(year) %>%
     ungroup()
@@ -70,6 +77,14 @@ NW %>% head() %>% knitr::kable()
 **不同的圖表類型是可以疊加在同一張圖上的**。我們也可以把`geom_point()` 另一種圖表型態加入，也是可以的，兩者的X與Y不相衝突。`geom_line()`、`geom_point()`、`geom_text()`三者會經常伴隨出現。
 
 ```{r select-vars-and-plot-type}
+
+NW %>%
+    ggplot() +
+    aes(year, Net_Worth, color = Category) + 
+    geom_line() + 
+    geom_point()
+    
+    
 # YOUR CODE SHOULD BE HERE
 
 
@@ -90,6 +105,10 @@ NW %>% head() %>% knitr::kable()
 
 ```{r}
 NW %>%
+    ggplot() + 
+    aes(year, Net_Worth, fill = Category, color = Category) + 
+    geom_area(position = "dodge", alpha = 0.2) + 
+    theme_minimal()
 # YOUR CODE SHOULD BE HERE
     
     
@@ -101,7 +120,7 @@ NW %>%
 ```{r grouping-area, message=FALSE, warning=FALSE}
 NW %>%    
     ggplot() + aes(year, Net_Worth,fill=Category) + 
-    geom_point(color="black") + 
+    # geom_point(color="black") + 
     geom_area(color="black", position="dodge", alpha=0.2)
 ```
 
@@ -116,8 +135,9 @@ NW %>%
 ```{r linetype-thickness-alpha}
 NW %>%    
     ggplot() + aes(year, Net_Worth, color=Category) + 
-    geom_line(size=1, linetype = "dotted", alpha=0.5, show.legend = F) +
-    geom_point(size=2, color="dimgrey", alpha=0.5, shape=18)
+    geom_line(size=1, alpha=0.5, show.legend = F) +
+    geom_point(size=2, color="deeppink", alpha=0.5, shape=18) + 
+    theme_minimal()
 ```
 
 ## 調整圖表主題色調
@@ -151,14 +171,16 @@ NW %>%
 **設定標題與X／Y軸標題（法二）**：這是一次設定圖表標題（`title`）、次標題（`suttitle`）、X軸與Y軸標題的方法。
 
 ```{r Add-x/y-label-title.M2}
-NW %>%    
+p <- NW %>%    
     ggplot() + aes(year, Net_Worth, color=Category) + 
     geom_line() +  
-    theme_minimal() + 
+    theme_bw() + 
     labs(title = "Net Worth by year grouped by age groups",
          subtitle = "Source from: ...1231231231.3.",
          x = "Year",
          y = "Net Worth")
+ggsave("scatterplot.png", p, width = 6, height = 4, dpi = 300)
+ggsave("scatterplot.pdf", p, width = 6, height = 4, dpi = 300, device = "pdf")
 ```
 
 **調整X軸與Y軸標題位置的**：必須要透過`theme()`來設定`axis.title.x = element_text(hjust=1)`。
@@ -251,7 +273,7 @@ Python和R這些程式語言的預設視覺化套件都沒辦法顯示中文，�
 ![](images/paste-A259BC75.png)
 
 ```{r}
-county <- read_csv("data/twdata/tw_population_opendata110N010.csv") %>%
+county <- read_csv("data/tw_population_opendata110N010.csv") %>%
     slice(-1, -(370:375)) %>%
     type_convert() %>%
     mutate(county = str_sub(site_id, 1, 3)) %>%
