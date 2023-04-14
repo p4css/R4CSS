@@ -36,10 +36,12 @@ names(trump_tweets_df)
 
 ## Extract source/user-agent
 
-        source  n
-        <chr>   <int>
-    1   Android 762     
-    2   iPhone  628 
+```         
+    source  n
+    <chr>   <int>
+1   Android 762     
+2   iPhone  628 
+```
 
 ![](images/paste-19A2D513.png)
 
@@ -47,25 +49,48 @@ names(trump_tweets_df)
 
 -   `<a href=\"http://twitter.com/download/android\" rel=\"nofollow\">Twitter for Android</a>`
 -   `<a href=\"http://twitter.com/download/iphone\" rel=\"nofollow\">Twitter for iPhone</a>`
--   `Twitter for (\\w+?)<`
+-   `Twitter for (\\w+?)<、`
 
 ```{r}
+html <- '<a href="http://twitter.com/download/android" rel="nofollow">Twitter for Android</a>'
+
+# 取出文字內容 using str_match()
+text <- str_match(html, "<a[^>]*>Twitter for (.*?)<\\/a>")[2]
+text
+```
+
+```{r}
+trump_tweets_df$statusSource[1]
 trump_tweets_df$statusSource[2]
+trump_tweets_df$statusSource[3]
 
 ## Extract source/user-agent
 
 tweets <- trump_tweets_df %>%
     select(id, created, text, statusSource) %>%
+    # mutate(source = str_match(statusSource, '<a[^>]*>Twitter for (.*?)<\\/a>')[,2]) %>% View
     extract(statusSource, "source", "Twitter for (\\w+?)<") %>%
     filter(source %in% c("iPhone", "Android"))
 
 tweets %>% count(source)
 
 tweets %>%
+    ggplot() + 
+    aes(created) + 
+    geom_density()
+
+
+tweets %>%
     ggplot() + aes(created, color=source) + 
     geom_density()
 
 ```
+
+::: practice
+**Practice.** 嘗試問ChatGPT，如何用R抽取「`<a href=\"http://twitter.com/download/iphone\" rel=\"nofollow\">Twitter for iPhone</a>`」這個HTML碼的文字部分（也就是Twitter for iPhone）。並且限定他使用R、stringr、運用tidyverse style撰寫看看。
+
+**Practice.** 當它輸出一個Regular Expression時，嘗試問他該Regular Expression的意涵為何。
+:::
 
 # Vis: Hour by tweet percentage
 
@@ -74,16 +99,26 @@ tweets %>%
 
 ```{r}
 library(lubridate)
+
+# tweets %>%
+#     mutate(hour = hour(with_tz(created, "EST"))) %>%
+#     count(source, hour) %>%
+#     ggplot() + 
+#     aes(hour, n, color = source) +
+#     geom_line()
+
+
+
 tweets %>%
-    mutate(hour = hour(with_tz(created, "EST"))) %>% 
+    mutate(hour = hour(with_tz(created, "EST"))) %>%
     count(source, hour) %>%
     group_by(source) %>%
     mutate(percent = n / sum(n)) %>%
     ungroup() %>% 
     ggplot() + aes(hour, percent, color = source) + 
-    scale_color_manual(labels = c("Adroid", "iPhone"), 
-                       values = c("royalblue", "gold")) + 
-    geom_line(size = 1) + 
+    scale_color_manual(labels = c("Adroid", "iPhone"),
+                       values = c("royalblue", "gold")) +
+    geom_line(linewidth = 1) + 
     labs(x = "Hour of day (EST)") + 
     theme_minimal()
 
@@ -110,8 +145,8 @@ tweets %>%
     ggplot() + 
     aes(source, n, fill = picture)  +
     geom_col(position = "dodge") + 
-    scale_fill_manual(labels = c("Picture/link", "No pictrue/link"),
-                      values = c("royalblue", "gold"))
+    scale_fill_manual(labels = c("No pictrue/link", "Picture/link"),
+                      values = c("gold", "royalblue"))
 
 
 ```
@@ -119,7 +154,7 @@ tweets %>%
 # Comparison of words
 
 1.  Removing all urls by replacement
-2.  Unnesting sentence to words in tidy-form by `unnest_token()`
+2.  Un-nesting sentence to words in tidy-form by `unnest_token()`
 3.  Filtering out stop_words by `anti_join()`
 4.  Counting word frequency for plotting
 
@@ -128,12 +163,17 @@ library(tidytext)	# unnest_tokens()
 library(stringr)	# str_detect(), str_replace_all()
 tidytext::stop_words
 # View(test)
+
+
 tweets %>%
     filter(!str_detect(text, '^"')) %>%
     ## 1. removing urls
-    
-    
+    mutate(text = str_remove_all(text, "https?://\\S+")) %>%
+    mutate(text = str_to_lower(text)) %>%
     ## 2. unnesting word tokens
+    mutate(word = str_extract_all(text, "\\b\\w+\\b")) %>%
+    unnest(word) %>%
+    filter(!word %in% tidytext::stop_words$word) %>% View
     
     ## 3. filter out stopwords
     

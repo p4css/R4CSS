@@ -1,0 +1,512 @@
+face="bold.italic"),
+axis.title.y = element_text(hjust=1, size=10,
+color="dimgrey",
+face="bold.italic")
+)
+NW %>%
+ggplot() + aes(year, Net_Worth, color=Category) +
+geom_line() +
+theme_minimal()
+th <- theme(plot.title = element_text(size=14, face="bold"),
+axis.title.x = element_text(hjust=1, size=10,
+color="dimgrey",
+face="bold.italic"),
+axis.title.y = element_text(hjust=1, size=10,
+color="dimgrey",
+face="bold.italic")
+)
+NW %>%
+ggplot() + aes(year, Net_Worth, color=Category) +
+geom_line(linetype = "dashed", alpha=0.5) +
+geom_point(size=2, color="dimgrey", alpha=0.5) +
+theme_minimal() +
+labs(title = "Net Worth by year grouped by age groups",
+x = "Year",
+y = "Net Worth") + th
+county <- read_csv("data/tw_population_opendata110N010.csv") %>%
+slice(-1, -(370:375)) %>%
+type_convert() %>%
+mutate(county = str_sub(site_id, 1, 3)) %>%
+group_by(county) %>%
+summarize(
+area = sum(area),
+people_total = sum(people_total)
+) %>%
+ungroup()
+county %>%
+arrange(desc(people_total)) %>%
+ggplot() + aes(county, people_total) %>%
+geom_col(fill="lightgrey", color="black") +
+theme_minimal()
+th <-
+theme(title = element_text(family="Heiti TC Light"),
+text = element_text(family="Heiti TC Light"),
+axis.text.y = element_text(family="PingFang TC"),
+axis.text.x = element_text(family="Heiti TC Light"),
+legend.text = element_text(family="Heiti TC Light"),
+plot.title = element_text(family="Heiti TC Light")
+)
+county %>%
+ggplot() + aes(county, people_total) %>%
+geom_col(fill="skyblue") +
+theme_minimal() + th +
+theme(axis.text.x = element_text(angle = 45))
+county %>%
+ggplot() + aes(county, people_total) %>%
+geom_col(fill="skyblue") +
+coord_flip() +
+theme_minimal() + th +
+theme(axis.text.x = element_text(angle = 45))
+county %>%
+# arrange(desc(people_total) %>%
+mutate(county = reorder(county, people_total)) %>%
+ggplot() + aes(county, people_total) %>%
+geom_col(fill="skyblue") +
+coord_flip() +
+theme_minimal() + th
+NW %>%
+ggplot() + aes(year, Net_Worth, color = Category) +
+geom_line() +
+scale_color_manual(
+limits=c("65-74", "35-44"),   # original chart group
+values=c("gold", "skyblue"),  # map to color
+name="Age group",             # legend title
+breaks=c("65-74", "35-44"),   # original legend group labels
+labels=c("elder(65-74)","younger(35-44)"), # map to new labels
+na.value = "lightgrey" # color for other groups
+) +
+theme_minimal()
+library(gghighlight)
+NW %>%
+ggplot() + aes(year, Net_Worth, color = Category) +
+geom_line() +
+gghighlight(Category %in% c("65-74", "35-44")) +
+theme_minimal() +
+scale_x_continuous(breaks = NULL) +
+theme(panel.background = element_rect(fill = "whitesmoke",
+colour = "whitesmoke",
+size = 0.5, linetype = "solid"))
+NW %>%
+ggplot() + aes(year, Net_Worth, color = Category) +
+geom_line() +
+gghighlight(Category %in% c("65-74", "35-44")) +
+scale_color_manual(
+limits=c("65-74", "35-44"),   # original chart group
+values=c("gold", "skyblue")) +   # map to color
+theme_minimal()
+county %>%
+mutate(group = if_else(county %in% c("新竹縣", "新竹市"), "highlight", "other")) %>%
+mutate(county = reorder(county, people_total)) %>%
+ggplot() + aes(county, people_total, fill=group) %>%
+geom_col() +
+scale_fill_manual(values=c("highlight"="Khaki", "other"="lightgrey")) +
+guides(fill="none") +
+coord_flip() +
+theme_minimal() + th
+county %>%
+mutate(county = reorder(county, people_total)) %>%
+ggplot() + aes(county, people_total) %>%
+geom_col(fill="deeppink") +
+gghighlight(county %in% c("新竹縣", "新竹市")) +
+guides(fill="none") +
+coord_flip() +
+theme_minimal() + th
+NW <- read_csv("data/interactive_bulletin_charts_agecl_median.csv") %>% View
+NW <- read_csv("data/interactive_bulletin_charts_agecl_median.csv") %>% View
+NW <- read_csv("data/interactive_bulletin_charts_agecl_median.csv") %>%
+select(Category, year, Net_Worth)  %>% View
+NW <- read_csv("data/interactive_bulletin_charts_agecl_median.csv") %>%
+select(Category, year, Net_Worth)  %>% View
+NW <- read_csv("data/interactive_bulletin_charts_agecl_median.csv") %>%
+select(Category, year, Net_Worth)  %>%
+group_by(Category) %>%
+arrange(year) %>%
+ungroup()
+View(NW)
+NW <- read_csv("data/interactive_bulletin_charts_agecl_median.csv") %>%
+select(Category, year, Net_Worth)  %>%
+group_by(Category) %>%
+arrange(year) %>%
+ungroup()
+NW %>% head() %>% knitr::kable()
+View(NW)
+View(NW)
+NW %>%
+ggplot()
+View(NW)
+NW %>%
+ggplot() +
+aes(year, Net_Worth)
+NW %>%
+ggplot() +
+aes(year, Net_Worth) +
+geom_line()
+NW %>%
+ggplot() +
+aes(year, Net_Worth) +
+geom_line() +
+geom_point()
+NW %>%
+ggplot() +
+aes(year, Net_Worth, group = Category) +
+geom_line() +
+geom_point()
+NW %>%
+ggplot() +
+aes(year, Net_Worth, group = Category) +
+geom_line(color = Category) +
+geom_point()
+NW %>%
+ggplot() +
+aes(year, Net_Worth, color = Category) +
+geom_line() +
+geom_point()
+NW <- read_csv("data/interactive_bulletin_charts_agecl_median.csv") %>%
+select(Category, year, Net_Worth)  %>%
+group_by(Category) %>%
+arrange(year) %>%
+ungroup() %>%
+pivot_wider(names_from = Category, values_from = Net_Worth) %>% View
+NW <- read_csv("data/interactive_bulletin_charts_agecl_median.csv") %>%
+select(Category, year, Net_Worth)  %>%
+group_by(Category) %>%
+arrange(year) %>%
+ungroup()
+View(NW)
+NW %>%
+ggplot() +
+aes(year, Net_Worth, group = Category) +
+geom_line() +
+geom_point()
+NW %>%
+ggplot() +
+aes(year, Net_Worth) +
+geom_area()
+NW %>%
+ggplot() +
+aes(year, Net_Worth, group = Category) +
+geom_area()
+NW %>%
+ggplot() +
+aes(year, Net_Worth, color = Category) +
+geom_area()
+NW %>%
+ggplot() +
+aes(year, Net_Worth, color = Category, fill = Category) +
+geom_area()
+NW %>%
+ggplot() +
+aes(year, Net_Worth, fill = Category) +
+geom_area()
+NW %>%
+ggplot() +
+aes(year, Net_Worth, fill = Category) +
+geom_area(position = "dodge")
+NW %>%
+ggplot() +
+aes(year, Net_Worth, fill = Category) +
+geom_area(position = "dodge", alpha = 0.2)
+NW %>%
+ggplot() +
+aes(year, Net_Worth, fill = Category) +
+geom_area(position = "dodge", alpha = 0.5)
+NW %>%
+ggplot() +
+aes(year, Net_Worth, fill = Category, color = Category) +
+geom_area(position = "dodge", alpha = 0.2)
+NW %>%
+ggplot() +
+aes(year, Net_Worth, fill = Category, color = Category) +
+geom_area(position = "dodge", alpha = 0.2) +
+theme_minimal()
+NW %>%
+ggplot() +
+aes(year, Net_Worth, fill = Category, color = Category) +
+geom_area(position = "dodge", alpha = 0.2) +
+theme_tw()
+NW %>%
+ggplot() +
+aes(year, Net_Worth, fill = Category, color = Category) +
+geom_area(position = "dodge", alpha = 0.2) +
+theme_bw()
+NW %>%
+ggplot() +
+aes(year, Net_Worth, fill = Category, color = Category) +
+geom_area(position = "dodge", alpha = 0.2) +
+theme_void()
+NW %>%
+ggplot() +
+aes(year, Net_Worth, fill = Category, color = Category) +
+geom_area(position = "dodge", alpha = 0.2) +
+theme_minimal()
+NW %>%
+ggplot() + aes(year, Net_Worth, color=Category) +
+geom_line(size=1, linetype = "dotted", alpha=0.5, show.legend = F) +
+geom_point(size=2, color="dimgrey", alpha=0.5, shape=18)
+NW %>%
+ggplot() + aes(year, Net_Worth, color=Category) +
+geom_line(size=1, linetype = "dotted", alpha=0.5, show.legend = F) +
+geom_point(size=2, color="dimgrey", alpha=0.5, shape=18)
+NW %>%
+ggplot() + aes(year, Net_Worth, color=Category) +
+geom_line(size=1, linetype = "dotted", alpha=0.5, show.legend = F) +
+geom_point(size=2, color="dimgrey", alpha=0.5, shape=18) +
+theme_minimla()
+NW %>%
+ggplot() + aes(year, Net_Worth, color=Category) +
+geom_line(size=1, linetype = "dotted", alpha=0.5, show.legend = F) +
+geom_point(size=2, color="dimgrey", alpha=0.5, shape=18) +
+theme_minimal()
+NW %>%
+ggplot() + aes(year, Net_Worth, color=Category) +
+geom_line(size=1, alpha=0.5, show.legend = F) +
+geom_point(size=2, color="dimgrey", alpha=0.5, shape=18) +
+theme_minimal()
+NW %>%
+ggplot() + aes(year, Net_Worth, color=Category) +
+geom_line(show.legend = F) +
+theme_void()
+NW %>%
+ggplot() + aes(year, Net_Worth, color=Category) +
+geom_line() +
+theme_minimal() +
+xlab("Year") +
+ylab("Net Worth") +
+ggtitle("Net Worth by year grouped by age groups")
+NW %>%
+ggplot() + aes(year, Net_Worth, color=Category) +
+geom_line() +
+theme_minimal() +
+labs(title = "Net Worth by year grouped by age groups",
+subtitle = "Source from: ...1231231231.3.",
+x = "Year",
+y = "Net Worth")
+NW %>%
+ggplot() + aes(year, Net_Worth, color=Category) +
+geom_line() +
+theme_minimal() +
+labs(title = "Net Worth by year grouped by age groups",
+subtitle = "Source from: ...1231231231.3.",
+x = "Year",
+y = "Net Worth") +
+ggsave("scatterplot.png", width = 6, height = 4, dpi = 300)
+NW %>%
+ggplot() + aes(year, Net_Worth, color=Category) +
+geom_line() +
+theme_minimal() +
+labs(title = "Net Worth by year grouped by age groups",
+subtitle = "Source from: ...1231231231.3.",
+x = "Year",
+y = "Net Worth") +
+ggsave("scatterplot.png", width = 6, height = 4, dpi = 300)
+p <- NW %>%
+ggplot() + aes(year, Net_Worth, color=Category) +
+geom_line() +
+theme_minimal() +
+labs(title = "Net Worth by year grouped by age groups",
+subtitle = "Source from: ...1231231231.3.",
+x = "Year",
+y = "Net Worth")
+ggsave("scatterplot.png", p, width = 6, height = 4, dpi = 300)
+p <- NW %>%
+ggplot() + aes(year, Net_Worth, color=Category) +
+geom_line() +
+theme_bw() +
+labs(title = "Net Worth by year grouped by age groups",
+subtitle = "Source from: ...1231231231.3.",
+x = "Year",
+y = "Net Worth")
+ggsave("scatterplot.png", p, width = 6, height = 4, dpi = 300)1
+ggsave("scatterplot.png", p, width = 6, height = 4, dpi = 300)
+ggsave("scatterplot.pdf", p, width = 6, height = 4, dpi = 300, device = "pdf")
+NW %>%
+ggplot() + aes(year, Net_Worth, color=Category) +
+geom_line() +
+theme_minimal() +
+labs(title = "Net Worth by year grouped by age groups",
+x = "Year",
+y = "Net Worth") +
+theme(plot.title = element_text(size=14, face="bold"),
+axis.title.x = element_text(hjust=1, size=10,
+color="dimgrey",
+face="bold.italic"),
+axis.title.y = element_text(hjust=1, size=10,
+color="dimgrey",
+face="bold.italic")
+)
+county <- read_csv("data/twdata/tw_population_opendata110N010.csv") %>%
+slice(-1, -(370:375)) %>%
+type_convert() %>%
+mutate(county = str_sub(site_id, 1, 3)) %>%
+group_by(county) %>%
+summarize(
+area = sum(area),
+people_total = sum(people_total)
+) %>%
+ungroup()
+county <- read_csv("data/tw_population_opendata110N010.csv") %>%
+slice(-1, -(370:375)) %>%
+type_convert() %>%
+mutate(county = str_sub(site_id, 1, 3)) %>%
+group_by(county) %>%
+summarize(
+area = sum(area),
+people_total = sum(people_total)
+) %>%
+ungroup()
+county <- read_csv("data/tw_population_opendata110N010.csv") %>%
+slice(-1, -(370:375)) %>%
+type_convert() %>%
+mutate(county = str_sub(site_id, 1, 3)) %>%
+group_by(county) %>%
+summarize(
+area = sum(area),
+people_total = sum(people_total)
+) %>%
+ungroup()
+county %>%
+arrange(desc(people_total)) %>%
+ggplot() + aes(county, people_total) %>%
+geom_col(fill="lightgrey", color="black") +
+theme_minimal()
+county %>%
+county %>%
+county %>%
+arrange(desc(people_total)) %>%
+ggplot() + aes(county, people_total) %>%
+geom_col(fill="lightgrey", color="black") +
+theme_minimal() +
+theme(axis.text.x = element_text(family="Heiti TC Light"))
+county <- read_csv("data/tw_population_opendata110N010.csv") %>%
+slice(-1, -(370:375)) %>%
+type_convert() %>%
+mutate(county = str_sub(site_id, 1, 3)) %>%
+group_by(county) %>%
+summarize(
+area = sum(area),
+people_total = sum(people_total)
+) %>%
+ungroup()
+county %>%
+arrange(desc(people_total)) %>%
+ggplot() + aes(county, people_total) %>%
+geom_col(fill="lightgrey", color="black") +
+theme_minimal() +
+theme(axis.text.x = element_text(family="Heiti TC Light"))
+county %>%
+arrange(desc(people_total)) %>%
+ggplot() + aes(county, people_total) %>%
+geom_col(fill="lightgrey", color="black") +
+theme_minimal() +
+theme(axis.text.x = element_text(family="Heiti TC Light"))
+th <-
+theme(title = element_text(family="Heiti TC Light"),
+text = element_text(family="Heiti TC Light"),
+axis.text.y = element_text(family="PingFang TC"),
+axis.text.x = element_text(family="Heiti TC Light"),
+legend.text = element_text(family="Heiti TC Light"),
+plot.title = element_text(family="Heiti TC Light")
+)
+county %>%
+ggplot() + aes(county, people_total) %>%
+geom_col(fill="skyblue") +
+theme_minimal() + th +
+theme(axis.text.x = element_text(angle = 45))
+th <-
+theme(title = element_text(family="Heiti TC Light"),
+text = element_text(family="Heiti TC Light"),
+axis.text.y = element_text(family="PingFang TC"),
+axis.text.x = element_text(family="Heiti TC Light"),
+legend.text = element_text(family="Heiti TC Light"),
+plot.title = element_text(family="Heiti TC Light")
+)
+county %>%
+ggplot() + aes(county, people_total) %>%
+geom_col(fill="skyblue") +
+theme_minimal() + th +
+theme(axis.text.x = element_text(angle = 45))
+knitr::opts_chunk$set(echo = TRUE, fig.asp=0.618, fig.width=6, fig.align = "center")
+# knitr::opts_chunk$set(echo = TRUE, fig.asp = 0.4, fig.width=8)
+library(tidyverse)
+options(scipen = 999)
+knitr::opts_chunk$set(echo = TRUE)
+data(housetasks)
+# head(housetasks)
+data(housetasks)
+install.packages(c("FactoMineR", "factoextra"))
+# install.packages(c("FactoMineR", "factoextra"))
+library("FactoMineR")
+library("factoextra")
+data(housetasks)
+head(housetasks)
+housetasks %>% View
+housetasks
+library(tidyverse)
+dt <- as.table(as.matrix(housetasks))
+balloonplot(t(dt), main ="housetasks", xlab ="", ylab="",
+label = FALSE, show.margins = FALSE)
+library(gplot)
+library(gplots)
+install.packages("gplots")
+library(gplots)
+balloonplot(t(dt), main ="housetasks", xlab ="", ylab="",
+label = FALSE, show.margins = FALSE)
+chisq <- chisq.test(housetasks)
+chisq
+CA(X, ncp = 5, graph = TRUE)
+library("FactoMineR")
+res.ca <- CA(housetasks, graph = FALSE)
+res.ca
+print(res.ca)
+# Chi-square statistics
+chi2 <- 1944.456
+# Degree of freedom
+df <- (nrow(housetasks) - 1) * (ncol(housetasks) - 1)
+# P-value
+pval <- pchisq(chi2, df = df, lower.tail = FALSE)
+pval
+library("factoextra")
+eig.val <- get_eigenvalue(res.ca)
+eig.val
+fviz_screeplot(res.ca, addlabels = TRUE, ylim = c(0, 50))
+fviz_screeplot(res.ca) +
+geom_hline(yintercept=33.33, linetype=2, color="red")
+# repel= TRUE to avoid text overlapping (slow if many point)
+fviz_ca_biplot(res.ca, repel = TRUE)
+row <- get_ca_row(res.ca)
+row
+# Coordinates
+head(row$coord)
+# Cos2: quality on the factore map
+head(row$cos2)
+# Contributions to the principal components
+head(row$contrib)
+head(row$coord)
+fviz_ca_row(res.ca, col.row="steelblue", shape.row = 15)
+head(row$cos2, 4)
+# Color by cos2 values: quality on the factor map
+fviz_ca_row(res.ca, col.row = "cos2",
+gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
+repel = TRUE)
+# Change the transparency by cos2 values
+fviz_ca_row(res.ca, alpha.row="cos2")
+library("corrplot")
+corrplot(row$cos2, is.corr=FALSE)
+```{}r
+```{}r
+# Cos2 of rows on Dim.1 and Dim.2
+fviz_cos2(res.ca, choice = "row", axes = 1:2)
+head(row$contrib)
+library("corrplot")
+corrplot(row$contrib, is.corr=FALSE)
+# Contributions of rows to dimension 1
+fviz_contrib(res.ca, choice = "row", axes = 1, top = 10)
+# Contributions of rows to dimension 2
+fviz_contrib(res.ca, choice = "row", axes = 2, top = 10)
+# Total contribution to dimension 1 and 2
+fviz_contrib(res.ca, choice = "row", axes = 1:2, top = 10)
+fviz_ca_row(res.ca, col.row = "contrib",
+gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
+repel = TRUE)
+install.packages("bookdown")
+install.packages("bookdown")
