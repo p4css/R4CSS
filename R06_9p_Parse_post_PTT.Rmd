@@ -1,16 +1,8 @@
 ---
-title: "R03_7 Parse POST PTT"
+title: "Parsing posts of PTT"
 author: "Jilung Hsieh"
-date: "10/9/2019"
-output:
-  html_document:
-    highlight: zenburn
-    number_sections: yes
-    theme: cerulean
-    toc: yes
-    css: style.css
-editor_options:
-  chunk_output_type: inline
+date: "`r Sys.Date()`"
+output: html_document
 ---
 
 # loading packages

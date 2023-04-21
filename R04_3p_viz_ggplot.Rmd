@@ -1,11 +1,8 @@
 ---
-title: "R04_3_ggplot_viz"
+title: "Visualization Introduction: Using ggplot2"
 author: "Jilung Hsieh"
 date: "`r Sys.Date()`"
-output: 
-  html_document: 
-    toc: yes
-    fig_caption: yes
+output: html_document
 ---
 
 # 用ggplot視覺化(I)

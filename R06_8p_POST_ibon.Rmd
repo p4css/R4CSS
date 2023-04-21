@@ -1,16 +1,8 @@
 ---
-title: "R03_6_POST_ibon"
+title: "Scraping with POST: ibon as a case"
 author: "Jilung Hsieh"
-date: "9/22/2019"
-output:
-  html_document:
-    highlight: zenburn
-    number_sections: yes
-    theme: cerulean
-    toc: yes
-    css: style.css
-editor_options:
-  chunk_output_type: inline
+date: "`r Sys.Date()`"
+output: html_document
 ---
 
 ```{r setup, include=FALSE}

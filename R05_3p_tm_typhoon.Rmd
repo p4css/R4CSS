@@ -1,25 +1,16 @@
 ---
-title: "TM02_news_typhoon"
+title: "Chinese Text Processing: Disaster News"
 author: "Jilung Hsieh"
-date: "2018/7/3"
-output:
-  html_document:
-    theme: cerulean
-    highlight: zenburn
-    toc: yes
-    toc_float:
-      collapsed: no
-    df_print: paged
-editor_options:
-  chunk_output_type: inline
+date: "`r Sys.Date()`"
+output: html_document
 ---
 
 # 載入套件
 
-1. tidyverse內涵繪圖和操作資料所需要的ggplot2和dplyr
-2. stringr雖然隨著tidyverse被安裝了，但不會隨著tidyverse被載入，要另外載入。
-3. 在中文斷詞的時候要用到tidytext和jiebaR。
-4. 處理時間時要用到lubridate。
+1.  tidyverse內涵繪圖和操作資料所需要的ggplot2和dplyr
+2.  stringr雖然隨著tidyverse被安裝了，但不會隨著tidyverse被載入，要另外載入。
+3.  在中文斷詞的時候要用到tidytext和jiebaR。
+4.  處理時間時要用到lubridate。
 
 ```{r}
 library(tidyverse)
@@ -32,18 +23,10 @@ library(jiebaR)
 # library(lubridate)
 ```
 
-
-
-
-
-
-
-
-
 # 為文件編id
 
-* 為了便於後續建立Document-Term-Matrix，這時候若Document自身沒有編號的話，就得把整個Document內容當成該篇文章的id，但也有（極小）可能有兩篇Document內容相同，那就會被視為同一篇文章或發生錯誤。所以必須要編id。
-* `row_number()`產生每列的編號，所以這邊就直接把每列的編號視為每篇文章的id，可以保持該id的唯一性。
+-   為了便於後續建立Document-Term-Matrix，這時候若Document自身沒有編號的話，就得把整個Document內容當成該篇文章的id，但也有（極小）可能有兩篇Document內容相同，那就會被視為同一篇文章或發生錯誤。所以必須要編id。
+-   `row_number()`產生每列的編號，所以這邊就直接把每列的編號視為每篇文章的id，可以保持該id的唯一性。
 
 ```{r}
 
@@ -56,14 +39,12 @@ news.df <- readRDS("data/typhoon.rds") %>%
 # View(news.df)
 ```
 
-
 # 斷詞
 
 ## 初始化斷詞器`cutter <- worker()`
 
-1. 斷詞的時候不見能把我們要的字詞斷出來，比方說你可能希望台北市不會被斷開，偏偏被斷成台北+市。請參見謝舒凱老師的講義。https://legacy.gitbook.com/book/loperntu/ladsbook/details。最簡單的方法就是窮舉，例如下面的`segment_not`即是。
-2. 初始化斷詞器後，
-
+1.  斷詞的時候不見能把我們要的字詞斷出來，比方說你可能希望台北市不會被斷開，偏偏被斷成台北+市。請參見謝舒凱老師的講義。[https://legacy.gitbook.com/book/loperntu/ladsbook/details。最簡單的方法就是窮舉，例如下面的\`segment_not\`即是](https://legacy.gitbook.com/book/loperntu/ladsbook/details。最簡單的方法就是窮舉，例如下面的%60segment_not%60即是){.uri}。
+2.  初始化斷詞器後，
 
 ```{r}
 # segment_not to avoid to be segmented by jeiba cutter
@@ -82,7 +63,6 @@ stopWords <- readRDS("data/stopWords.rds")
 View(stopWords)
 # load("../segment_not.R")
 ```
-
 
 # Tokenization
 
@@ -117,7 +97,6 @@ unnested.df %>%
 
 ```
 
-
 ## Word frequency distribution
 
 ```{r}
@@ -148,11 +127,10 @@ word.count %>%
 ```
 
 # Practice: Comparing word frequenc by early/recent variable
+
 ```{r}
 
 ```
-
-
 
 # word frequency
 
@@ -174,10 +152,8 @@ news.df %>%
     
 ```
 
-
-
-
 # tf_idf
+
 ```{r}
 unnested.df %>%
     group_by(word) %>%
@@ -193,9 +169,8 @@ unnested.df %>%
     
 ```
 
-
 # word_correlation
+
 ```{r}
 
 ```
-

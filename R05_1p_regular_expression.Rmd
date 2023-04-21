@@ -1,17 +1,8 @@
 ---
 title: "R05_1_regular_expression"
 author: "Jilung Hsieh"
-date: "10/16/2019"
-output:
-  html_document:
-    theme: cerulean
-    highlight: zenburn
-    toc: yes
-    toc_float:
-      collapsed: no
-    df_print: paged
-editor_options:
-  chunk_output_type: inline
+date: "`r Sys.Date()`"
+output: html_document
 ---
 
 ```{r setup, include=FALSE}

@@ -1,19 +1,8 @@
 ---
-title: "R02_1 Paid Maternity Leave"
+title: "Paid Maternity Leave"
 author: "Jilung Hsieh"
-date: "2019/9/2"
-output:
-  html_document:
-    theme: cerulean
-    highlight: zenburn
-    toc: yes
-    toc_float:
-      collapsed: no
-    df_print: paged
-editor_options:
-  chunk_output_type: inline
-  markdown: 
-    wrap: 72
+date: "`r Sys.Date()`"
+output: html_document
 ---
 
 ```{r setup, include=FALSE}

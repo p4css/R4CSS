@@ -1,15 +1,8 @@
 ---
-title: "R05_6_TM_President_Speech"
-output:
-  html_document:
-    theme: cerulean
-    highlight: zenburn
-    toc: yes
-    toc_float:
-      collapsed: no
-    df_print: paged
-editor_options:
-  chunk_output_type: inline
+title: "President Speech: Topic Modeling by LDA"
+author: "Jilung Hsieh"
+date: "`r Sys.Date()`"
+output: html_document
 ---
 
 ```{r setup, include=FALSE}
@@ -18,16 +11,14 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 library(tidyverse)
-options(stringsAsFactors = F)
 options(verbose = T)
 options(scipen = 999)
 library(tidytext)
 library(jiebaR)
-library(lubridate)
 ```
 
-
 # Loading data
+
 ```{r}
 fnames <- list.files("data/president_speech/", full.names = T)
 contents <- c()
@@ -41,10 +32,10 @@ raw.df <- tibble(fname = fnames, content = contents) %>%
     mutate(content = str_replace_all(content, "台灣", "臺灣"))
 ```
 
-
-
 # Tokenization
+
 ## Initializing jieba
+
 ```{r}
 segment_not <- c("蔡英文", "馬英九")
 cutter <- worker()
@@ -53,56 +44,62 @@ stopWords <- readRDS("data/stopWords.rds")
 watched <- c("青年")
 ```
 
-
 ## Tokenized to unnested tidy form
+
 ```{r}
 unnested.df <- raw.df %>% 
     mutate(word = map(content, function(x)segment(x, cutter))) %>%
     unnest(word) %>%
     filter(!str_detect(word, "[a-zA-Z0-9]+") | (word %in% watched)) %>%
-    filter(!(word %in% setdiff(stopWords, watched))) %>%
+    filter(!(word %in% setdiff(stopWords$word, watched))) %>%
     filter(nchar(word) > 1 | (word %in% watched)) %>%
     select(doc = fname, word)
 ```
 
+```{r}
+unnested.df %>% head(10)
+```
 
 # Visualization
 
 ## Visualizing specific terms of 2020 by log-ratio compared with 2016
+
 ```{r}
 
 ```
 
-
-
 # Topic modeling
+
 ## Convert to doc-term-matrix
+
 ```{r}
 
 ```
 
 ## Topic modeling
+
 ```{r}
 # install.packages("topicmodels")
 library(topicmodels)
 
 ```
 
-
 # Inspecting topic modeling results
+
 ## topic-term prabability: beta
 
 ```{r}
 
 ```
 
-
 ## Evaluation LDA by perplexity
+
 ```{r}
 
 ```
 
 ## Document-topic probability: gamma
+
 ```{r}
 
 ```

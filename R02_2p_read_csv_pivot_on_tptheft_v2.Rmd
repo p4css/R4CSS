@@ -1,3 +1,11 @@
+---
+title: "Read csv: Pivot on tptheft"
+author: "Jilung Hsieh"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+
 ```{r include=FALSE}
 library(tidyverse)
 ```
@@ -92,8 +100,10 @@ Pivot analysis: Counting and Summarizing 清理完資料後，我們要回答的
 
 接下來要用base套件的R，根據某個變數值（例如上述的時間）來篩出符合條件的資料，或者篩去不符合條件的資料。其語法是要在`df[ , ]`逗號前加上篩選的條件，也就是對資料列進行篩選，篩出或篩除都是以整列為單位。在此的條件是`df$time`[在]{style="color:hotpink"}`00~02`、`02~04`、...之間；或者是`df$time`[不在]{style="color:hotpink"}`03~05`、`05~07`、...之間。表示法分別如下：
 
-    df$time %in% c("00~02", "02~04", "04~6",...)
-    !df$time %in% c("03~05", "05~07", ...)
+```         
+df$time %in% c("00~02", "02~04", "04~6",...)
+!df$time %in% c("03~05", "05~07", ...)
+```
 
 -   `%in%` 表示的是左方`df$time`的值是否是右方Vector中的其中一個
 
@@ -189,7 +199,7 @@ dplyr::glimpse(df)
 
 **(參考) 用R程式將該網址的檔案抓回本機端儲存。**部分Mac電腦無法使用`read.csv()`從網路上取得資料又轉為`data.frame`，一個可行的辦法是先用`GET(url,write_disk("data/tptheft.csv"))`將其取回並命名為`data/tptheft.csv`，之後再用`df <- read.csv("data/tptheft.csv")`直接讀取該檔案。
 
-``` {r}
+```{r}
 library(httr)
 GET(url, write_disk("data/tptheft.csv", overwrite = TRUE))
 df <- read_csv("data/tptheft.csv", locale = locale(encoding = "Big5"))
@@ -206,44 +216,48 @@ df <- read_csv("data/tptheft.csv", locale = locale(encoding = "Big5"))
 
 <!-- -->
 
-    # View(df)
-    head(df)    # get first part of the data.frame
+```         
+# View(df)
+head(df)    # get first part of the data.frame
 
-    class(df)
-    ## [1] "spec_tbl_df" "tbl_df"      "tbl"         "data.frame"
+class(df)
+## [1] "spec_tbl_df" "tbl_df"      "tbl"         "data.frame"
 
-    str(df)
-    ## 'data.frame':    3347 obs. of  5 variables:
-    ##  $ 編號    : int  1 2 3 4 5 6 7 8 9 10 ...
-    ##  $ 案類    : chr  "住宅竊盜" "住宅竊盜" "住宅竊盜" "住宅竊盜" ...
-    ##  $ 發生日期: int  1030623 1040101 1040101 1040101 1040101 1040102 1040102 1040102 1040102 1040104 ...
-    ##  $ 發生時段: chr  "08~10" "00~02" "00~02" "06~08" ...
-    ##  $ 發生地點: chr  "臺北市中正區廈門街91~120號" "臺北市文山區萬美里萬寧街1~30號" "臺北市信義區富台里忠孝東路5段295巷6弄1~30號" "臺北市中山區新生北路1段91~120號" ...
+str(df)
+## 'data.frame':    3347 obs. of  5 variables:
+##  $ 編號    : int  1 2 3 4 5 6 7 8 9 10 ...
+##  $ 案類    : chr  "住宅竊盜" "住宅竊盜" "住宅竊盜" "住宅竊盜" ...
+##  $ 發生日期: int  1030623 1040101 1040101 1040101 1040101 1040102 1040102 1040102 1040102 1040104 ...
+##  $ 發生時段: chr  "08~10" "00~02" "00~02" "06~08" ...
+##  $ 發生地點: chr  "臺北市中正區廈門街91~120號" "臺北市文山區萬美里萬寧街1~30號" "臺北市信義區富台里忠孝東路5段295巷6弄1~30號" "臺北市中山區新生北路1段91~120號" ...
 
-    summary(df)
-    ##      編號            案類              發生日期         發生時段           發生地點        
-    ## Min.   :   1.0   Length:3347        Min.   :1030623   Length:3347        Length:3347       
-    ## 1st Qu.: 837.5   Class :character   1st Qu.:1050320   Class :character   Class :character  
-    ## Median :1674.0   Mode  :character   Median :1060708   Mode  :character   Mode  :character  
-    ## Mean   :1674.0                      Mean   :1063954                                        
-    ## 3rd Qu.:2510.5                      3rd Qu.:1080306                                        
-    ## Max.   :3347.0                      Max.   :1110328  
+summary(df)
+##      編號            案類              發生日期         發生時段           發生地點        
+## Min.   :   1.0   Length:3347        Min.   :1030623   Length:3347        Length:3347       
+## 1st Qu.: 837.5   Class :character   1st Qu.:1050320   Class :character   Class :character  
+## Median :1674.0   Mode  :character   Median :1060708   Mode  :character   Mode  :character  
+## Mean   :1674.0                      Mean   :1063954                                        
+## 3rd Qu.:2510.5                      3rd Qu.:1080306                                        
+## Max.   :3347.0                      Max.   :1110328  
+```
 
 #### 觀察資料維度
 
 e.g., dim(), ncol(), nrow(),length()
 
-    dim(df)
-    ## [1] 3347    5
+```         
+dim(df)
+## [1] 3347    5
 
-    ncol(df)
-    ## [1] 5
+ncol(df)
+## [1] 5
 
-    nrow(df)
-    ## [1] 3347
+nrow(df)
+## [1] 3347
 
-    length(df)
-    ## [1] 5
+length(df)
+## [1] 5
+```
 
 #### 觀察變數
 

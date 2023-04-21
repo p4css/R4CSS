@@ -1,3 +1,12 @@
+---
+title: "Join demography and referendum data"
+author: "Jilung Hsieh"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+
+
 ```{r include=FALSE}
 knitr::opts_chunk$set(echo=T, cache = T, warning = F, message = FALSE, class.output = "output")
 library(knitr)

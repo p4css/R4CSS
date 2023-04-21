@@ -1,4 +1,9 @@
-1--- title: "R03_1\_base_to_dplyr_maternal_leave" author: "Jilung Hsieh" date: "3/4/2022" output: html_document ---
+---
+title: "Base to dplyr: Maternal leave" 
+author: "Jilung Hsieh"
+date: "`r Sys.Date()`"
+output: html_document
+---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)

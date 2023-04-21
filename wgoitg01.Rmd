@@ -3,9 +3,6 @@ title: "WGOITG practice"
 author: "Jilung Hsieh"
 date: "`r Sys.Date()`"
 output: html_document
-editor_options: 
-  markdown: 
-    wrap: 72
 ---
 
 # Set up
@@ -24,11 +21,9 @@ library(gghighlight)
 
 # Median of net worth by age group
 
-The news:
-<https://www.nytimes.com/2021/05/11/learning/lesson-plans/teach-about-inequality-with-these-28-new-york-times-graphs.html>
+The news: <https://www.nytimes.com/2021/05/11/learning/lesson-plans/teach-about-inequality-with-these-28-new-york-times-graphs.html>
 
-1.  `names(toplot)` should be
-    `[1] "year"     "Category" "Net_worth"       "increase"`
+1.  `names(toplot)` should be `[1] "year"     "Category" "Net_worth"       "increase"`
 2.  Select `year`, `Category`, and `Net_Worth`
 3.  Grouped by `Category`
     1.  Sort by `year` (using `arrange`)
@@ -58,13 +53,11 @@ toplot %>%
 
 # UNICEF-Optimistic
 
-<https://www.nytimes.com/2021/11/17/upshot/global-survey-optimism.html>
-<https://changingchildhood.unicef.org/about>
+<https://www.nytimes.com/2021/11/17/upshot/global-survey-optimism.html> <https://changingchildhood.unicef.org/about>
 
 1.  relabel by mutate and `ordered()` with levels and labels\
     `mutate(var1 = ordered(var2, levels = c(…), labels = c(…))`
-2.  `count()` and `spread()` then `mutate()` a new var `perc` standing
-    for answering "world will be better!" proportion.
+2.  `count()` and `spread()` then `mutate()` a new var `perc` standing for answering "world will be better!" proportion.
 3.  `spread()` by `age` group and its `perc`
 4.  `rename` columns
 5.  then plotting
@@ -104,9 +97,7 @@ toplot %>%
 
 # Global Carbon Projects
 
-[Who Has The Most Historical Responsibility for Climate Change? - The
-New York Times
-(nytimes.com)](https://www.nytimes.com/interactive/2021/11/12/climate/cop26-emissions-compensation.html?campaign_id=29&emc=edit_up_20211112&instance_id=45236&nl=the-upshot&regi_id=52022771&segment_id=74222&te=1&user_id=7cc6d9cd8f523e256ae41958ee8a9cb5)
+[Who Has The Most Historical Responsibility for Climate Change? - The New York Times (nytimes.com)](https://www.nytimes.com/interactive/2021/11/12/climate/cop26-emissions-compensation.html?campaign_id=29&emc=edit_up_20211112&instance_id=45236&nl=the-upshot&regi_id=52022771&segment_id=74222&te=1&user_id=7cc6d9cd8f523e256ae41958ee8a9cb5)
 
 ```{r}
 

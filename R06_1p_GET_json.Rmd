@@ -1,11 +1,8 @@
 ---
-title: "R06_1 read JSON"
+title: "Read Web API: JSON"
 author: "Jilung Hsieh"
 date: "`r Sys.Date()`"
-output: 
-  html_document: 
-    toc: yes
-    fig_caption: yes
+output: html_document
 ---
 
 # Notes
@@ -16,7 +13,6 @@ output:
 
 ```{r}
 library(tidyverse)
-options(stringsAsFactors = F)
 
 # loading httr package to get back web data
 library(httr)
@@ -40,7 +36,7 @@ fromJSON('[{"a":1, "b":2}, {"a":1, "b":3}, {"a":5, "b":7}]')
 
 ```{r}
 library(jsonlite)
-raw <- read_json("../../R4CSS/data/url_104.json")
+raw <- read_json("data/url_104.json")
 raw$data$list
 ```
 
@@ -50,7 +46,7 @@ raw$data$list
 raw <- GET("https://tcgbusfs.blob.core.windows.net/blobyoubike/YouBikeTP.json") %>%
     content("text") %>%
     fromJSON()
-raw
+# raw
 ```
 
 # Case 1: Well-formatted Air-Quality
@@ -61,7 +57,7 @@ Go to <https://data.gov.tw/dataset/40448>, click the json file, and copy the lin
 
 ```{r Getting AQI data}
 
-url <- "YOUR URL HERE"
+url <- "your_url"
 
 df <- fromJSON(content(GET(url), "text", encoding = "utf-8"))
 df %>% glimpse()
@@ -153,16 +149,16 @@ df$records %>% knitr::kable()
 
 ```{r}
 url_sc_flu <- "https://od.cdc.gov.tw/eic/Weekly_Age_County_Gender_487a.json"
-url_appledaily <- "https://tw.appledaily.com/pf/api/v3/content/fetch/search-query?query=%7B%22searchTerm%22%3A%22%25E6%259F%25AF%25E6%2596%2587%25E5%2593%25B2%22%2C%22start%22%3A20%7D&d=209&_website=tw-appledaily"
-url_dcard <- "https://www.dcard.tw/_api/forums/girl/posts?popular=true"
+# url_appledaily <- "https://tw.appledaily.com/pf/api/v3/content/fetch/search-query?query=%7B%22searchTerm%22%3A%22%25E6%259F%25AF%25E6%2596%2587%25E5%2593%25B2%22%2C%22start%22%3A20%7D&d=209&_website=tw-appledaily"
+# url_dcard <- "https://www.dcard.tw/_api/forums/girl/posts?popular=true"
 url_pchome <- "http://ecshweb.pchome.com.tw/search/v3.3/all/results?q=X100F&page=1&sort=rnk/dc"
 url_ubike <- "https://tcgbusfs.blob.core.windows.net/blobyoubike/YouBikeTP.json"
 url_cnyes <- "https://news.cnyes.com/api/v3/news/category/headline?startAt=1588262400&endAt=1589212799&limit=30"
 ```
 
 ```{r}
-df <- fromJSON(content(GET(url_appledaily), "text", encoding = "utf-8"))
-df$content
+df <- fromJSON(content(GET(url_sc_flu), "text", encoding = "utf-8"))
+df$items$data
 ```
 
 # Case 2: cnyes news
@@ -180,23 +176,27 @@ res <- fromJSON(content(GET(url_cnyes), "text", encoding = "utf-8"))
 glimpse(res)
 ```
 
-    # Tracing the data.frame in the data
-    res$data$list
+```         
+# Tracing the data.frame in the data
+res$data$list
 
-    # Assigning to a variable
-    df <- res$data$list
+# Assigning to a variable
+df <- res$data$list
 
-    # Previewing data
-    head(df)
-    str(df)
+# Previewing data
+head(df)
+str(df)
+```
 
 ## (option) 取回資料並寫在硬碟
 
 有時候寫爬蟲尤其是在爬會即時更新的資料時，會需要反覆定時地抓資料，這時候通常會先通通抓回來再慢慢合併整理。此時要特別注意如何保持每次抓回來的資料都是獨特的一個資料。以下面的例子來講，因為每次檔名都是一樣的，他會一直覆蓋過去，所以再怎麼抓，都不會是歷時性資料。通常會自動讀取當下時間當成檔名的一部分，這樣就不會重複了。這將在日後youbike的例子中用到。
 
-    response <- GET(url_cnyes,
-                    write_disk("data/url_cnyes.json",
-                               overwrite=TRUE))
+```         
+response <- GET(url_cnyes,
+                write_disk("data/url_cnyes.json",
+                           overwrite=TRUE))
+```
 
 # Case 3: footRumor - ill-formatted
 

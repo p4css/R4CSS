@@ -1,12 +1,8 @@
 ---
-title: "R06_2 Crawling 104"
-title: "Trump tweet analysis by dplyr"
+title: "Crawling 104"
 author: "Jilung Hsieh"
 date: "`r Sys.Date()`"
-output: 
-  html_document: 
-    toc: yes
-    fig_caption: yes
+output: html_document
 ---
 
 
