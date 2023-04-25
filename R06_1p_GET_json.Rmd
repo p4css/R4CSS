@@ -151,13 +151,18 @@ df$records %>% knitr::kable()
 url_sc_flu <- "https://od.cdc.gov.tw/eic/Weekly_Age_County_Gender_487a.json"
 # url_appledaily <- "https://tw.appledaily.com/pf/api/v3/content/fetch/search-query?query=%7B%22searchTerm%22%3A%22%25E6%259F%25AF%25E6%2596%2587%25E5%2593%25B2%22%2C%22start%22%3A20%7D&d=209&_website=tw-appledaily"
 # url_dcard <- "https://www.dcard.tw/_api/forums/girl/posts?popular=true"
-url_pchome <- "http://ecshweb.pchome.com.tw/search/v3.3/all/results?q=X100F&page=1&sort=rnk/dc"
+url_pchome <- "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=iphone&page=1&sort=rnk/dc"
 url_ubike <- "https://tcgbusfs.blob.core.windows.net/blobyoubike/YouBikeTP.json"
 url_cnyes <- "https://news.cnyes.com/api/v3/news/category/headline?startAt=1588262400&endAt=1589212799&limit=30"
 ```
 
 ```{r}
-df <- fromJSON(content(GET(url_sc_flu), "text", encoding = "utf-8"))
+
+df <- GET(url_pchome) %>%
+    content("text", , encoding = "utf-8") %>%
+    fromJSON()
+
+df <- fromJSON(content(GET(url_pchome), "text", encoding = "utf-8"))
 df$items$data
 ```
 
