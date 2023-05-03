@@ -28,7 +28,7 @@ options(stringsAsFactors = F)
 ## No pipeline
 
 ```{r}
-url <- "http://www.ibon.com.tw/retail_inquiry.aspx#gsc.tab=0"
+url <- "https://www.ibon.com.tw/retail_inquiry.aspx#gsc.tab=0"
 # Getting and Parsing url to xml document
 
 
@@ -43,7 +43,7 @@ url <- "http://www.ibon.com.tw/retail_inquiry.aspx#gsc.tab=0"
 ```{r}
 
 # Writing as pipeline version
-url <- "http://www.ibon.com.tw/retail_inquiry.aspx#gsc.tab=0"
+url <- "https://www.ibon.com.tw/retail_inquiry.aspx#gsc.tab=0"
 # counties <- 
 
 # counties

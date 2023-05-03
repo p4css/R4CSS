@@ -27,8 +27,13 @@ library(jsonlite)
 
 ```{r}
 library(jsonlite)
-fromJSON('{"a":1, "b":2}')
-fromJSON('[{"a":1, "b":2}, {"a":1, "b":3}]')
+dat <- fromJSON('{"userName":"jirlong", "age":"43", "token":"123456578"}')
+dat$userName
+dat$age
+dat$token
+class(dat)
+dat <- fromJSON('[{"a":1, "b":2}, {"a":1, "b":3}]')
+class(dat)
 fromJSON('[{"a":1, "b":2}, {"a":1, "b":3}, {"a":5, "b":7}]')
 ```
 
@@ -37,7 +42,9 @@ fromJSON('[{"a":1, "b":2}, {"a":1, "b":3}, {"a":5, "b":7}]')
 ```{r}
 library(jsonlite)
 raw <- read_json("data/url_104.json")
-raw$data$list
+raw$data$list[[1]]
+
+fromJSON("data/url_104.json") %>% toJSON() %>% prettify()
 ```
 
 ## JSON as a web file
@@ -46,7 +53,7 @@ raw$data$list
 raw <- GET("https://tcgbusfs.blob.core.windows.net/blobyoubike/YouBikeTP.json") %>%
     content("text") %>%
     fromJSON()
-# raw
+raw
 ```
 
 # Case 1: Well-formatted Air-Quality
@@ -175,7 +182,9 @@ df$items$data
 url_cnyes <- "https://news.cnyes.com/api/v3/news/category/headline?startAt=1588262400&endAt=1589212799&limit=30"
 
 res <- fromJSON(content(GET(url_cnyes), "text", encoding = "utf-8"))
-
+res$statusCode
+res$message
+res$items$per_page
 # Using glimpse(), View(), str(), class() to preview data
 # View(res)
 glimpse(res)

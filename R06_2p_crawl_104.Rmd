@@ -19,7 +19,7 @@ library(tidyverse)
 
 ```{r}
 # Copy and assign the 2nd page url to url2
-url2 <- 
+url2 <- "https://www.104.com.tw/jobs/search/list?ro=0&kwop=7&keyword=%E8%B3%87%E6%96%99%E7%A7%91%E5%AD%B8&expansionType=area%2Cspec%2Ccom%2Cjob%2Cwf%2Cwktm&order=14&asc=0&page=2&mode=s&jobsource=2018indexpoc&langFlag=0&langStatus=0&recommendJob=1&hotJob=1"
 
 # Copy and assign  the 3rd page url to url3
 url3 <- 
