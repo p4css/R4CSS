@@ -92,7 +92,7 @@ browseURL(links[1])
 
 ## None Pipeline
 ```{r}
-url <- "http://www.ibon.com.tw/retail_inquiry.aspx#gsc.tab=0"
+url <- "https://www.ibon.com.tw/retail_inquiry.aspx#gsc.tab=0"
 # Get and parse html -> XML document
 doc <- read_html(url)
 
@@ -108,7 +108,7 @@ counties <- html_text(nodes)
 ## Pipeline
 ```{r}
 
-counties <- "http://www.ibon.com.tw/retail_inquiry.aspx#gsc.tab=0" %>%
+counties <- "https://www.ibon.com.tw/retail_inquiry.aspx#gsc.tab=0" %>%
     read_html() %>%
     html_nodes("#Class1 option") %>%
     html_text()
