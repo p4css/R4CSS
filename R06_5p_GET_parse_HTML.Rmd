@@ -4,18 +4,18 @@ author: "Jilung Hsieh"
 date: "`r Sys.Date()`"
 output: html_document
 ---
-    
-    ```{r setup, include=FALSE}
+
+````         
+```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+````
 
 ```{r}
 library(httr)
 library(rvest) # for traversing html structure
 library(tidyverse)
-options(stringsAsFactors = F)
 ```
-
 
 # Getting county
 
@@ -53,18 +53,22 @@ options(stringsAsFactors = F)
 
 ```
 
-
-
 # Getting PTT
+
 ```{r}
 # Assigning url
-url <- "https://www.ptt.cc/bbs/Boy-Girl/index4589.html"
+url <- "https://www.ptt.cc/bbs/BabyMother/index7351.html"
+browseURL(url)
 
 # Using read_html() to get back and convert to xml_document
 # Checking the clas()
+doc <- read_html(url)
+class(doc)
 
 # Using html_node() or html_nodes() to get the nodes you want
 # Checking the length
+nodes <- html_nodes(doc, ".r-ent .title a")
+
 
 # Using html_text() or html_attr() to convert the node to data
 # Getting titles using html_text()
@@ -72,7 +76,7 @@ titles <- html_text(nodes)
 
 # Getting links using html_attr()
 links <- html_attr(nodes, "href")
-
+links
 # setting prefix of url
 pre <- "https://www.ptt.cc"
 
@@ -87,10 +91,10 @@ links[1]
 browseURL(links[1])
 ```
 
-
 # Pipeline
 
 ## None Pipeline
+
 ```{r}
 url <- "https://www.ibon.com.tw/retail_inquiry.aspx#gsc.tab=0"
 # Get and parse html -> XML document
@@ -103,9 +107,8 @@ nodes <- html_nodes(doc, "#Class1 > option")
 counties <- html_text(nodes)
 ```
 
-
-
 ## Pipeline
+
 ```{r}
 
 counties <- "https://www.ibon.com.tw/retail_inquiry.aspx#gsc.tab=0" %>%
