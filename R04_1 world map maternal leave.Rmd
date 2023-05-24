@@ -1,0 +1,69 @@
+---
+title: "R Notebook"
+output:
+  html_document:
+    df_print: paged
+editor_options:
+  chunk_output_type: inline
+---
+
+# Loading library
+
+```{r}
+library(readxl)
+library(rworldmap) # for drawing rworldmap
+options(stringsAsFactors = F)
+```
+
+# Loading maternal leave data
+
+```{r}
+rawdata <- read_excel("data/WORLD-MACHE_Gender_6.8.15.xls", "Sheet1", col_names=T)
+mapdata <- rawdata[,c(3, 6:24)]
+```
+
+# Joining data to map
+
+```{r}
+# join your data with the world map data
+myMap <- joinCountryData2Map(mapdata, joinCode = "ISO3", nameJoinColumn = "iso3")
+# 196 codes from your data successfully matched countries in the map
+# 1 codes from your data failed to match with a country code in the map
+# 47 codes from the map weren't represented in your data
+
+myMap$matleave_13
+```
+
+# Drawing map
+
+```{r}
+# dev.off()
+mapCountryData(myMap
+               , nameColumnToPlot="matleave_13"
+               , catMethod = "categorical"
+)
+```
+
+## Drawing map by specific colors
+
+```{r}
+# self-defined colors
+colors <- c("#FF8000", "#A9D0F5", "#58ACFA", "#0080FF", "#084B8A")
+mapCountryData(myMap
+			   , nameColumnToPlot="matleave_13"
+			   , catMethod = "categorical"
+			   , colourPalette = colors
+			   , addLegend="FALSE"
+)
+
+```
+
+# Practice05_1.1 Drawing world map for maternal leave
+
+-   see <https://paper.dropbox.com/doc/R-Practices--AZcStEI5gso~rAtGwxeJfnmuAg-ZEEzLrsT856GHxCGOOhpr#:uid=922603734424699999737903&h2=Practice05_1.1>
+-   Drawing map for all years paid maternal leave in one figure
+-   Remember to set `par()` to plot all sub-figures in one plot as follow
+
+```{r}
+
+```
