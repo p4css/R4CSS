@@ -44,8 +44,8 @@ cleaned %>% head(10)
 觀察一下現在的資料，發現，行政院、主計總處等均屬於行政支出，但行政支出卻自有一列。依照長表格的格式來說，應嘗試把「款」作為機構的變項。所以將款的數字取代為「行政支出」等支出類別的名稱。
 
 ```{r}
-cleaned %>% mutate(款 = ifelse(!is.na(款), org, 款)) %>% View
-    head(10)
+cleaned %>% mutate(款 = ifelse(!is.na(款), org, 款)) %>%
+    head(20)
 ```
 
 接下來，希望能夠在「款==`NA`」的地方填入該欄的「前一個值」例如行政支出。查詢一下（關鍵字如「Fill in NA column values with the last value that was not NA」）還真的有這樣的函式可以操作。
@@ -54,7 +54,7 @@ cleaned %>% mutate(款 = ifelse(!is.na(款), org, 款)) %>% View
 library(zoo)
 cleaned %>% 
     mutate(款 = ifelse(!is.na(款), org, 款)) %>%
-    mutate(款 = zoo::na.locf(款)) %>% View
+    mutate(款 = zoo::na.locf(款)) %>%
     head(10)
 ```
 
@@ -80,8 +80,8 @@ cleaned <- raw %>%
   filter(!is.na(科)) %>%
   select(-科) %>% type_convert()  %>%
   mutate(上年度預算 = as.numeric(上年度預算), 
-              上年度決算 = as.integer(上年度決算),
-              預算差 = as.numeric(預算差)) %>%
+         上年度決算 = as.integer(上年度決算),
+         預算差 = as.numeric(預算差)) %>%
   replace_na(list(上年度預算 = 0, 上年度決算 = 0)) %>%
   mutate(預算差 = 本年度預算 - 上年度預算)
 ```
@@ -132,7 +132,8 @@ fullvaccinated %>% head(10)
 
 ```{r}
 fullvaccinated %>%
-  spread(m, people_fully_vaccinated_per_hundred, fill=NA) %>% View
+  pivot_wider(names_from = m, values_from = people_fully_vaccinated_per_hundred, values_fill = NA) %>% View
+  # spread(m, people_fully_vaccinated_per_hundred, fill=NA) %>% View
     head(10)
 ```
 
@@ -140,8 +141,10 @@ fullvaccinated %>%
 
 ```{r}
 fullvaccinated %>%
-    spread(m, people_fully_vaccinated_per_hundred, fill=NA) %>%
-    gather(month, perc, -country) %>%
+    pivot_wider(names_from = m, values_from = people_fully_vaccinated_per_hundred, values_fill = NA) %>%
+    # spread(m, people_fully_vaccinated_per_hundred, fill=NA) %>%
+    pivot_longer(names_to = "month", values_to = "perc", cols = -country) %>%
+    # gather(month, perc, -country) %>%
     arrange(country, month) %>% head(20)
 ```
 
@@ -151,8 +154,8 @@ fullvaccinated %>%
 
 ```{r echo=FALSE}
 fullvaccinated %>%
-    spread(m, people_fully_vaccinated_per_hundred, fill=NA) %>%
-    gather(month, perc, -country) %>%
+    pivot_wider(names_from = m, values_from = people_fully_vaccinated_per_hundred, values_fill = NA) %>%
+    pivot_longer(names_to = "month", values_to = "perc", cols = -country) %>%
     arrange(country, month) %>%
     group_by(country) %>%
     arrange(month) %>%
@@ -173,7 +176,7 @@ fullvaccinated %>%
     mutate(perc = zoo::na.locf(perc, na.rm = F)) %>%
     ungroup() %>%
     arrange(country, month) %>%
-    replace_na(list(perc=0)) %>% View
+    replace_na(list(perc=0)) %>%
     arrange(country, month) %>% head(10)
 ```
 
