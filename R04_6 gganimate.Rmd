@@ -1,0 +1,91 @@
+---
+title: "R04_6_gganimate"
+author: "Jilung Hsieh"
+date: "`r Sys.Date()`"
+output: html_document
+---
+https://gist.github.com/rafapereirabr/0d68f7ccfc3af1680c4c8353cf9ab345
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(readxl)
+options(scipen = 999)
+```
+
+```{r prepare-data}
+pml <- read_excel("data/WORLD-MACHE_Gender_6.8.15.xls", "Sheet1", col_names=T) %>%
+	select(country, iso3, contains("matleave"), -contains("wrr")) %>%
+	gather("year", "degree", 3:21) %>%
+	replace_na(list(degree=0)) %>%
+	mutate(year2=as.POSIXct(strptime(year, "matleave_%y"))) %>%
+	mutate(year3 = strftime(year2, "%Y")) %>%
+    select(country, ISO3=iso3, year=year3, degree)
+```
+
+```{r get-worldmap}
+library(rworldmap)
+wmap <- getMap(resolution="low")
+wmap <- spTransform(wmap, CRS("+proj=robin")) # reproject
+wmap <- fortify(wmap)
+wmap %>%
+    filter(!duplicated(id))
+```
+
+
+```{r join-map-data}
+pml_map <- wmap %>%
+    left_join(pml, by=c("id"="country")) %>%
+    filter(!is.na(ISO3)) %>%
+    mutate(year = as.integer(year))
+
+# devtools::install_github("thomasp85/transformr")
+
+pml_map %>%
+    select(id) %>%
+    filter(!duplicated(.))
+```
+
+
+```{r plot-testing}
+pml_map %>%
+    filter(year==1995) %>%
+    ggplot() + 
+    aes(x = long, y = lat, 
+                     group=group, fill=factor(degree)) + 
+    geom_polygon(color="grey") +
+    theme_void() + 
+    scale_fill_manual(values=c("1"="red",
+                               "2"="LightCyan",
+                               "3"="lightskyblue",
+                               "4"="DodgerBlue",
+                               "5"="MediumBlue")) + 
+    coord_cartesian(xlim = c(-11807982, 14807978))
+```
+
+
+```{r animating}
+library(gganimate)
+pml.ani <- pml_map %>%
+    ggplot() + 
+    aes(x = long, y = lat, 
+        group=group, fill=factor(degree)) + 
+    geom_polygon(color="grey") +
+    theme_void() + 
+    scale_fill_manual(values=c("1"="red",
+                               "2"="LightCyan",
+                               "3"="lightskyblue",
+                               "4"="DodgerBlue",
+                               "5"="MediumBlue")) + 
+    coord_cartesian(xlim = c(-11807982, 14807978)) + 
+    transition_time(year)
+# + 
+#     ease_aes("linear") +
+#     enter_fade() +
+#     exit_fade()
+
+animate(pml.ani, fps = 10, end_pause = 30, width = 750, height = 450, renderer = gifski_renderer())
+
+anim_save("pml2.gif", animation = last_animation())
+```
+

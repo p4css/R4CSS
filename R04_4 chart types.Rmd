@@ -1,0 +1,147 @@
+---
+title: "R04_4 Chart types"
+author: "Jilung Hsieh"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+如果指定中文字型，無法採用斜體（`face="italic"`）
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+options(scipen = 999)
+th <- theme_minimal() + 
+  theme(
+    title = element_text(family="Noto Sans CJK TC"), #all title elements
+    text = element_text(family="Noto Sans CJK TC"),  #all text elements
+    plot.title = element_text(face="bold"),
+    axis.title.x = element_text(hjust=1, face="bold.italic"),
+    axis.title.y = element_text(hjust=1, face="bold.italic"),
+        )
+```
+
+
+# Line chart
+
+```{r}
+NW <- read_csv("data/nytdata/interactive_bulletin_charts_agecl_median.csv") %>%
+    select(Category, year, Net_Worth)  %>%
+    group_by(Category) %>%
+    arrange(year) %>%
+    ungroup()
+```
+
+## plotting
+一共有三個變項，X軸為年、Y軸為淨資產。難的是要去習慣，如果要畫多條線，就要有個用來做因子（分組）的變量，每一條線就是一個分組。以下例而言就是依照年齡層來分組。
+
+```{r}
+NW %>%    
+    ggplot() + aes(year, Net_Worth, color=Category) + 
+    geom_line() + 
+    theme_minimal() + 
+    labs(title = "Net Worth by year grouped by age groups",
+         x = "Year",
+         y = "Net Worth") + th
+```
+
+# Scatter
+
+```{r}
+bw <- read_csv("data/nytdata/unicef-changing-childhood-data.csv") %>% 
+    select(country = WP5, age = WP22140, bw = WP22092) %>%
+    mutate(country = ordered(country, 
+                             levels=c(1, 3, 4, 10, 11, 12, 13, 14, 17, 
+                                      29, 31, 33, 35, 36, 60, 61, 77, 
+                                      79, 81, 87, 165), 
+                             labels=c("USA", "Morocco", "Lebanon",
+                                      "Indonesia","Bangladesh", "UK", 
+                                      "France", "Germany", "Spain", 
+                                      "Japan", "India", "Brazil", 
+                                      "Nigeria", "Kenya", "Ethiopia",
+                                      "Mali", "Ukraine", "Cameroon", 
+                                      "Zimbabwe","Argentina", "Peru"))) %>%
+    count(country, age, bw) %>%
+    group_by(country, age) %>%
+    mutate(perc = n/sum(n)) %>% 
+    ungroup() %>%
+    filter(bw == 1) %>%
+    select(country, age, perc) %>%
+    spread(age, perc) %>%
+    rename(`15-24y` = `1`, `40+y` = `2`)
+```
+
+
+```{r}
+bw %>%
+  ggplot() + aes(`40+y`, `15-24y`, label = country) + 
+  geom_point(color = "skyblue", size = 2) + 
+  geom_smooth(method = lm, se=FALSE, linetype="dotdash", size=0.3) + 
+  xlim(0.2, 0.85) + ylim(0.2, 0.85) + 
+  geom_text(hjust = -0.1, vjust = -0.5) + 
+  geom_abline(intercept = 0, slop = 1, 
+              color="DeepPink", alpha=0.5, linetype="dashed") + 
+  th + 
+  theme(aspect.ratio=1)
+```
+
+# Barplot
+```{r}
+county <- read_csv("data/tw_population_opendata110N010.csv") %>%
+    slice(-1, -(370:375)) %>%
+    type_convert() %>%
+    mutate(county = str_sub(site_id, 1, 3)) %>%
+    group_by(county) %>%
+    summarize(
+        area = sum(area), 
+        people_total = sum(people_total)
+    ) %>%
+    ungroup()
+
+county %>%
+  mutate(county = reorder(county, people_total)) %>%
+  ggplot() + aes(county, people_total) %>%
+  geom_col(fill="skyblue") +
+  coord_flip() + th
+```
+
+# Boxplot
+```{r}
+aqi.toplot <- read_rds("https://github.com/p4css/R4CSS/raw/master/data/AQI_Chaozhou.rds") %>%
+    arrange(日期)%>%
+    filter(測項=="PM2.5") %>%
+    gather("hour", "PM25", 4:28) %>%
+    mutate(PM25 = as.numeric(PM25)) %>%
+    drop_na() %>%
+    mutate(year = lubridate::year(日期), month = lubridate::month(日期)) %>%
+    filter(month %in% c(11, 12, 1, 2, 3))
+
+aqi.toplot %>%
+    mutate(year = as.character(year)) %>%
+    ggplot() + aes(y=year, x=PM25)  + 
+    geom_boxplot(fill="skyblue", alpha=0.2) + 
+    xlim(0, 200) + 
+    theme_minimal()
+
+```
+
+
+# Treemap
+```{r}
+totreemap <- read_csv("data/nytdata/GCB2021v34_MtCO2_flat.csv") %>% 
+    drop_na(`Total`) %>%
+    filter(!Country %in% c("Global", "International Transport")) %>%
+    filter(Year==2020) %>%
+    arrange(desc(`Total`)) %>%
+    mutate(perc = Total/sum(Total)) %>%
+    slice(1:20)
+
+library(treemapify)
+totreemap %>%
+    ggplot() + aes(area = perc, fill=`Per Capita`, label=Country) +
+    geom_treemap() + 
+    geom_treemap_text(color="white", 
+                      place="centre", 
+                      grow=TRUE
+                      )
+```
+
