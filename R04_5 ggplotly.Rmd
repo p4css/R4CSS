@@ -12,8 +12,8 @@ options(scipen = 999)
 
 th <- theme_minimal() + 
   theme(
-    title = element_text(family="Noto Sans CJK TC"), #all title elements
-    text = element_text(family="Noto Sans CJK TC"),  #all text elements
+    title = element_text(family="Heiti TC Light"), #all title elements
+    text = element_text(family="Heiti TC Light"),  #all text elements
     plot.title = element_text(face="bold"),
     axis.title.x = element_text(hjust=1, face="bold.italic"),
     axis.title.y = element_text(hjust=1, face="bold.italic"),
@@ -193,7 +193,7 @@ totreemap <- read_csv("data/GCB2021v34_MtCO2_flat.csv") %>%
     mutate(perc = Total/sum(Total)) %>%
     slice(1:20)
 library(treemapify)
-carbon.p <- totreemap %>%
+totreemap %>%
     ggplot() + aes(area = perc, fill=`Per Capita`, label=Country) +
     geom_treemap() + 
     geom_treemap_text(color="white", 
@@ -203,5 +203,5 @@ carbon.p <- totreemap %>%
 ```
 
 ```{r fail-ggplotly}
-# carbon.p %>% ggplotly
+carbon.p %>% ggplotly
 ```

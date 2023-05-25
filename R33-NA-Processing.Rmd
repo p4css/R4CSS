@@ -32,7 +32,7 @@ raw %>% head(10)
 names(raw) <- c("款", "科", "目", "節", "機構", "本年度預算", "上年度預算", "上年度決算", "預算差")
 
 cleaned <- raw %>%
-    slice(-(1:2)) %>%
+    slice(-(1:2)) %>% 
     filter(!is.na(款) | !is.na(科)) %>%
     select(-目, -節) %>%
     separate(機構, c("oid", "org"), sep="\n")
@@ -53,8 +53,8 @@ cleaned %>% mutate(款 = ifelse(!is.na(款), org, 款)) %>%
 ```{r}
 library(zoo)
 cleaned %>% 
-    mutate(款 = ifelse(!is.na(款), org, 款)) %>%
-    mutate(款 = zoo::na.locf(款)) %>%
+    mutate(款 = ifelse(!is.na(款), org, 款)) %>% 
+    mutate(款 = zoo::na.locf(款)) %>% View
     head(10)
 ```
 
@@ -76,9 +76,10 @@ cleaned <- raw %>%
   select(-目, -節) %>%
   separate(機構, c("oid", "org"), sep="\n") %>%
   mutate(款 = ifelse(!is.na(款), org, 款)) %>%
-  mutate(款 = zoo::na.locf(款)) %>%
+  mutate(款 = zoo::na.locf(款)) %>% 
   filter(!is.na(科)) %>%
-  select(-科) %>% type_convert()  %>%
+  select(-科) %>%
+    type_convert()  %>%
   mutate(上年度預算 = as.numeric(上年度預算), 
          上年度決算 = as.integer(上年度決算),
          預算差 = as.numeric(預算差)) %>%
