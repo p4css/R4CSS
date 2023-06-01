@@ -99,9 +99,7 @@ dt$QA3_lv[1:10]
 -   Q7 請問您會不會受到假消息影響？
 -   Q8 請問您認為其他人會不會受到假消息的影響？
 
-對於Q7、Q8的問題是詢問填答者認為自己或他人會不會受到假消息影響，並從「一點也不會」、「不會」、「會」到「絕對會」共分四個等第。Q7分別是「81,
-446, 650, 39」、Q8分別是「5, 58, 803,
-350」。相較於Q7，Q8的分佈略為左傾，亦即傾向於認為其他人較容易受影響。此時如果想要分析Q7和Q8間的關係，由於各有四個等第，其交叉分析表會有16個項目，相當難以分析。
+對於Q7、Q8的問題是詢問填答者認為自己或他人會不會受到假消息影響，並從「一點也不會」、「不會」、「會」到「絕對會」共分四個等第。Q7分別是「81, 446, 650, 39」、Q8分別是「5, 58, 803, 350」。相較於Q7，Q8的分佈略為左傾，亦即傾向於認為其他人較容易受影響。此時如果想要分析Q7和Q8間的關係，由於各有四個等第，其交叉分析表會有16個項目，相當難以分析。
 
 ```{r}
 dt2 <- dt %>%
@@ -112,9 +110,7 @@ dt2 <- dt %>%
   mutate(Q7_3rd_lv = ordered(Q7_3rd_lv, levels=c("低", "高")))
 ```
 
-這時候一種策略是把這兩題視為順序尺度變數，然後把兩題的分數相減。相減後的分數從「-1,
-0, 1, 2, 3」各有「12, 482, 600, 103,
-19」，不難猜到會是一個較為集中的分佈，後續僅能當作順序尺度或連續變項來分析，不適合找一個閾值轉類別變項。
+這時候一種策略是把這兩題視為順序尺度變數，然後把兩題的分數相減。相減後的分數從「-1, 0, 1, 2, 3」各有「12, 482, 600, 103, 19」，不難猜到會是一個較為集中的分佈，後續僅能當作順序尺度或連續變項來分析，不適合找一個閾值轉類別變項。
 
 另一種策略是，分別先把Q7與Q8的「一點也不會」和「不會」群組為「不會」、再把「會」與「絕對會」群組為「會」，這樣Q7與Q8的交叉分析表會變成2X2的分析表，雖然群組數量比較少，但別忘記Q7的填答結果集中在會與不會、而Q8為一個較為偏右的分佈，集中在「會」和「絕對會」。Q8勢必會造成比例不均的分組。
 
@@ -143,8 +139,7 @@ dt2 %>% count(Q7_3rd_lv)
 對於**`vcd::assocstats(xtb)`**的分析結果：
 
 -   這些統計量用於評估**`QA3_lv`**和**`Q7_3rd_lv`**之間的關聯性程度。
--   連續性係數（Contingency Coeff.）和克拉瑪爾V（Cramer's
-    V）的值，表示兩個變數之間的關聯性較弱，但仍存在一定程度的相關性。
+-   連續性係數（Contingency Coeff.）和克拉瑪爾V（Cramer's V）的值，表示兩個變數之間的關聯性較弱，但仍存在一定程度的相關性。
 
 ```{r}
 
@@ -187,5 +182,59 @@ xtb %>% as_tibble() %>%
     ), color="black",) + theme_minimal() +
   theme(text = element_text(family="Heiti TC Light"),
         title = element_text(family="Heiti TC Light"))
+
+```
+
+## VIS
+
+```{r}
+th <- 
+  theme(title = element_text(family="Heiti TC Light"),
+        text = element_text(family="Heiti TC Light"), 
+        axis.text.y = element_text(family="PingFang TC"),
+        axis.text.x = element_text(family="Heiti TC Light"),
+        legend.text = element_text(family="Heiti TC Light"),
+        plot.title = element_text(family="Heiti TC Light")
+        )
+```
+
+```{r}
+
+
+dt2 %>%
+    mutate(Q7_n = as.numeric(Q7)-2) %>%
+    # mutate(Q7_n = ordered(Q7_n, 
+    #                       levels=c(-1, 0, 1, 2),
+    #                       labels = c("一點也不會", "不會", "會", "絕對會"))) %>%
+    count(QA3_lv, Q7_n) %>%
+    ggplot() + 
+    aes(QA3_lv, n, fill=Q7_n) + 
+    geom_col(position = position_stack(reverse = TRUE)) + 
+    coord_flip() + th
+    
+```
+
+```{r}
+
+color <- c("#9393C6", "#A8A8A8","#FFA166", "#FF6200")
+dt2 %>%
+    mutate(Q7_n = as.numeric(Q7)-2) %>%
+    # mutate(Q7_n = ordered(Q7_n, 
+    #                       levels=c(-1, 0, 1, 2),
+    #                       labels = c("一點也不會", "不會", "會", "絕對會"))) %>%
+    count(QA3_lv, Q7) %>%
+    mutate(y_acc = cumsum(n)) %>%
+    group_by(QA3_lv) %>%
+    mutate(y_end = y_acc - min(y_acc) - n[[2]]) %>%
+    mutate(y_start = y_end - n) %>%
+    ungroup() %>% 
+    ggplot() + 
+    aes(x = QA3_lv, xend = QA3_lv, y = y_start, yend = y_end, , color=Q7) + 
+    geom_segment(size = 8) +
+    coord_flip() + 
+    scale_color_manual("", 
+                       labels = c("一點也不會", "不會", "會", "絕對會"), 
+                       values = color, guide = "legend") +
+    th
 
 ```
