@@ -5,22 +5,27 @@ date: "`r Sys.Date()`"
 output: html_document
 ---
 
-
-```{r}
-options(stringsAsFactors = F)
+```{r include=FALSE}
+knitr::opts_chunk$set(cache = T, warning = F, message = FALSE, class.output = "output")
+library(knitr)
+library(kableExtra)
+library(tidyverse)
 ```
 
+# Dataframe
 
-# Data1: Taipei city population data
-## Copying data and creating vectors
+## 基本操作
+### 產生新的Dataframe
 
+#### 複製資料至vector
+直接複製Wikipedia上的台北市某五區人口資料
 ```{r}
 population <- c(158228, 126687, 228075, 204903, 308383, 187920)
 town <- c("中正", "大同", "中山", "松山", "大安", "萬華")
 area <- c(7.6071, 5.6815, 13.6821, 9.2878, 11.3614, 8.8522)
 ```
 
-## Building a data.frame
+#### 合併等長vector為dataframe
 ```{r}
 df <- data.frame(town, population, area)
 df$density = df$population / df$area
@@ -30,11 +35,8 @@ summary(df)
 ```
 
 
-# Data2: Import/Export data of Taiwan
-
-* [台灣出口進口貿易資料查詢](https://cus93.trade.gov.tw/FSC3040F/FSC3040F)
-
-## Combining 3 vectors to a data.frame
+#### 存放台灣貿易各國進出口量
+* 運用台灣出口進口資料 [台灣出口進口貿易資料查詢](https://cus93.trade.gov.tw/FSC3040F/FSC3040F)
 
 ```{r}
 country <- c("CN", "US", "JP", "HK", "KR", "SG", "DE", "MY", "VN", "PH", "TH", "AU", "NL", "SA", "ID", "GB", "IN", "FR", "IT", "AE")
@@ -45,7 +47,7 @@ export <- c(22.987, 12.204, 11.837, 7.739, 5.381, 4.610, 2.866, 2.784, 2.414, 2.
 ```
 
 
-* 合併vector為data.frame
+#### 合併vector為data.frame
 
 * 這時候我們若以`str(df)`觀察該`df`的結構會發現，文字型態的資料被轉為`Factors`，這是我們所不樂見的。過去統計通常會把文字型態當成類別變數，於是用`Factors`作為資料型態，但資料科學中經常要處理大量的文字資料，此時，我們可以把`read.csv`的一個參數`stringsAsFactors`設為`FALSE`，意味著預設不要將文字的資料轉為Factor而是直接以文字變項來處理。* `stringsAsFactors = FALSE`也是`read.csv()`的參數（parameter、argument）。因為一般讀檔會預設把文字讀為類別變項也就是Factor，但資料分析經常要處理文字資料而不是類別變項，所以會希望預設不要把文字讀取為類別變項，因此要設定`stringsAsFactors = FALSE`。
 
@@ -69,7 +71,7 @@ df.test <- data.frame()
 
 
 
-# Observing data.frame
+### 觀察dataframe
 
 * `View(df)` 用RStudio所提供的GUI直接觀看變數
 * `head(df)` 取前面六筆資料（也就是六列的資料來概觀該資料）
@@ -91,7 +93,7 @@ help(summary)
 
 
 
-## Data dimension inspecting
+#### 觀察資料維度
 
 ```{r}
 dim(df)
@@ -100,8 +102,8 @@ nrow(df)
 length(df)
 ```
 
-
-# Getting one variable from a data.frame
+### 操作dataframe
+#### 取出一個變項
 
 * `names(df)`  列出變數名稱
 * `df$發生.現.地點` 顯示該變數內容
@@ -119,7 +121,7 @@ summary(df)
 
 
 
-# **mutate** 透過運算產生新變數
+#### (mutate)透過運算產生新變數
 * 這裡容易犯錯的是，要記得跟程式講說你要加總或四則運算的是哪個df的variable。
 * 從下面的這個操作中，該data.frame會產生一個新的變數`sub`，這就相當於Excel中的某一行減去某一行，然後把資料放在新的一行。
 
@@ -130,7 +132,7 @@ df$sub <- df$import - df$export
 
 
 
-# **filter, select**篩選資料、選取變數
+#### (filter)篩選資料、選取變數
 
 * 注意，要告訴程式`import`和`export`是哪個`data.frame`的。
 
@@ -161,7 +163,7 @@ class(unlist(df[1, -1])) # filter the 1st row and select all columns except 1
 
 
 
-# **sorting**排序：按照某個變數排序
+#### (arrange) 按某個變數排序
 
 * `df.sorted <- df[order(df$import),]`會使得整個df照`import`的大小排序重新做排列。因為`order(df$import)`會把資料照指定順序排列後的位置傳回來，所以把他丟給`df`的列的位置，便會使得`df`的資料照指定的順序排列。
 預設是由小到大，加上`decreasing = T`這個參數後變成由大而小。
@@ -181,7 +183,7 @@ head(df.sorted)
 ```
 
 
-# Plotting
+## 簡易繪圖
 
 * `graphics::plot()`為會預載入R的繪圖套件，如果希望繪圖的同時加上回歸線和資料點標籤的話，必須要三行一起執行。
 ```{r}
@@ -197,7 +199,7 @@ lines(1:25, 1:25, col='red')
 ```
 
 
-# More: using dplyr
+## 基本操作：使用dplyr
 ```{r}
 library(dplyr)
 df <- data.frame(country, import, export, stringsAsFactors = F)
@@ -206,5 +208,40 @@ filter(df, import > export)
 select(df, c(1, 3))
 message(df$country)
 print(df$country)
+```
+
+## tibble, data_frame, data.frame
+`警告： "data_frame()" was deprecated in tibble 1.1.0. Please use "tibble()" instead.`
+```{r}
+df <- data.frame(a=1:2, b=3:4, c=5:6)
+class(df)
+df <- data_frame(a=1:2, b=3:4, c=5:6)
+class(df)
+df <- tibble(a=1:2, b=3:4, c=5:6)
+class(df)
+```
+
+
+## Database - SQLite
+
+```{r eval=FALSE, include=FALSE}
+myfetchData <- function(dbname){
+  conn = dbConnect(RSQLite::SQLite(), 
+                   dbname=dbname)
+  
+  # for mac
+  # res <- dbSendQuery(conn, "SELECT urls.url, visits.visit_time, visits.visit_duration, visits.id, visits.from_visit, visits.transition, visits.segment_id, urls.id FROM visits INNER JOIN urls ON visits.url=urls.id;")
+  
+  # for win
+  res <- dbSendQuery(conn, "SELECT urls.url, 
+                     CAST(visits.visit_time as TEXT) as visit_time, 
+                     CAST(visits.visit_duration as TEXT) as visit_duration, 
+                     visits.id, visits.from_visit, visits.transition, visits.segment_id, urls.id 
+                     FROM visits INNER JOIN urls ON visits.url=urls.id;")
+  
+  data <- dbFetch(res, n=-1)
+  data
+}
+
 ```
 
