@@ -1,5 +1,5 @@
 ---
-title: "Base to dplyr: Maternal leave" 
+title: "Paid Maternal Leave by dplyr" 
 author: "Jilung Hsieh"
 date: "`r Sys.Date()`"
 output: html_document
@@ -90,8 +90,8 @@ m55 <-
 read_excel("data/WORLD-MACHE_Gender_6.8.15.xls", "Sheet1", col_names=T)
 ```
 
-
 ## Now ask chatgpt
+
 Q: "I have a data frame with iso3 codes in the first column and year values ranging from 1995 to 2013 in the second to twentieth columns. I would like to convert this wide-format table to a long-format table with three columns: iso3, year, and corresponding value from the original wide-format table. How can I accomplish this?"
 
 ChatGPT "You can use the pivot_longer() function from the tidyr package to convert a wide table to a long table in R. Here's an example code that shows how to do this with your data:"
@@ -125,25 +125,6 @@ read_excel("data/WORLD-MACHE_Gender_6.8.15.xls", "Sheet1", col_names=T) %>%
 	filter(matleave_13==5, matleave_95!=5) %>%
 	pivot_longer(names_to = "year", cols = 2:20, values_to = "degree")
 ```
-
-# ChatGPT practice
-
-The following is your ChatGPT task. Here is the complete working code. After understanding the code, how would you ask ChatGPT to explain the following three lines of code? Please try to write your questions to ChatGPT in this RMD document. Perhaps you can start by asking what the meaning of these three lines of code is.
-
-## Question1
-Q: 
-ChatGPT: 
-Q: 
-ChatGPT: 
-
-## Question2
-Q: 
-ChatGPT: 
-
-## Question3
-Q: 
-ChatGPT: 
-
 
 # Working tidyverse version
 

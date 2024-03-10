@@ -365,3 +365,41 @@ for (i in c(1:nrow(m55))){
 # m50 <- m5[!staySame, ]
 
 ```
+
+```{r}
+library(readxl)
+library(tidyverse)
+
+# Use read_excel() from readxl to import the xls file
+df <- read_excel("data/WORLD-MACHE_Gender_6.8.15.xls", sheet = "Sheet1", col_names = TRUE)
+
+# Select iso3, and matleave columns by index
+matleave <- df %>%
+  select(iso3, matleave_95:matleave_13)
+
+# Inspect the data structure
+str(matleave)
+
+# Replace all NA cells with 0
+matleave <- matleave %>%
+  mutate(across(everything(), ~ifelse(is.na(.), 0, .)))
+
+# Filter rows by condition
+m5 <- matleave %>%
+  filter(matleave_13 == 5)
+
+# Filter rows by another condition
+m55 <- m5 %>%
+  filter(matleave_95 == 5)
+
+# Plot
+m55 %>%
+  pivot_longer(cols = -iso3) %>%
+  ggplot(aes(x = name, y = value)) +
+  geom_bar(stat = "identity", width = 0.5, fill = "blue") +
+  facet_wrap(~iso3, nrow = 4) +
+  theme_minimal() +
+  theme(strip.text = element_text(size = 20),
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+
+```
