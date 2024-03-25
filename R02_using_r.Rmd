@@ -124,6 +124,8 @@ head(first_page$responseData) %>% rename(戶長=headhousehold_count)
     -   [YouBike2.0臺北市公共自行車即時資訊](https://data.taipei/dataset/detail?id=c6bc8aed-557d-41d5-bfb1-8da24f78f2fb)
 
 ```{r}
+library(httr)
+library(jsonlite)
 url <- "https://tcgbusfs.blob.core.windows.net/dotapp/youbike/v2/youbike_immediate.json"
 ubike.df <- fromJSON(content(GET(url),"text", encoding = "utf-8"))
 head(ubike.df) %>% select(1:6)
