@@ -5,8 +5,6 @@ date: "`r Sys.Date()`"
 output: html_document
 ---
 
-
-
 ```{r include=FALSE}
 knitr::opts_chunk$set(echo=T, cache = T, warning = F, message = FALSE, class.output = "output")
 library(knitr)
@@ -24,6 +22,10 @@ library(tidyverse)
 
 ```{r read csv}
 raw <- read_csv("data/opendata107Y030.csv") %>%
+    slice(-1) %>%
+    mutate(vname = str_c(site_id, village)) %>%
+    select(vname, everything())
+    
   # YOUR CODE SHOULD BE HERE
 
 
@@ -76,9 +78,12 @@ tidy_data <- raw %>%
 ```{r}
 tidy_data <- raw %>%
     pivot_longer(names_to = "key", values_to = "value", cols = 6:ncol(.)) %>% 
+    # separate(key, into = c("married", "age", "gender"), sep = "_") %>% View
     mutate(key = str_replace(key, "_age", "")) %>%
     mutate(key = str_replace(key, "100up", "100_110")) %>%
     mutate(key = str_replace(key, "15down", "0_15")) %>%
+    separate(key, into = c("married", "ageLower", "ageUpper", "gender"), sep = "_") %>%
+    mutate(value = as.numeric(value))
     # YOUR CODE SHOULD BE HERE
   
   
@@ -119,8 +124,50 @@ raw %>%
 ```{r}
 
 village_stat <- tidy_data %>%
+    mutate(ageLower = as.numeric(ageLower), 
+          ageUpper = as.numeric(ageUpper)) %>%
+    filter(ageLower >= 20) %>%
+    group_by(vname) %>%
+    summarise(
+        legalPopulation = sum(value),
+        elderSum = sum(value[ageLower >=65]),
+        womenSum = sum(value[gender=="f"]),
+        marriedSum = sum(value[married %in% c("married", "widowed")])
+              ) %>%
+    ungroup() %>%
+    mutate(
+        elderPerc = elderSum / legalPopulation,
+        marriedPerc = marriedSum / legalPopulation,
+        womenPerc = womenSum / legalPopulation
+    )
     # YOUR CODE SHOULD BE HERE
-    
+
+town_stat <- village_stat %>%
+    left_join(raw %>% select(vname, site_id), by="vname") %>% 
+    mutate(site_id = str_replace(site_id, "三民一|三民二", "三民區")) %>%
+    mutate(site_id = str_replace(site_id, "鳳山一|鳳山二", "鳳山區")) %>%
+    group_by(site_id) %>%
+    summarise(
+        legalPopulation = sum(legalPopulation),
+        elderSum = sum(elderSum),
+        marriedSum = sum(marriedSum),
+        womenSum = sum(womenSum)
+    ) %>%
+    ungroup()
+
+
+town_stat <- town_stat %>%
+    mutate(
+        elderPerc = elderSum / legalPopulation,
+        marriedPerc = marriedSum / legalPopulation,
+        womenPerc = womenSum / legalPopulation
+    )
+
+
+# %>%
+#     ggplot() + aes(womenPerc, elderPerc) + 
+#     geom_point(alpha=0.5) + 
+#     geom_text(aes(label = site_id), family = "Heiti TC Light")
 ```
 
 測試
@@ -173,7 +220,7 @@ town_stat %>%
 首先，先讀取資料並重新命名每個變項。由於我們要連結公投資料和前面的內政部人口統計資料，所以要注意兩筆資料間是否有共通的key（資料庫稱為鍵值）。`town_stat`的是以`site_id`鄉鎮市區名為主鍵，所以公投資料這邊也產生一個同名的鄉鎮市區變項`site_id`。
 
 ```{r}
-ref10 <- read_csv("data/ref10.csv") %>%
+ref10 <- read_csv("data/ref10.csv")
   # YOUR CODE SHOULD BE HERE
 
   

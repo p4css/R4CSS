@@ -406,6 +406,7 @@ NW %>%
 ### 使用gghighlight套件
 
 ```{r message=FALSE, warning=FALSE}
+# install.packages("gghighlight")
 library(gghighlight)
 NW %>%    
     ggplot() + aes(year, Net_Worth, color = Category) + 
@@ -427,7 +428,9 @@ NW %>%
     gghighlight(Category %in% c("65-74", "35-44")) + 
     scale_color_manual(
         limits=c("65-74", "35-44"),   # original chart group
-        values=c("gold", "skyblue")) +   # map to color
+        values=c("gold", "skyblue"),
+        na.value = "black"
+        ) +   # map to color
     theme_minimal()
 ```
 
@@ -442,7 +445,7 @@ county %>%
   ggplot() + aes(county, people_total, fill=group) %>%
   geom_col() +
   scale_fill_manual(values=c("highlight"="Khaki", "other"="lightgrey")) +
-  guides(fill="none") + 
+  guides(fill="none") +
   coord_flip() + 
   theme_minimal() + th
 ```
@@ -455,7 +458,7 @@ county %>%
     ggplot() + aes(county, people_total) %>%
     geom_col(fill="deeppink") +
     gghighlight(county %in% c("新竹縣", "新竹市")) + 
-    guides(fill="none") + 
-    coord_flip() + 
+    # guides(fill="none") + 
+    coord_flip() +
     theme_minimal() + th
 ```

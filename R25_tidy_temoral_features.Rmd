@@ -23,6 +23,7 @@ R 裡面，常用的時間物件有 **`POSIXct`** 與 **`POSIXlt`** 兩種，我
 knitr::opts_chunk$set(echo=T, cache = T, warning = F, message = FALSE, class.output = "output")
 library(knitr)
 library(tidyverse)
+options(scipen = 999)
 ```
 
 ## char-to-timestamp
@@ -133,10 +134,10 @@ clean %>%
 clean %>%
     mutate(m = month(ptime)) %>% 
     count(m) %>%
-    ggplot() + aes(m, n) + 
-    geom_col()
+    ggplot() + aes(x=m, n) + 
+    geom_col() + 
+    scale_x_continuous(breaks = 1:12)
     
-
 ```
 
 ## Freq-by-date (good)
