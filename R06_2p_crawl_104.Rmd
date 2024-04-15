@@ -13,7 +13,19 @@ library(tidyverse)
 
 # Scraper Overview
 
-1.  先確認可以爬取JSON或者必須要剖析HTML：觀察**Network**的**Fetch/XHR**是否有JSON格式的內容出現。觀察的小訣竅：想辦法載入第二頁（點選、或往下捲動產生），找到是否有載入新的JSON。
+## JSON的概念
+
+1.  呈現在我們面前的網頁都是HTML，但一個HTML如新聞網站的版面，通常會分為資料和功能區塊。對爬蟲學習者來說，新聞的標題與其超鏈結才是資料，其他如分類、廣告等都是屬於功能區塊。
+
+2.  當發送第一個request時，通常會獲取整個HTML頁面，包括所有的內容。但是，當需要僅更新部分內容時，例如獲取第二頁的新聞，此時如果又要更新整個頁面版面，非常龐大，這時往往會使用AJAX的方式。這個request會向伺服器請求JSON格式的資料。當瀏覽器收到第二個request的回應後，使用JavaScript處理回應的資料，並將其動態地更新網頁上的特定部分，而不需要重新加載整個頁面。
+
+## 爬蟲判斷流程
+
+1.  先確認可以爬取JSON或者必須要剖析HTML：觀察**Network**的**Fetch/XHR**中所依次載入的內容，是否有JSON格式的內容出現。
+
+    1.  點選**Network**的**Fetch/XHR**中逐一載入的檔案會看到Header、Payload、Preview、Response等分頁。要觀察是否有JSON格式，要看的是Preview，要複製該頁面的鏈結，要找Header。
+
+    2.  觀察的小訣竅：想辦法載入第二頁（點選、或往下捲動產生），找到是否有載入新的JSON。如果在Fetch/XHR都沒有出現跟頁面相關的JSON格式數據，那應該就會是要剖析HTML格式的網頁。
 
 2.  JSON類爬蟲：確認是自己想抓的JSON檔後，複製該頁面連結，貼至瀏覽器網址列上測試。如果網頁上可以直接載入該頁面內的JSON內容，代表該JSON容易取得，可以進入寫程式的環節。如果會產生存取錯誤，可能就需要觀察Referer或Cookie以取得該頁面內容。
 
@@ -156,4 +168,28 @@ res$data$list %>% View
 
 
 
+```
+
+# Complete Code
+
+```{r}
+all.df <- tibble()
+refer_url <- "https://www.104.com.tw"
+
+for(p in 1:10){
+    url <- str_c('https://www.104.com.tw/jobs/search/list?ro=0&kwop=7&keyword=%E8%B3%87%E6%96%99%E7%A7%91%E5%AD%B8&order=12&asc=0&page=', 
+                 p, 
+                 "&mode=s&jobsource=2018indexpoc")
+    print(p)
+    res <- GET(url, add_headers("referer"=refer_url)) %>%
+        content("text") %>%
+        fromJSON()
+    
+    res$data$list$tags <- NULL
+    res$data$list$link <- NULL
+    
+    all.df <- bind_rows(all.df, res$data$list)
+}
+
+all.df$jobNo %>% unique %>% length
 ```
