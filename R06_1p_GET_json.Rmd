@@ -5,12 +5,6 @@ date: "`r Sys.Date()`"
 output: html_document
 ---
 
-# Notes
-
--   如果你用了`View()`會沒辦法knit成html檔，導致於你無法繳交。
-
-# Scraper Overview
-
 # Loading libraries
 
 ```{r}
@@ -41,6 +35,12 @@ fromJSON('[{"a":1, "b":2}, {"a":1, "b":3}, {"a":5, "b":7}]')
 
 ## JSON as a local file
 
+1.  `fromJSON("data/url_104.json")` - 此行程式碼使用jsonlite套件中的`fromJSON`函式，將名為"url_104.json"的JSON檔案讀取為R語言中的資料結構（通常是列表或資料框）。
+
+2.  `toJSON()` - 此函式將R語言中的資料結構轉換為JSON格式。
+
+3.  `prettify()` - 最後，`prettify()`函式將JSON資料進行格式化，以便更容易閱讀。
+
 ```{r}
 library(jsonlite)
 raw <- read_json("data/url_104.json")
@@ -51,105 +51,21 @@ fromJSON("data/url_104.json") %>% toJSON() %>% prettify()
 
 ## JSON as a web file
 
+這段程式碼是用於從指定的URL中獲取JSON格式的資料，然後將其轉換為R語言中的資料結構。讓我們一一解釋：
+
+1.  `httr::GET()` - 此行程式碼使用了httr套件中的`GET`函式，用於向指定的URL發送GET請求，以獲取相應的資料。在這個例子中，我們發送了一個GET請求至該網址。如果是個合乎規定存取，他會回覆一個[HTML status code](https://developer.mozilla.org/zh-TW/docs/Web/HTTP/Status)（你可上網查詢看看有哪些Status code）。如果是2開頭的數字例如`200 OK`代表該伺服器接受該請求並開始傳回檔案。
+
+2.  `httr::content(response, "text", encoding = "utf-8")` - 此函式用於從HTTP Response中的內容以文字資料型態提取出來。用`?content`查詢看看`content(response, "text")`的用途。
+
+3.  `jsonlite::fromJSON()` - 因為我們用眼睛觀察得知該目標鏈結的內容是JSON格式的檔案，所以選用`jsonlite`套件的`fromJSON()`函式將前一步驟所提取的文字型態資料轉換為R語言中的資料結構，通常是`list`或`data.frame`。`fromJSON()`預期會把JSON中`[]`的每一個項目轉為一筆筆的資料，然後把`{}`的pair當成column的變數名稱。
+
+4.  `.json`或`.csv`都只是幫助程式初步篩選檔案的副檔名罷了，這兩種類型的檔案跟`.txt`檔一樣，都是屬於用一般編輯器就可以打開的「純文字檔案」（就打開以後看得到文字的意思）。裡面的究竟是不是個完整的json檔這都要自己去觀察。
+
 ```{r}
-raw <- GET("https://tcgbusfs.blob.core.windows.net/blobyoubike/YouBikeTP.json") %>%
+raw <- GET("https://tcgbusfs.blob.core.windows.net/dotapp/youbike/v2/youbike_immediate.json") %>%
     content("text") %>%
     fromJSON()
 raw
-```
-
-# Case 1: Well-formatted Air-Quality
-
-Go to <https://data.gov.tw/dataset/40448>, click the json file, and copy the link, e.g., "<https://data.epa.gov.tw/api/v1/aqx_p_432?limit=1000&api_key=9be7b239-557b-4c10-9775-78cadfc555e9&format=json>". (However, the link address, especially the `pi_key=9be7b239-557b-4c10-9775-78cadfc555e9` will change every time).
-
-![](images/paste-390F44D8.png)
-
-```{r Getting AQI data}
-
-url <- "your_url"
-
-df <- fromJSON(content(GET(url), "text", encoding = "utf-8"))
-df %>% glimpse()
-df$records %>% head() %>% knitr::kable(format = "html")
-```
-
-### Using knitr::kable() for better printing
-
-```{r using kableExtra to print}
-df$records %>% head() %>% knitr::kable(format = "html")
-```
-
-## Step-by-step: Parse JSON format string to R objs
-
-`fromJSON(content(GET(url), "text", encoding = "utf-8"))`由內到外有三個函式。 \* `httr::GET()`按照指定的url發出GET request把網頁抓回來，如果是個合乎規定存取，就會順利取回該伺服器發的response。 \* `hrrt::content(response, "text", encoding = "utf-8")` 用`?content`查詢看看`content(response, "text")`的用途。其是把抓回來的檔案，轉為純文字的字串。content()是把抓回來的response解成純文字（JSON本身就是以純文字儲存，只是格式特別而已）。
-
--   `jsonlite::fromJSON()` 因為我們用眼睛看就知道他是個JSON格式的檔案，所以用`fromJSON()`這個函式，把用JSON格式編成的字串轉為R的物件，有可能是`data.frame`或`list`。`fromJSON()`預期會把JSON中`[]`的每一個項目轉為一筆筆的資料，然後把`{}`的pair當成column的變數名稱
-
-### `Step 1. GET()` 發送請求
-
-向該URL的伺服器發送`GET()` request以取得該檔案。若成功取得，他會回覆一個[HTML status code](https://developer.mozilla.org/zh-TW/docs/Web/HTTP/Status)（你可上網查詢看看有哪些Status code）。如果成功的話就是2開頭的數字例如`200 OK`代表該伺服器接受該請求並開始傳回檔案。
-
-```{r}
-# Getting url back by GET()
-
-
-# Inspecting returned data
-response
-class(response)
-```
-
-(Tips) Using `?httr::GET` to inspect the function
-
-### `Step 2. httr::content()` 將回應資料的轉純文字
-
-回應的資料看他的`class`是一個`response`，但如果看Global Environment看來是個`list`，裡面裝載很多資料，而主要核心的內容在`content`這個欄位，但看來是用`binary code`裝起來的，而不是純文字。
-
-因此，對於這個抓回來的檔案，我需要用httr::content()幫忙把純文字給解出來。經查詢`help`可得知`content()`後面的參數有三類，其中可以要轉為純文字的就是`content(response, "text")`。因此偵測轉出來的變數會是長度為1的`character`。
-
-```{r}
-# Parsing to textual data by content()
-
-
-
-
-nchar(text)
-cat(text)
-class(text)
-length(text)
-```
-
-(Tips) using `??httr::content` to inspect the function
-
-### Step 3. `fromJSON()`: 將JSON格式文字轉為R物件
-
-最後是將這個`character`轉為R的物件，也就是data.frame或list。注意，此時text是一個`character`，那是我們知道他是用JSON格式編寫的文字檔，就像我們知道.csv檔是用逗號分隔表示法依樣，JSON就是用層層疊疊的`[]{}`記號來表述資料的結構。
-
-並要提醒初學者，`.json`或`.csv`都只是幫助程式初步篩選檔案的副檔名罷了，這兩種類型的檔案跟`.txt`檔一樣，都被歸屬為Win系統所謂的「純文字文件檔案」（就打開以後看得到文字的意思）。裡面的究竟是不是個完整的json檔這都要去看、去測。我自然也可以在`.json`的檔案裡偷偷亂用逗號分隔模式撰寫。
-
-```{r}
-
-
-
-
-dim(df)
-glimpse(df)
-?fromJSON
-```
-
-## Combining all functions
-
-UVI Open data: <https://data.gov.tw/dataset/6076>
-
-<https://data.epa.gov.tw/api/v1/uv_s_01?limit=1000&api_key=9be7b239-557b-4c10-9775-78cadfc555e9&format=json>
-
-```{r}
-url <- "YOUR URL HERE"
-
-# Combining all functions
-
-
-
-df$records %>% knitr::kable()
 ```
 
 # **Practices: Loading json data**
@@ -161,7 +77,6 @@ url_sc_flu <- "https://od.cdc.gov.tw/eic/Weekly_Age_County_Gender_487a.json"
 # url_appledaily <- "https://tw.appledaily.com/pf/api/v3/content/fetch/search-query?query=%7B%22searchTerm%22%3A%22%25E6%259F%25AF%25E6%2596%2587%25E5%2593%25B2%22%2C%22start%22%3A20%7D&d=209&_website=tw-appledaily"
 # url_dcard <- "https://www.dcard.tw/_api/forums/girl/posts?popular=true"
 url_pchome <- "https://ecshweb.pchome.com.tw/search/v3.3/all/results?q=iphone&page=1&sort=rnk/dc"
-url_ubike <- "https://tcgbusfs.blob.core.windows.net/blobyoubike/YouBikeTP.json"
 url_cnyes <- "https://news.cnyes.com/api/v3/news/category/headline?startAt=1588262400&endAt=1589212799&limit=30"
 ```
 
@@ -171,13 +86,12 @@ df <- GET(url_pchome) %>%
     content("text", , encoding = "utf-8") %>%
     fromJSON()
 
-df <- fromJSON(content(GET(url_pchome), "text", encoding = "utf-8"))
-df$items$data
+df$prods
 ```
 
-# Case 2: cnyes news
+# Hierarchy of JSON: cnyes
 
-第二類是最常會見到的例子，解出來的資料是個很多階層的`list`，通常一筆資料傳回來時多會附加一些metadata，比方說，一共幾筆資料、下一個資料區塊在哪裡，好讓使用者或者本地端的瀏覽器能夠繼續取得下一筆資料。因此，資料通常會在樹狀節點的某一個子節點。
+這類是最常見到的例子，解出來的資料是個很多階層的`list`，通常一筆資料傳回來時多會附加一些metadata，比方說，一共幾筆資料、下一個資料區塊在哪裡，好讓使用者或者本地端的瀏覽器能夠繼續取得下一筆資料。因此，資料通常會在樹狀節點的某一個子節點。
 
 ```{r}
 
@@ -214,7 +128,7 @@ response <- GET(url_cnyes,
                            overwrite=TRUE))
 ```
 
-# Case 3: footRumor - ill-formatted
+# (Option) ill-formatted JSON
 
 食品闢謠的例子可能是個沒好好編過JSON的單位所編出來的案子，資料很簡單，但卻是一個list裡面有329個data.frame，且每個data.frame只有對腳現有資料，然後每一筆資料就一個data.frame。
 
@@ -232,7 +146,7 @@ dim(safefood[[1]])
 # print(content(GET(url), "text"))
 ```
 
-## 處理非典型的JSON檔
+## 處理非典型的JSON檔（食藥署的資料）
 
 -   但這時候也不難觀察到其規律性。既然每個data.frame是一筆資料，且資料都是照順序出現在對角線，那我就把data.frame給`unlist()`拆成vector後，把`NA`給移除了，那剩下的就是我們要的資料了。
 
