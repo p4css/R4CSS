@@ -10,7 +10,6 @@ output: html_document
 library(tidyverse)
 library(httr)
 library(rvest)
-options(stringsAsFactors = F)
 ```
 
 
@@ -69,7 +68,6 @@ pauthor <- metadata[1]
 ptitle <- metadata[2]
 
 
-
 # Combining data to a data frame
 post.temp <- tibble(url, pcontent, ptitle, pauthor, ptime)
 
@@ -103,12 +101,6 @@ for(url in posts$link){
     
     all_posts <- bind_rows(all_posts, post.temp)
 }
-
-
-
-
-
-
 
 
 ```
