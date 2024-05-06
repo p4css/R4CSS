@@ -27,7 +27,7 @@ options(stringsAsFactors = F)
 url <- "https://www.ptt.cc/bbs/HatePolitics/index.html"
 
 # Using read_html(), write_html() and browseURL() to examine the link
-read_html(url) %>% write_html("test.html")
+read_html(url) %>% xml2::write_html("test.html")
 
 # Browsing the URL by browseURL()
 browseURL("test.html")
@@ -45,7 +45,7 @@ response <- GET(url, config = set_cookies("over18" = "1"))
 response %>%
     content("text") %>%
     read_html() %>%
-    write_html("test_with_cookie.html")
+    xml2::write_html("test_with_cookie.html")
 
 
 # Examining the url
