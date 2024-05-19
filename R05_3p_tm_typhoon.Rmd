@@ -14,7 +14,7 @@ output: html_document
 
 ```{r}
 library(tidyverse)
-options(stringsAsFactors = F)
+# options(stringsAsFactors = F)
 options(verbose = T)
 options(scipen = 999)
 # library(stringr)
@@ -43,7 +43,7 @@ news.df <- readRDS("data/typhoon.rds") %>%
 
 ## 初始化斷詞器`cutter <- worker()`
 
-1.  斷詞的時候不見能把我們要的字詞斷出來，比方說你可能希望台北市不會被斷開，偏偏被斷成台北+市。請參見謝舒凱老師的講義。[https://legacy.gitbook.com/book/loperntu/ladsbook/details。最簡單的方法就是窮舉，例如下面的\`segment_not\`即是](https://legacy.gitbook.com/book/loperntu/ladsbook/details。最簡單的方法就是窮舉，例如下面的%60segment_not%60即是){.uri}。
+1.  斷詞的時候不見能把我們要的字詞斷出來，比方說你可能希望台北市不會被斷開，偏偏被斷成台北+市。請參見謝舒凱老師的講義。<https://legacy.gitbook.com/book/loperntu/ladsbook/details。最簡單的方法就是窮舉，例如下面的%60segment_not%60即是>。
 2.  初始化斷詞器後，
 
 ```{r}
@@ -60,7 +60,7 @@ new_user_word(tagger, segment_not)
 
 # loading Chinese stop words
 stopWords <- readRDS("data/stopWords.rds")
-View(stopWords)
+# View(stopWords)
 # load("../segment_not.R")
 ```
 
@@ -80,20 +80,15 @@ unnested.df <- news.df %>%
     # filter(timestamp > as.Date("2009-01-01")) %>%
     # select(-time) %>%
     # select(title, text, cat, everything()) %>%
-    mutate(word = purrr::map(text, function(x)segment(x, tagger))) %>% 
+    # mutate(word = map(text, function(x)segment(x, cutter))) %>%
+    mutate(word = map(text, function(x) tryCatch({segment(x, cutter)}, error = function(e) NA))) %>%
+    
     select(doc_id, word) %>%
-    mutate(word = purrr::map(word, function(x)str_c(names(x), "_", x))) %>% 
     unnest(word) %>% 
-    separate(word, c("pos", "word"), sep = "_") %>% 
     filter(!(word %in% stopWords$word)) %>%
     filter(!str_detect(word, "[a-zA-Z0-9]+"))
 ?unnest
 
-unnested.df %>%
-    filter(pos %in% c("a")) %>% View
-    count(doc_id, pos) %>%
-    View
-    
 
 ```
 
@@ -113,6 +108,9 @@ unnested.df %>%
     theme(axis.text.y = element_text(family="Heiti TC Light"))
 
 
+word.count <- unnested.df %>%
+    count(word)
+
 word.count %>%
     count(n, sort=T) %>%
     ggplot(aes(n, nn)) + 
@@ -126,7 +124,7 @@ word.count %>%
     scale_y_log10() 
 ```
 
-# Practice: Comparing word frequenc by early/recent variable
+# Practice: Comparing word frequency by early/recent variable
 
 ```{r}
 
@@ -136,11 +134,10 @@ word.count %>%
 
 ```{r}
 news.df %>%
-    mutate(word = purrr::map(text, function(x)segment(x, tagger))) %>% 
+    mutate(word = map(text, function(x) tryCatch({segment(x, cutter)}, error = function(e) NA))) %>%
     select(doc_id, word) %>%
     mutate(word = purrr::map(word, function(x)str_c(names(x), "_", x))) %>% 
     unnest(word) %>% 
-    separate(word, c("pos", "word"), sep = "_") %>%
     count(word, sort = T) %>%
     count(n, sort = T) %>%
     ggplot() + 
@@ -167,10 +164,4 @@ unnested.df %>%
     ungroup() %>%
     left_join(news.df %>% select(doc_id, title)) %>% View
     
-```
-
-# word_correlation
-
-```{r}
-
 ```

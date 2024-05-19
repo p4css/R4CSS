@@ -170,7 +170,7 @@ tweets %>%
     ## 2. unnesting word tokens
     mutate(word = str_extract_all(text, "\\b\\w+\\b")) %>%
     unnest(word) %>%
-    filter(!word %in% tidytext::stop_words$word) %>% View
+    filter(!word %in% tidytext::stop_words$word) %>%
     
     ## 3. filter out stopwords
     
