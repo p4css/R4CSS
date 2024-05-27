@@ -63,7 +63,7 @@ pml_map %>%
 
 ```{r plot-testing}
 pml_map %>%
-    filter(year==1995) %>%
+    filter(year==1998) %>%
     ggplot() + 
     aes(x = LON, y = LAT, 
         fill=factor(degree)) + 
@@ -75,7 +75,7 @@ pml_map %>%
                                "3"="lightskyblue",
                                "4"="DodgerBlue",
                                "5"="MediumBlue")) + 
-    coord_sf(xlim = c(-13007982, 15007978))
+    coord_sf(xlim = c(-13007982, 15007978), ylim=c(-8056014, 9071460))
 ```
 
 ## Treat `year` as transition variable
@@ -98,7 +98,10 @@ pml_map %>%
 library(gganimate)
 # install.packages("transformr")
 library(transformr)
+min(pml_map$LAT)
+max(pml_map$LAT)
 pml.ani <- pml_map %>%
+    # drop_na(country) %>%
     # filter(year==1995) %>%
     ggplot() + 
     aes(x = LON, y = LAT, 
@@ -111,7 +114,7 @@ pml.ani <- pml_map %>%
                                "3"="lightskyblue",
                                "4"="DodgerBlue",
                                "5"="MediumBlue")) + 
-    coord_sf(xlim = c(-13007982, 15007978)) + 
+    coord_sf(xlim = c(-13007982, 15007978), ylim=c(-8056014, 9071460)) + 
     transition_time(year)
 
 
