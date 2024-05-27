@@ -152,7 +152,7 @@ news.df %>%
 # tf_idf
 
 ```{r}
-unnested.df %>%
+tf_idf <- unnested.df %>%
     group_by(word) %>%
     filter(n() > 10) %>%
     ungroup() %>%
@@ -162,6 +162,14 @@ unnested.df %>%
     arrange(-tf_idf) %>%
     slice(1:15) %>%
     ungroup() %>%
-    left_join(news.df %>% select(doc_id, title)) %>% View
-    
+    left_join(news.df %>% select(doc_id, title))
+```
+
+```{r}
+tf_idf %>%
+    group_by(doc_id) %>%
+    arrange(-tf_idf) %>%
+    slice(1:5) %>%
+    ungroup() %>%
+    count(word, sort = T)
 ```

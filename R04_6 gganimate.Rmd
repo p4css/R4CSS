@@ -31,24 +31,34 @@ pml <- read_excel("data/WORLD-MACHE_Gender_6.8.15.xls", "Sheet1", col_names=T) %
 2.  **`wmap <- fortify(wmap)`**: 使用**`fortify()`**函數將地圖的地理資料轉換為ggplot2套件可以理解的格式。這一步將地理資料轉換為一個資料框（data frame），其中每一行對應地圖上的一個多邊形區域。
 
 ```{r get-worldmap}
+# install.packages("rgdal")
+library(sf)
 library(rworldmap)
 wmap <- getMap(resolution="low")
 wmap <- spTransform(wmap, CRS("+proj=robin")) # reproject
 wmap <- fortify(wmap)
 wmap %>%
     filter(!duplicated(id))
+
+
+data("countriesLow", package = "rworldmap")
+countries_sf <- st_as_sf(countriesLow)
+countries_sf_robinson <- st_transform(countries_sf, crs = "+proj=robin")
+ggplot(data = countries_sf_robinson) +
+  geom_sf() +
+  theme_minimal()
 ```
 
 ```{r join-map-data}
-pml_map <- wmap %>%
-    left_join(pml, by=c("id"="country")) %>%
+pml_map <- countries_sf_robinson %>%
+    left_join(pml, by="ISO3") %>%
     filter(!is.na(ISO3)) %>%
     mutate(year = as.integer(year))
 
 # devtools::install_github("thomasp85/transformr")
 
 pml_map %>%
-    select(id) %>%
+    select(ISO3) %>%
     filter(!duplicated(.))
 ```
 
@@ -60,10 +70,11 @@ pml_map %>%
 pml_map %>%
     filter(year==1995) %>%
     ggplot() + 
-    aes(x = long, y = lat, 
-                     group=group, fill=factor(degree)) + 
-    geom_polygon(color="grey") +
-    theme_void() + 
+    aes(x = LON, y = LAT, 
+        fill=factor(degree)) + 
+    geom_sf() +
+    theme_minimal()
+    # theme_void() + 
     scale_fill_manual(values=c("1"="red",
                                "2"="LightCyan",
                                "3"="lightskyblue",

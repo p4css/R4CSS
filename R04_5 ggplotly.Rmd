@@ -55,7 +55,7 @@ NW.plot <- NW %>%
          x = "Year",
          y = "Net Worth") + th
 
-ggplotly(NW.plot) %>%
+ggplotly(NW.plot)
   config(displayModeBar = FALSE)
 ```
 
@@ -75,7 +75,7 @@ NW.plot <- NW %>%
         text = paste0("<b>年(X): </b>", year, "<br>",
                       "<b>淨資產(Y): </b>", Net_Worth,"<br>",
                       "<b>年齡組: </b>", Category),
-        group=1) + 
+        group=Category) + 
     geom_line() + 
     theme_minimal() + 
     labs(title = "Net Worth by year grouped by age groups",

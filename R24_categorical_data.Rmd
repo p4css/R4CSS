@@ -66,13 +66,13 @@ dt <- raw %>%
 ```
 
 ```{r}
-dt$QA3[1:10]
-as.integer(dt$QA3[1:10])
+dt$QA3_lv[1:10]
+as.integer(dt$QA3_lv[1:10])
 ```
 
 ### Excluding {#excluding}
 
-如果有某些類別變數的值（如「拒答」）不想被編入`factor`，可以在`reorder()`中加入`exclude`的參數指定不想被編入類別值。
+如果有某些類別變數的值（如「拒答」）不想被編入`factor`，可以在`order()`中加入`exclude`的參數指定不想被編入類別值。
 
 ```         
   mutate(QASide=ordered(QASide, 
@@ -154,7 +154,6 @@ dt2 %>% count(Q7_3rd_lv)
 -   連續性係數（Contingency Coeff.）和克拉瑪爾V（Cramer's V）的值，表示兩個變數之間的關聯性較弱，但仍存在一定程度的相關性。
 
 ```{r}
-
 (xtb <- xtabs(~QA3_lv + Q7_3rd_lv, data=dt2))
 (chi2 <- chisq.test(xtb))
 
@@ -162,6 +161,9 @@ vcd::assocstats(xtb)
 print(round(chi2$observed, 2))
 print(round(chi2$expected, 2))
 print(round(chi2$residuals, 2))
+
+
+
 ```
 
 ```{r}
