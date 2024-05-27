@@ -34,11 +34,6 @@ pml <- read_excel("data/WORLD-MACHE_Gender_6.8.15.xls", "Sheet1", col_names=T) %
 # install.packages("rgdal")
 library(sf)
 library(rworldmap)
-wmap <- getMap(resolution="low")
-wmap <- spTransform(wmap, CRS("+proj=robin")) # reproject
-wmap <- fortify(wmap)
-wmap %>%
-    filter(!duplicated(id))
 
 
 data("countriesLow", package = "rworldmap")
@@ -73,14 +68,14 @@ pml_map %>%
     aes(x = LON, y = LAT, 
         fill=factor(degree)) + 
     geom_sf() +
-    theme_minimal()
+    theme_minimal() +
     # theme_void() + 
     scale_fill_manual(values=c("1"="red",
                                "2"="LightCyan",
                                "3"="lightskyblue",
                                "4"="DodgerBlue",
                                "5"="MediumBlue")) + 
-    coord_cartesian(xlim = c(-11807982, 14807978))
+    coord_sf(xlim = c(-13007982, 15007978))
 ```
 
 ## Treat `year` as transition variable
@@ -101,25 +96,31 @@ pml_map %>%
 
 ```{r animating}
 library(gganimate)
+# install.packages("transformr")
+library(transformr)
 pml.ani <- pml_map %>%
+    # filter(year==1995) %>%
     ggplot() + 
-    aes(x = long, y = lat, 
-        group=group, fill=factor(degree)) + 
-    geom_polygon(color="grey") +
-    theme_void() + 
+    aes(x = LON, y = LAT, 
+        fill=factor(degree)) + 
+    geom_sf() +
+    theme_minimal() +
+    # theme_void() + 
     scale_fill_manual(values=c("1"="red",
                                "2"="LightCyan",
                                "3"="lightskyblue",
                                "4"="DodgerBlue",
                                "5"="MediumBlue")) + 
-    coord_cartesian(xlim = c(-11807982, 14807978)) + 
+    coord_sf(xlim = c(-13007982, 15007978)) + 
     transition_time(year)
+
+
 # + 
 #     ease_aes("linear") +
 #     enter_fade() +
 #     exit_fade()
 
-animate(pml.ani, fps = 10, end_pause = 30, width = 750, height = 450, renderer = gifski_renderer())
+animate(pml.ani, fps = 15, end_pause = 30, width = 1600, height = 1200, renderer = gifski_renderer())
 
 anim_save("pml2.gif", animation = last_animation())
 ```

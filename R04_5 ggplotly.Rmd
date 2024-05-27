@@ -112,7 +112,7 @@ bw <- read_csv("data/unicef-changing-childhood-data.csv") %>%
     rename(`15-24y` = `1`, `40+y` = `2`)
 ```
 
-```{r  ggplot2, message=FALSE, warning=FALSE, include=FALSE}
+```{r ggplot2, message=FALSE, warning=FALSE, include=FALSE}
 bw.p <- bw %>%
     ggplot() + aes(`40+y`, `15-24y`, label = country) + 
     geom_point(color = "skyblue", size = 2) + 
