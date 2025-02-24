@@ -1,42 +1,48 @@
----
-title: "Loading data"
-author: "Jilung Hsieh"
-date: "`r Sys.Date()`"
-output: html_document
----
-
 ```{r include=FALSE}
 knitr::opts_chunk$set(cache = T, warning = F, message = FALSE, class.output = "output")
+
+library(knitr)
+library(kableExtra)
 library(tidyverse)
 ```
 
 # (PART) R BASIC {.unnumbered}
 
-# R Basic {#basic}
+# Using R {#basic}
 
 本章介紹如何使用 RStudio 編寫和執行 R 程式語言、R語言的基本語法、以及Vector和data.frame資料型態。
 
 ## Using RStudio
 
-### RStudio Interface
+### 介面概覽
 
-RStudio的介面主要分為四大區塊：
+RStudio 的介面主要劃分為四大區塊，各自負責不同功能：
 
--   左上的區塊是「Source」（可切換至「Visual」）是撰寫程式碼與R Markdown的區塊；
+-   **左上區（Source/Visual）：** 撰寫程式碼及 R Markdown 文件的區域。
 
--   左下角「Console」的區塊，每行程式碼的執行和執行結果都會出現在此，也可觀察程式執行結果；
+-   **左下區（Console）：** 顯示程式碼執行的即時結果，可直接輸入命令進行互動式操作。
 
--   右上角區塊最常用的是「Environment」這個分頁，程式碼執行過程產生的變數／變項都會出現在這裡。
+-   **右上區（Environment）：** 呈現執行過程中產生的變數與資料物件，方便檢查數據內容。
 
--   右下角區塊我最常用的是「Files」這個分頁，顯示的是我自己電腦本機端的檔案目錄。右下角區塊也常常用到「Packages」，可查閱現在的程式執行環境有載入哪些套件；當用`help(some_function)`查詢某個套件或某個函式的功能是，就會自動跳到「Help」分頁。
+-   **右下區（Files/Packages/Help）：**
+
+    -   **Files：** 顯示本機檔案目錄，便於瀏覽資料。
+
+    -   **Packages：** 列出目前已載入與可用的套件。
+
+    -   **Help：** 查詢函式與套件說明，方便尋求技術支援。
 
 ![](images/image-1886736556.png)
 
-### Writing R Markdown
+### 撰寫R Markdown
 
-R Markdown這種格式讓程式寫作者可以將程式碼和非程式碼的內容寫在同一份文件中。例如我想要寫作一本關於程式的書，裡面有很多的程式碼，但也要有很多說明、章節與段落。此時，這些非程式碼的區塊通常被稱為「內容區塊（Text Cell）」，而程式碼的區塊就稱為「Code Cell」。尤其是資料分析師或資料科學家很愛用這種格式，因為經常要為程式的執行結果寫很多說明，甚至利用標題一、標題二來區分章節。
+R Markdown 格式允許作者在同一份文件中同時混合撰寫程式碼與敘述性文字，非常適合用來撰寫技術文件與學術報告。文件中常見的區塊包括：
 
-**內容區塊**使用Markdown格式撰寫，顧名思義，支援用Markdown這種標記語法來快速撰寫如標題一、標題二、點列、編號等格式化文字。詳細指令可以參考[rmarkdown-cheatsheet (rstudio.com)](https://www.rstudio.com/wp-content/uploads/2015/02/rmarkdown-cheatsheet.pdf)。這種格式的靈活性和強大功能，使得 R Markdown 成為撰寫技術文檔和學術報告的理想選擇，能夠有效地將敘述性文本與程式碼結果結合，提升文檔的互動性和表達力。
+-   **內容區塊（Text Cell）：** 使用 Markdown 語法撰寫標題、段落、點列等格式化文字。詳細指令可以參考[rmarkdown-cheatsheet (rstudio.com)](https://www.rstudio.com/wp-content/uploads/2015/02/rmarkdown-cheatsheet.pdf)。這種格式的靈活性和強大功能，使得 R Markdown 成為撰寫技術文檔和學術報告的理想選擇，能夠有效地將敘述性文本與程式碼結果結合，提升文檔的互動性和表達力。
+
+-   **程式碼區塊（Code Cell）：** 撰寫 R 程式碼，並可直接執行以呈現結果。
+
+### 常用快捷鍵
 
 **程式碼區塊**可以用下列鍵盤指令來新增和執行。
 
@@ -53,10 +59,11 @@ Practice. 用鍵盤快速鍵新增一個程式碼區塊、輸入以下程式碼�
 `a*b`
 :::
 
-### Installing third-party packages
+### 安裝與載入第三方套件
 
--   套件的使用分為**安裝(`install.packages("pkg_name")`)**和**載入（`library(pkg_name)`）**兩個動作。通常安裝好R的時候就已經安裝好基本`base`套件。當執行R時便會將base套件**預載**入程式的執行環境中。
--   熱心的R使用者會編寫第三方套件，並且將這些套件開放給群眾使用。通常這些套件已經被上載到**R cran**提供下載。而**R cran**上的套件我們可以使用`install.packages("package_name")`來自動安裝到我們的電腦中。
+-   套件的使用分為「**安裝(`install.packages("pkg_name")`)」**和「**載入（`library(pkg_name)`）」**兩個步驟。
+-   通常安裝好R的時候就已經安裝好基本`base`套件。當執行R時便會將base套件**預載**入程式的執行環境中。
+-   熱心的R使用者會編寫第三方套件，而第三方套件則可透過 R CRAN 自動安裝。。而**R cran**上的套件我們可以使用`install.packages("package_name")`來自動安裝到我們的電腦中。
 
 ***Practice 1.*** 執行以下程式碼
 
@@ -66,9 +73,7 @@ install.packages("jsonlite")
 install.packages("httr")
 ```
 
-#### **Loading package**
-
-在安裝這些第三方套件之後，需要將它們載入到程式的運行環境中，然後才能使用。因此，需要使用 **`library(package_name)`** 命令來載入它們。
+**載入套件。**在安裝這些第三方套件之後，需要將它們載入到程式的運行環境中，然後才能使用。因此，需要使用 **`library(package_name)`** 命令來載入它們。
 
 ```{r eval=FALSE}
 library(tidyverse)
@@ -76,7 +81,21 @@ library(jsonlite)
 library(httr)
 ```
 
-### Code "Comment"
+### R 預載套件介紹
+
+當 R 的程式開始執行時，會預載入一些基本的套件，包括 **`stats`**、**`graphics`**、**`grDevices`**、**`utils`** 和 **`datasets`**。這些套件為 R 提供了基本的數據處理、統計分析、圖形顯示和檔案處理等功能。以下是這些套件的重要函式：
+
+-   **`stats`**：這個套件包含了許多統計分析相關的函式，例如假設檢定、方差分析、線性迴歸和時間序列分析等。其中，比較常用的函式有 **`t.test()`**、**`lm()`**、**`glm()`**、**`anova()`**、**`cor()`** 等。
+
+-   **`graphics`**：這個套件提供了用於繪製各種圖形的函式，例如散佈圖、直方圖、盒鬚圖、線圖、散點矩陣等。其中，常用的函式有 **`plot()`**、**`hist()`**、**`boxplot()`**、**`lines()`**、**`points()`** 等。
+
+-   **`grDevices`**：這個套件包含了用於輸出圖形的函式，例如 **`pdf()`**、**`png()`**、**`jpeg()`** 和 **`tiff()`** 等。
+
+-   **`utils`**：這個套件包含了一些實用的函式，例如 **`install.packages()`**、**`help()`**、**`data()`** 等。
+
+-   **`datasets`**：這個套件包含了一些內建的數據集，可以用來進行測試和練習，例如 **`iris`**、**`mtcars`**、**`CO2`** 等。可以使用 **`data()`** 函式載入這些數據集。
+
+### 程式碼註解技巧
 
 下列程式碼中開頭有`#`符號者為註解，程式設計師用這種註解來為程式碼做說明，便於自己日後閱讀或與他人溝通。程式在執行時會自動忽略前面有`#`符號的程式碼。如果要執行以下程式碼，要把前面的`#`記號給拿掉。在RStudio中你可以用滑鼠或鍵盤圈選下三行，然後用快速鍵`command(ctrl)+shift+c`就可以開關（Comment/Un-comment)這幾行程式碼。
 
@@ -86,9 +105,11 @@ library(httr)
 # a*b
 ```
 
-## First Attempt
+## Practical Examples
 
-### Loading Open Data from the MOI
+本節將透過實作範例，展示如何使用 R 讀取線上資料並進行基本資料操作。
+
+### 從內政部開放資料讀取資料
 
 MOS（Ministry of the Interior）: 中華民國行政院內政部
 
@@ -101,7 +122,17 @@ first_page <- fromJSON(content(GET(url), "text"))
 head(first_page$responseData) %>% rename(戶長=headhousehold_count)
 ```
 
-### Obtaining Taipei Youbike (v2) Realtime Data
+### 取得臺北 YouBike (v2) 即時資料
+
+以下範例從臺北市資料大平臺下載 YouBike 即時資訊，並檢視前六欄資料
+
+```{r}
+url <- "https://tcgbusfs.blob.core.windows.net/dotapp/youbike/v2/youbike_immediate.json"
+
+ubike.df <- fromJSON(content(GET(url),"text", encoding = "utf-8"))
+head(ubike.df) %>% select(1:6)
+ubike.df # %>% View
+```
 
 -   觀察[臺北市資料大平臺 (data.taipei)](https://data.taipei/dataset?qs=youbike)上關於Youbike的資料，你認為哪些資料是具有資料新聞價值的？
 
@@ -123,17 +154,9 @@ head(first_page$responseData) %>% rename(戶長=headhousehold_count)
 
     -   [YouBike2.0臺北市公共自行車即時資訊](https://data.taipei/dataset/detail?id=c6bc8aed-557d-41d5-bfb1-8da24f78f2fb)
 
-```{r}
-library(httr)
-library(jsonlite)
-url <- "https://tcgbusfs.blob.core.windows.net/dotapp/youbike/v2/youbike_immediate.json"
-ubike.df <- fromJSON(content(GET(url),"text", encoding = "utf-8"))
-head(ubike.df) %>% select(1:6)
-```
+### 讀取臺北住宅竊盜點位資訊
 
-### Reading Taipei Residential Burglary Data
-
-該資料網址可到[臺北市資料大平臺 (data.taipei)](https://data.taipei/)上查詢「住宅竊盜點位資訊」後，點選「API」後複製取得。
+使用 `read_json()` 讀取臺北市住宅竊盜點位資訊的 API 資料，並利用 `dplyr` 檢視資料結構。該資料網址可到[臺北市資料大平臺 (data.taipei)](https://data.taipei/)上查詢「住宅竊盜點位資訊」後，點選「API」後複製取得。
 
 ```{r eval=FALSE}
 url <- "https://data.taipei/api/v1/dataset/93d9bc2d-af08-4db7-a56b-9f0a49226fa3?scope=resourceAquire"
@@ -143,29 +166,30 @@ head(df)
 dplyr::glimpse(df)
 ```
 
-## R Q&A
+## Q&A
 
-### Encoding and Language
+### 編碼與語系設定
+
+在處理含有中文資料時，可能會遇到編碼問題，可透過 `Sys.setlocale()` 指定適當的語系：
 
 ```{r eval=FALSE}
 Sys.setlocale(category = "LC_ALL", locale = "UTF-8")
 Sys.setlocale(category = "LC_ALL", locale = "cht")
 ```
 
-如果讀取到資料有中文的話，此時，你只需要指定locale為cht，然後重開該data.frame就可以解決該問題。
+如果讀取到資料有中文的話，此時，你只需要指定`locale`為`cht`，然後重開該`data.frame`就可以解決該問題。
 
 ```{r eval=FALSE}
 Sys.setlocale(category = "LC_ALL", locale = "cht")
 ```
 
-但你在寫程式剖析HTML時若使用了rvest這個套件，有可能在html_node()函式時會因為編碼而產生問題，此時你會需要把locale改為C。這個C指的是C語言的C。
+若在使用 `rvest` 套件解析 HTML 時遇到編碼問題，則可將語系設定為 C（代表 C 語言的預設語系）：
 
 ```{r eval=FALSE}
 Sys.setlocale(category = "LC_ALL", locale = "C")
 ```
 
--   參考連結：<http://psmethods.postach.io/post/ru-he-geng-gai-rde-yu-she-yu-xi>
--   參考連結：<https://stat.ethz.ch/R-manual/R-devel/library/base/html/locales.html>
+-   參考連結：[R: Query or Set Aspects of the Locale](https://stat.ethz.ch/R-manual/R-devel/library/base/html/locales.html)
 -   The locale describes aspects of the internationalization of a program. Initially most aspects of the locale of R are set to "C" (which is the default for the C language and reflects North-American usage)
 
 ### RMD/R Notebook無法儲存
