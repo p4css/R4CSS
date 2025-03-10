@@ -1,0 +1,107 @@
+---
+title: "AS01_base_google_trend"
+author: "YOUR NAME"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+# ADD libraries here
+
+```
+
+# AS01 Visualize Google Trends
+
+這份作業將帶領同學學習如何使用 **R Markdown** 來處理 **Google Trends** 下載的數據，並透過**時間序列視覺化**來分析趨勢變化。作業目標不僅包括掌握 **bar chart** 與 **line chart** 的繪製，也希望同學能積極使用 **ChatGPT**、**Claude** 等 AI 工具來協助解決程式撰寫與數據分析過程中的困難。
+
+## Step 1. 下載Google Trend數據
+
+-   前往 Google Trends
+
+-   選擇一組感興趣的關鍵字（至少三個詞、建議用英文詞、關鍵字的搜尋量不要差太多會比較好觀察），設定時間範圍，時間可選「Past 12 months」或「Past 5 years」，下載 CSV 檔案。
+
+## Step 2. 讀取與前處理數據
+
+### 2.1 Read CSV files
+
+-   使用 `read.csv()` 或 `read.table()` 讀取資料。
+
+-   注意：跳過前兩行，因為第一行是類別說明，第二行是空行
+
+```{r}
+# YOUR CODE SHOULD BE HERE
+
+head(data)
+```
+
+### 2.2 Cleaning data
+
+-   使用類似將空值取代為0的方法處理數據中的 "\<1" 值（將其替換為0.5）
+
+```{r}
+
+```
+
+### 2.3 Type conversion
+
+-   將第2-4欄（Column）轉換為數值型態（有可能要詢問ChatGPT或Claude）
+
+```{r}
+
+```
+
+### 2.4 Renaming columns
+
+-   如果你覺得Column names不太清楚，可以使用以下語法來修改\
+    `names(data) <- c("Week", "賴清德", "傅崐萁", "黃國昌")`
+
+```{r}
+
+```
+
+### 2.5 觀察資料
+
+用`head()`印出前五筆數據。
+
+```{r}
+# YOUR CODE SHOULD BE HERE
+# head(data)
+```
+
+## Step 3. Bar plot
+
+-   仿照Paid Maternity Leavek的方式用`barplot()`由上而下將每個關鍵字查詢的Timeline繪製為Bar。如果有三組關鍵字，就由上而下三個子圖。
+
+-   注意，如果你使用的是Windows，有可能要調整字型。
+
+```{r}
+Sys.setlocale(category = "LC_ALL", locale = "cht") # Change locale
+par(family = "STHeitiTC-Light") # Setting Chinese Fonts: Mac
+par(family = "STKaiti") # Setting Chinese Fonts: Windows OK
+par(mfrow = c(3, 1), mar = c(2, 4, 2, 2))
+
+# barplot(...)
+# barplot(...)
+# barplot(...)
+```
+
+## 
+
+## Step 3. Line Chart
+
+-   **折線圖**（Line Chart）：使用 `plot()` 搭配`lines()`建立折線圖。
+
+```{r}
+Sys.setlocale(category = "LC_ALL", locale = "cht") # Change locale
+par(family = "STHeitiTC-Light") # Setting Chinese Fonts: Mac
+par(family = "STKaiti") # Setting Chinese Fonts: Windows OK
+
+# plot( ...
+# )
+# lines(..., col = "blue")
+# lines(..., col = "black")
+```
