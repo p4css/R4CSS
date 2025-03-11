@@ -40,7 +40,7 @@ head(data)
 
 ### 2.2 Cleaning data
 
--   使用類似將空值取代為0的方法處理數據中的 "\<1" 值（將其替換為0.5）
+-   使用類似將空值取代為0的方法處理數據中的 "\<1" 值（將其替換為0.5 或0）
 
 ```{r}
 
@@ -81,7 +81,7 @@ head(data)
 ```{r}
 Sys.setlocale(category = "LC_ALL", locale = "cht") # Change locale
 par(family = "STHeitiTC-Light") # Setting Chinese Fonts: Mac
-par(family = "STKaiti") # Setting Chinese Fonts: Windows OK
+# par(family = "STKaiti") # Setting Chinese Fonts: Windows OK
 par(mfrow = c(3, 1), mar = c(2, 4, 2, 2))
 
 # barplot(...)
@@ -91,7 +91,7 @@ par(mfrow = c(3, 1), mar = c(2, 4, 2, 2))
 
 ## 
 
-## Step 3. Line Chart
+## Step 4. Line Chart
 
 -   **折線圖**（Line Chart）：使用 `plot()` 搭配`lines()`建立折線圖。
 
