@@ -126,7 +126,7 @@ df_selected <- df %>%
 df_filtered <- df_selected %>%
   filter(county == "臺北市") %>%
   filter(year >= 104) %>%
-  filter(!area %in% c("中和市", "板橋市")) %>%
+  filter(!county %in% c("中和市", "板橋市")) %>%
   filter(!timestamp %in% c("01~03","03~05", "05~07", "09~11", "11~13", "11~03", "12~15", "15~17", "15~18", "17~19", "18~21", "19~21", "21~23", "21~24", "23~01"))
 ```
 
@@ -142,6 +142,11 @@ df_wide <- df_filtered %>%
   pivot_wider(names_from = area, values_from = n, values_fill = 0)
 
 ??pivot_wider
+```
+
+```{r}
+df_long <- df_wide %>%
+  pivot_longer(cols = 2:ncol(.), names_to = "area", values_to = "n")
 ```
 
 ### Plot with long table
