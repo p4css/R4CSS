@@ -40,27 +40,20 @@ library(tidyverse)
 
 如果知道這個套件是`readr`的話，也可以到右下方的工作區塊找到「Packages」工作視窗，裡面有列出現在載入的所有的套件，也有套件中的所有函式。偶而看一看會發現一些自己平常忽略的好用工具。
 
+**用read_csv()來讀取。**除了 base套件的`read.csv()`外，也可使用`readr`套件的`read_csv()`函式來讀取，該套件屬於tidyverse套件系的其中一個套件，如果已經有用`install.packages("tidyverse")`安裝過，只要用`library(tidyverse)`就可以使用`read_csv()`函式。在此鼓勵各位使用tidyverse系列套件。普遍來說，`read_csv()` 的功能和效果都會比`read.csv()`好，該函式還會自動猜測每個變數的變數型態並直接進行轉換（尤其是有時間欄位的時候，會非常方便）。
+
 ```{r}
 library(knitr)
-library(kableExtra)
 library(tidyverse)
 
-df <- read.csv("data/臺北市住宅竊盜點位資訊-UTF8-BOM-1.csv")
+df <- read.csv("data/臺北市住宅竊盜點位資訊-UTF8-BOM.csv", fileEncoding = "Big5")
+df <- read_csv("data/臺北市住宅竊盜點位資訊-UTF8-BOM.csv", locale = locale(encoding = "Big5"))
 head(df) 
 ```
-
-**用read_csv()來讀取。**除了 base套件的`read.csv()`外，也可使用`readr`套件的`read_csv()`函式來讀取，該套件屬於tidyverse套件系的其中一個套件，如果已經有用`install.packages("tidyverse")`安裝過，只要用`library(tidyverse)`就可以使用`read_csv()`函式。在此鼓勵各位使用tidyverse系列套件。普遍來說，`read_csv()` 的功能和效果都會比`read.csv()`好，該函式還會自動猜測每個變數的變數型態並直接進行轉換（尤其是有時間欄位的時候，會非常方便）。
 
 ::: debug
 萬一遇到中文檔案會有讀檔編碼問題時，有可能該檔案是用big5來儲存的，可以在`read_csv()`中設定`locale`來指定讀取的編碼方法。如`read_csv(url, locale = locale(encoding = "Big5"))`
 :::
-
-```{r}
-library(readr)
-df <- read_csv("data/臺北市住宅竊盜點位資訊-UTF8-BOM-1.csv")
-# df <- read_csv("data/臺北市住宅竊盜點位資訊-UTF8-BOM-1.csv", locale = locale(encoding = "Big5"))
-head(df)
-```
 
 #### 觀察變數 {#tptheft_var_overview}
 

@@ -1,7 +1,6 @@
 ```{r include=FALSE}
 knitr::opts_chunk$set(echo=T, cache = T, warning = F, message = FALSE, class.output = "output")
 library(knitr)
-library(kableExtra)
 library(tidyverse)
 ```
 

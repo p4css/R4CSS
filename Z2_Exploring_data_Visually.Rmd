@@ -1,0 +1,176 @@
+# Case Studies (Taiwan) {#taiwan}
+
+## TW AQI Visual Studies
+
+```{r}
+library(tidyverse)
+library(readxl)
+# options(stringsAsFactors = F)
+```
+
+```{r eval=FALSE, include=FALSE}
+xls_files <- list.files("data/twdata/AQI/", pattern = ".xls", full.names = T)
+
+
+csv_files <- list.files("data/twdata/AQI/", pattern = ".csv", full.names = T)
+```
+
+```{r eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+all_data <- tibble()
+for(fname in xls_files){
+    tmp <- readxl::read_excel(fname) %>% type_convert()
+    all_data <- bind_rows(all_data, tmp)
+}
+all_data2 <- tibble()
+for(fname in csv_files){
+    tmp <- read_csv(fname, locale = locale(encoding = "Big5")) %>%
+        filter(測站=="潮州") %>%
+        mutate(日期 = lubridate::as_date(日期)) %>%
+        type_convert() 
+    all_data2 <- bind_rows(all_data2, tmp)
+}
+
+all_data <- bind_rows(all_data, all_data2)
+
+save(all_data, file="data/twdata/AQI潮州.rda")
+write_rds(all_data, "data/twdata/AQI_Chaozhou.rds")
+```
+
+```{r eda-load-by-purrr, eval=FALSE, include=FALSE}
+
+xlsdata <- list.files("data/twdata/AQI/", pattern = ".xls", full.names = T) %>%
+    purrr::map(function(x){readxl::read_excel(x) %>% type_convert()}) %>%
+    bind_rows()
+
+csvdata <- list.files("data/twdata/AQI/", pattern = ".csv", full.names = T) %>%
+    purrr::map(function(x){read_csv(x, locale=locale(encoding = "Big5")) %>%
+            filter(測站=="潮州") %>%
+            mutate(日期 = lubridate::as_date(日期)) %>%
+            type_convert() }) %>%
+    bind_rows()
+
+
+all_data <- bind_rows(xlsdata, csvdata)
+
+```
+
+### eda-load-data-from-github
+
+```{r}
+# aqi_data <- read_rds("https://github.com/p4css/R4CSS/raw/master/data/AQI_Chaozhou.rds")
+aqi_data <- read_rds("data/AQI_Chaozhou.rds")
+```
+
+### Trending: Central tendency
+
+```{r eda-clean-data}
+toplot <- aqi_data %>%
+    arrange(日期)%>%
+    filter(測項=="PM2.5") %>%
+    gather("hour", "PM25", 4:28) %>% 
+    mutate(PM25 = as.numeric(PM25)) %>%
+    drop_na() %>%
+    group_by(日期) %>%
+    summarize(avg = mean(PM25)) %>% 
+    ungroup() %>%
+    mutate(year = lubridate::year(日期), 
+           month = lubridate::month(日期)) %>%
+    group_by(year, month) %>% 
+    summarize(avg = mean(avg)) %>%
+    ungroup()
+    
+```
+
+Counting data by month and plotting to ensure the degree of data loss.
+
+```{r eda-exame-data-lose}
+
+aqi_data %>%
+    filter(測項=="PM2.5") %>%
+    arrange(日期)%>%
+    gather("hour", "PM25", 4:28) %>% 
+    mutate(PM25 = as.numeric(PM25)) %>%
+    drop_na() %>%
+    group_by(日期) %>%
+    summarize(avg = mean(PM25)) %>% 
+    ungroup() %>%
+    arrange(日期) %>%
+    mutate(year = lubridate::year(日期), 
+           month = lubridate::month(日期)) %>%
+    count(year, month) %>%
+    mutate(rn = row_number()) %>%
+    ggplot() + aes(rn, n) + 
+    geom_line() + theme_minimal()
+
+
+```
+
+-   [科普小學堂-空氣中的懸浮粒子](https://fphsa.org.tw/eh/%E7%A7%91%E6%99%AE%E5%B0%8F%E5%AD%B8%E5%A0%82%EF%BD%9C%E7%A9%BA%E6%B0%A3%E4%B8%AD%E7%9A%84%E5%8D%B1%E5%AE%B3%EF%BC%8D%E7%B4%B0%E6%87%B8%E6%B5%AE%E5%BE%AE%E7%B2%92pm2-5/?gclid=Cj0KCQjw_4-SBhCgARIsAAlegrXyT47_JTqzwuZ93EiEaerVLEwwIR03XgBkMVIvQKFvLQ9GNeMQh9kaAh3vEALw_wcB)
+-   [台灣PM2.5三大面向：空汙現況多嚴重？要怪中國還是怪自己？ - 第 1 頁 - The News Lens 關鍵評論網](https://www.thenewslens.com/article/115229)
+
+```{r eda-central-trend}
+library(gghighlight)
+toplot %>%
+    mutate(month = as.character(month)) %>%
+    group_by(month) %>%
+    arrange(year) %>%
+    # mutate(diff = avg -first(avg),
+    #        month = as.character(month)) %>%
+    # ungroup() %>%
+    ggplot() + aes(year, avg, color = month) + 
+    geom_line() + 
+    # geom_point() + 
+    gghighlight(month %in% c("11", "12", "1", "2", "3")) + 
+    theme_minimal()
+```
+
+### Trending: Extreme value
+
+```{r eda-boxplot}
+toplot2 <- aqi_data %>%
+    arrange(日期)%>%
+    filter(測項=="PM2.5") %>%
+    gather("hour", "PM25", 4:28) %>%
+    mutate(PM25 = as.numeric(PM25)) %>%
+    drop_na() %>%
+    group_by(日期) %>%
+    summarize(avg = sum(PM25)/24) %>% 
+    ungroup() %>%
+    mutate(year = lubridate::year(日期), month = lubridate::month(日期)) %>%
+    group_by(year, month) %>%
+    summarize(purple = sum(avg>150),
+              red = sum(avg>54),
+              orange = sum(avg>35)) %>%
+    ungroup()
+
+toplot2 %>%
+    mutate(month = as.character(month)) %>%
+    group_by(month) %>%
+    arrange(year) %>%
+    ggplot() + aes(year, orange, color = month) + 
+    geom_line() + 
+    # geom_point() + 
+    gghighlight(month %in% c("11", "12", "1", "2", "3")) + 
+    ylab("Days (PM25 > 35) in one month") + 
+    theme_minimal()
+```
+
+```{r}
+toplot3 <- aqi_data %>%
+    arrange(日期)%>%
+    filter(測項=="PM2.5") %>%
+    gather("hour", "PM25", 4:28) %>%
+    mutate(PM25 = as.numeric(PM25)) %>%
+    drop_na() %>%
+    mutate(year = lubridate::year(日期), month = lubridate::month(日期)) %>%
+    filter(month %in% c(11, 12, 1, 2, 3))
+```
+
+```{r message=FALSE, warning=FALSE}
+toplot3 %>%
+    mutate(year = as.character(year)) %>%
+    ggplot() + aes(y=year, x=PM25)  + 
+    geom_boxplot(fill="skyblue", alpha=0.2) + 
+    xlim(0, 200) + 
+    theme_minimal()
+```
