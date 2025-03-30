@@ -58,17 +58,17 @@ comments <- tibble(pid = c("p02", "p03", "p04"), ccontent = c("comment01", "comm
 result <- left_join(posts, comments, by = c("postid" = "pid"))
 ```
 
-## 案例說明-公投案與人口資料
+## 1. 案例說明-公投案與人口資料
 
 2018年中華民國全國性公民投票共有10個提案，其中6個提案獲得通過。通過的提案包括反空污、反燃煤發電、反日本核災地區食品進口、民法婚姻限定一男一女、國中小不實施同志教育、非民法保障同性共同生活，以及廢止電業法非核家園條文。未通過的提案有2020東京奧運台灣正名、以民法保障同性婚姻和國中小性別平等教育明定入法。此次公投與九合一地方選舉同時舉行，並創下中華民國歷史上公民投票案數最多的一次。（請見[中華民國全國性公民投票 - 維基百科，自由的百科全書](https://zh.wikipedia.org/zh-tw/%E4%B8%AD%E8%8F%AF%E6%B0%91%E5%9C%8B%E5%85%A8%E5%9C%8B%E6%80%A7%E5%85%AC%E6%B0%91%E6%8A%95%E7%A5%A8)）。
 
-### 資料來源
+### 1.1 資料來源
 
 -   [15歲以上現住人口按性別、年齡、婚姻狀況及教育程度分 \| 政府資料開放平臺 (data.gov.tw)](https://data.gov.tw/dataset/32944)
 -   [15歲以上現住人口按性別、年齡、婚姻狀況及教育程度分(含同婚) ｜ 政府資料開放平臺](https://data.gov.tw/dataset/117988) （118後）
 -   [ywchiu/referendum: 2018 公投案資料集](https://github.com/ywchiu/referendum) 網路上有一些已經整理好的公投資料，或者要到中選會下載。
 
-### 處理策略
+### 1.2 處理策略
 
 在這個案例中，合併公投結果與人口統計資料的策略主要是基於兩個資料集之間的共同鍵值（`site_id`），將兩個資料集根據相同的地理單位進行合併。首先，讀取並清理內政部的總人口統計資料，將其轉換為 tidy 型態後，透過 `group_by()` 和 `summarise()` 來匯總每個鄉鎮市區（或村里）的基本人口資料。接著，讀取公投結果資料，並創建一個名為 `site_id` 的變項，使其與人口統計資料中的相對應變項對應。
 
@@ -83,7 +83,7 @@ result <- left_join(posts, comments, by = c("postid" = "pid"))
 3.  合併鄉鎮市區層級的年齡指數和公投結果
 4.  視覺化年齡與公投結果間的相關性
 
-## I. 讀取內政部人口統計資料 {#moi}
+## 2. 讀取內政部人口統計資料 {#moi}
 
 首先，使用 `slice(-1)` 函數來去除第一行的中文欄位名稱。接著，縣市鄉鎮市區（`site_id`）和村里（`village`）原本是兩個分開的變項，然而，由於不同的鄉鎮市可能會有相同的村里名稱，因此需要將 `site_id` 與 `village` 這兩個變項結合，形成一個完整的村里名稱 `vname`。
 
@@ -99,7 +99,7 @@ raw %>% head()
 # raw %>% glimpse()
 ```
 
-## II. 觀察資料
+## 3. 觀察資料
 
 在資料分析中，我們常見兩種資料型態：**long-table（長格式表格）** 和 **wide-table（寬格式表格）**。這兩種格式在統計分析中的應用有所不同。
 
@@ -111,7 +111,7 @@ raw %>% head()
 
 ![](images/clipboard-879219800.png)
 
-## III. 彙整列數據為新的變項：使用Rowwise()
+## 4. 彙整列數據為新的變項：使用Rowwise()
 
 觀察`raw`中的資料，你可以看見他是一個寬表格，但每一列已經是一個完整的觀察單位（此範例為村里）。過去我們可能會需要把資料轉為長表格後，再用 `group()`搭配 `summarize()`來做群組彙整運算。但這個例子剛好很特別，我們要形成的指標，只要把某幾個欄（變項）給加總起來就好。例如，把所有變項名稱中有包含60歲以上的資料欄的列值給加起來。而這產生了一個問題，**現在我有數十個變項的列值想要相加（就像這個例子），要怎麼辦**？
 
@@ -149,7 +149,7 @@ village_stat <- raw %>%
   ungroup()
 ```
 
-### 補充 (1)：`c_across()`的應用時機
+### 補充：`c_across()`的應用時機
 
 | 需求                       | 做法                                   |
 |----------------------------|----------------------------------------|
@@ -158,9 +158,104 @@ village_stat <- raw %>%
 | 每列最大值                 | `mutate(max_val = max(c_across(a:c)))` |
 | 依欄位範圍條件過濾（進階） | `filter(any(c_across(a:c) > 10))`      |
 
-### 補充 (2)：不用`rowwise()`的做法
+## 5. 將村里指標匯總為鄉鎮市區指標 {#moi_town_groupby}
 
-#### **Step 1. 寬表轉長表**
+剛剛是根據村里（village）來建立指標，現在要根據鄉鎮市區來建立指標。走過前方的邏輯後，我們只需要把原本用來做`group_by()`的村里變項`vname`改為鄉鎮市區的變項`site_id`，就可以完成這件事，其他都一樣，你發現沒？
+
+不過這邊我要多做一件事。因為三民區和鳳山區兩個區非常的大（我猜），所以內政資料中的鄉鎮市區資料有分「三民一」、「三民二」、「鳳山一」、「鳳山二」。我們只要在彙整資料前，將`site_id`的這四類值取代好，便可以在鄉鎮市區的指標中一併彙整。以下我一共彙整出四種資料，分別為該區人口數（`legalPopulation`）、老年人口數（`elderSum`）、曾婚人口數（`marriedSum`）、女性人口數（`womenSum`）。不難想像接下來可以計算出各鄉鎮市區的老年人口比例、曾婚比例、女性比例等。
+
+```{r}
+town_stat <- village_stat %>%
+  # mutate(site_id = str_sub(vname, 1, 6)) %>%
+  mutate(site_id = str_replace(site_id, "三民一|三民二", "三民區")) %>%
+  mutate(site_id = str_replace(site_id, "鳳山一|鳳山二", "鳳山區")) %>%
+  group_by(site_id) %>%
+  summarize(
+    legalPopulation = sum(legalPopulation),
+    elderSum = sum(elderSum),
+    marriedSum = sum(marriedSum),
+    womenSum = sum(womenSum)
+  ) %>%
+  ungroup()
+```
+
+## 6. 視覺化測試（老年人口數 x 曾婚人口數） {#moi_visual_popul}
+
+```{r}
+th <-
+  theme(
+    title = element_text(family = "Heiti TC Light"),
+    text = element_text(family = "Heiti TC Light"),
+    axis.text.y = element_text(family = "PingFang TC"),
+    axis.text.x = element_text(family = "Heiti TC Light"),
+    legend.text = element_text(family = "Heiti TC Light"),
+    plot.title = element_text(family = "Heiti TC Light")
+  )
+
+town_stat %>%
+  mutate(marriedPerc = marriedSum / legalPopulation) %>%
+  mutate(womenPerc = womenSum / legalPopulation) %>%
+  mutate(elderPerc = elderSum / legalPopulation) %>%
+  ggplot() +
+  aes(womenPerc, elderPerc) +
+  geom_point(alpha = 0.3) +
+  geom_text(aes(label = site_id, vjust = 1.3, size = 2), family = "Heiti TC Light") +
+  theme_light() +
+  th
+# geom_jitter(alpha = 0.3)
+```
+
+## 7. 合併公投資料 {#referendum}
+
+### 7.1. 讀取公投資料
+
+首先，先讀取資料並重新命名每個變項。由於我們要連結公投資料和前面的內政部人口統計資料，所以要注意兩筆資料間是否有共通的key（資料庫稱為鍵值）。`town_stat`的是以`site_id`鄉鎮市區名為主鍵，所以公投資料這邊也產生一個同名的鄉鎮市區變項`site_id`。
+
+```{r}
+ref10 <- read_csv("data/ref10.csv") %>%
+  select(
+    county = 縣市, town = 鄉鎮市區,
+    agree = 同意票數, disagree = 不同意票數,
+    legalVote = 有效票數, illegalVote = 無效票數,
+    vote = 投票數, legalPopulation = 投票權人數
+  ) %>%
+  mutate(site_id = str_c(county, town)) %>%
+  drop_na(site_id)
+
+names(ref10)
+```
+
+合併資料測試，注意，由於兩邊都有`legalPopulation`，所以`town_stat`中的`legalPopulation`增生為`legalPopulation.x`，而`ref10`中的`legalPopulation`則重新命名為`legalPopulation.y`。
+
+```{r}
+town_stat %>%
+  left_join(ref10, by = "site_id") %>%
+  head()
+```
+
+### 7.2. 合併公投資料並視覺化 {#moi_join_ref}
+
+由於人口統計資料中的鄉鎮市區若只有兩個字如「東區」中間有一全形空白「東　區」，但公投資料中並沒有這樣的空白，所以為了兩者要能夠正確合併，需要先做好取代。可以逐一取代，或者，直接取代掉該全形空白為空字串即可。
+
+```{r}
+town_stat %>%
+  mutate(site_id = str_replace(site_id, "　", "")) %>%
+  left_join(ref10, by = "site_id") %>%
+  mutate(
+    agreeRate = agree / legalVote,
+    marriedPerc = marriedSum / legalPopulation.x,
+    elderPerc = elderSum / legalPopulation.x
+  ) %>%
+  ggplot() +
+  aes(agreeRate, elderPerc) +
+  geom_point(alpha = 0.5, color = "royalblue") +
+  geom_text(aes(label = site_id, vjust = 1.3, size = 2), family = "Heiti TC Light") +
+  theme_light()
+```
+
+## 8. 補充：不用`rowwise()`的做法
+
+### **8.1. 寬表轉長表**
 
 接下來，我要用 `pivot_longer()` 把表格型態的資料轉為 `tidy` 型態，也就是Long-table的型態。相對於`pivot_wider()`把某一變項展開成欄方向的變項，`pivot_longer()`函式是用來收合被展開的變項。針對這個資料，我要將變項欄（`single_age_15down_m`、`single_age_15_19_m`等）轉為單一變項（命名為 `key` ），再把其所對應到的資料值，也轉為單一變項（命名為 `value`）。
 
@@ -177,7 +272,7 @@ tidy_data <- raw %>%
 
 `pivot_longer()`後資料列從7760增加至1,179,520列。
 
-#### Step 2. 切分變項
+### 8.2. 切分變項
 
 由於每一列恰好是一種婚姻狀態、一個年齡層和一個性別，所以，我們可以把`key`中的婚姻狀態、年齡層和性別切割出來做為變數。觀察`key`欄位發現其格式有一些規律性，主要是婚姻狀態_年齡下界_年齡上界_性別的形式。標準的範例如`married_15_10_m或widowed_25_29_f`，但有一些並非這種形式，必須要先做一點前處理。例如：
 
@@ -215,9 +310,7 @@ tidy_data <- raw %>%
   arrange(vname)
 ```
 
-#### （Optional）運用`rowwise()` {#moi_rowwise}
-
-#### Step 3. 使用`group_by()`建立村里指標 {#moi_vil_groupby}
+### 8.3. 使用`group_by()`建立村里指標 {#moi_vil_groupby}
 
 將資料轉換為tidy型態後，接下來要做的事情是建立村里、鄉鎮市區、縣市的分級指標。針對每個村里，我希望計算出總人口數`people`（原本依據年齡與性別、婚姻情形分割）、老年人總數`elderSum`、曾結婚人口總數`marriedSum`。之後再分別除以該村里的總人口數`people`，老年人的人口比例`elderPerc`以及結婚的人口比例`marriedPerc`。
 
@@ -259,99 +352,4 @@ village_stat %>%
 village_stat %>%
   left_join(raw %>% select(vname, site_id), by = "vname") %>%
   head()
-```
-
-## IV. 將村里指標匯總為鄉鎮市區指標 {#moi_town_groupby}
-
-剛剛是根據村里（village）來建立指標，現在要根據鄉鎮市區來建立指標。走過前方的邏輯後，我們只需要把原本用來做`group_by()`的村里變項`vname`改為鄉鎮市區的變項`site_id`，就可以完成這件事，其他都一樣，你發現沒？
-
-不過這邊我要多做一件事。因為三民區和鳳山區兩個區非常的大（我猜），所以內政資料中的鄉鎮市區資料有分「三民一」、「三民二」、「鳳山一」、「鳳山二」。我們只要在彙整資料前，將`site_id`的這四類值取代好，便可以在鄉鎮市區的指標中一併彙整。以下我一共彙整出四種資料，分別為該區人口數（`legalPopulation`）、老年人口數（`elderSum`）、曾婚人口數（`marriedSum`）、女性人口數（`womenSum`）。不難想像接下來可以計算出各鄉鎮市區的老年人口比例、曾婚比例、女性比例等。
-
-```{r}
-town_stat <- village_stat %>%
-  # mutate(site_id = str_sub(vname, 1, 6)) %>%
-  mutate(site_id = str_replace(site_id, "三民一|三民二", "三民區")) %>%
-  mutate(site_id = str_replace(site_id, "鳳山一|鳳山二", "鳳山區")) %>%
-  group_by(site_id) %>%
-  summarize(
-    legalPopulation = sum(legalPopulation),
-    elderSum = sum(elderSum),
-    marriedSum = sum(marriedSum),
-    womenSum = sum(womenSum)
-  ) %>%
-  ungroup()
-```
-
-## V.. 視覺化測試（老年人口數 x 曾婚人口數） {#moi_visual_popul}
-
-```{r}
-th <-
-  theme(
-    title = element_text(family = "Heiti TC Light"),
-    text = element_text(family = "Heiti TC Light"),
-    axis.text.y = element_text(family = "PingFang TC"),
-    axis.text.x = element_text(family = "Heiti TC Light"),
-    legend.text = element_text(family = "Heiti TC Light"),
-    plot.title = element_text(family = "Heiti TC Light")
-  )
-
-town_stat %>%
-  mutate(marriedPerc = marriedSum / legalPopulation) %>%
-  mutate(womenPerc = womenSum / legalPopulation) %>%
-  mutate(elderPerc = elderSum / legalPopulation) %>%
-  ggplot() +
-  aes(womenPerc, elderPerc) +
-  geom_point(alpha = 0.3) +
-  geom_text(aes(label = site_id, vjust = 1.3, size = 2), family = "Heiti TC Light") +
-  theme_light() +
-  th
-# geom_jitter(alpha = 0.3)
-```
-
-## VI. 合併公投資料 {#referendum}
-
-### 1. 讀取公投資料
-
-首先，先讀取資料並重新命名每個變項。由於我們要連結公投資料和前面的內政部人口統計資料，所以要注意兩筆資料間是否有共通的key（資料庫稱為鍵值）。`town_stat`的是以`site_id`鄉鎮市區名為主鍵，所以公投資料這邊也產生一個同名的鄉鎮市區變項`site_id`。
-
-```{r}
-ref10 <- read_csv("data/ref10.csv") %>%
-  select(
-    county = 縣市, town = 鄉鎮市區,
-    agree = 同意票數, disagree = 不同意票數,
-    legalVote = 有效票數, illegalVote = 無效票數,
-    vote = 投票數, legalPopulation = 投票權人數
-  ) %>%
-  mutate(site_id = str_c(county, town)) %>%
-  drop_na(site_id)
-
-names(ref10)
-```
-
-合併資料測試，注意，由於兩邊都有`legalPopulation`，所以`town_stat`中的`legalPopulation`增生為`legalPopulation.x`，而`ref10`中的`legalPopulation`則重新命名為`legalPopulation.y`。
-
-```{r}
-town_stat %>%
-  left_join(ref10, by = "site_id") %>%
-  head()
-```
-
-### 2. 合併公投資料並視覺化 {#moi_join_ref}
-
-由於人口統計資料中的鄉鎮市區若只有兩個字如「東區」中間有一全形空白「東　區」，但公投資料中並沒有這樣的空白，所以為了兩者要能夠正確合併，需要先做好取代。可以逐一取代，或者，直接取代掉該全形空白為空字串即可。
-
-```{r}
-town_stat %>%
-  mutate(site_id = str_replace(site_id, "　", "")) %>%
-  left_join(ref10, by = "site_id") %>%
-  mutate(
-    agreeRate = agree / legalVote,
-    marriedPerc = marriedSum / legalPopulation.x,
-    elderPerc = elderSum / legalPopulation.x
-  ) %>%
-  ggplot() +
-  aes(agreeRate, elderPerc) +
-  geom_point(alpha = 0.5, color = "royalblue") +
-  geom_text(aes(label = site_id, vjust = 1.3, size = 2), family = "Heiti TC Light") +
-  theme_light()
 ```
