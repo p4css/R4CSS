@@ -9,6 +9,15 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+## LTN Scraper Process
+
+1.  **測試：**先爬取某一頁回來看看是否能成功抓取
+    1.  拆解url為base_url + params (parameters)
+2.  **主程式：**爬取第一頁（或第二頁）以取得最末頁的頁碼
+3.  **測試：**剖析（Parse）第一頁的內容（會產生一個data.frame，包含標題、內文、時間等欄位）
+4.  **主程式：**寫一個for-loop，用第三個步驟產生的程式碼，依次爬取第一頁、第二頁、第三頁至最末頁，並把所有的data.frame用`bind_rows()`給串接起來。
+5.  **視覺化：**把含有時間字串的欄位轉為時間物件，再轉為月份，統計每個月的文章數。
+
 ## Libraries
 
 -   `httr`：抓取網站資料（例如 RESTful API）。處理授權（OAuth）、cookies 等。
