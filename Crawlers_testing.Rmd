@@ -1,0 +1,29 @@
+---
+title: "House Pricing Comparison"
+output: html_document
+date: "2025-04-27"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(httr)
+library(jsonlite)
+```
+
+```{r}
+url <- "https://lvr.land.moi.gov.tw/SERVICE/QueryPrice/46ebd317af0bc30010d762db7673a295?q=VTJGc2RHVmtYMTlSOGNwOG9lTzhlSENWdjd3akxzN1FWYUdKc3lCK3hCR21BZnExTnRORm5iTGduQ1JFZnlaR2JXcGZOWEhqTlNndlA2b2JYUit6S3pqcVJqMHZQeE1lWmZkRXpHRWt5NFhCdFZDWk02UmQwUTNQbUlGb0cxWWRVU1VJbGlDdUxrZ2k4Qm5MbEV2T2FoSnJpZi9tdDdmNDUyYlBnQUMxWXFlYUhzaEFmdCtWZHpRcFJzQ3VYMGhzamNBMy9pT2dhL1VhY1lUZy94cFlOYmsxS1hENnRNYnU5YnN5dzh5aHlBR0J0UDVidmk2d0lHNFNpdUpOS216UUppdlprTFJhNFFocDMwVHlMbWQxMGZSc0FwRmlWUFVtbE5mRjZkUEJwMEtDb3RiUFFGeHlMN041UkJNYytMVWdHY2NsVFViZDVNQyszUWF4cEh3TGdxZ2JDcmRqakJ5UnFoY3ozNWVhUHVwa2hNRkpvMzlHc05OaTl2OVpMc1ovRVpnSXRRV2FRUEpqamZ6YjB4ZldaSjdDNzBoSmpFWVgyaERZUVBlUlBSbmlxSW05akxNejFpS0VjcDVKenlNREZRUnhkZWplRmtIRGNtODUxK0xBeFlUUmdMaVR1Y25DZFVUU05YQkdNSjdUaUhFM0JsOWExK3Q1cG93a1FiY05nNkJEcWloWkVySWhpU2QraXdXckQwRGgzMllzOGJ5TDZ6eHBUUG5ZTk5EMm9YU0dYd1ZHTUR3VzcwVGNzN3ByQ1dQMXhwUjhIL2o2aks0Qkhaenh4clM0Rnh5cEtud2pHWUdlVVN5Wm16Q3hybE9QbkQ4VlYrdGRQWHR0dlFvZUFTb1hnbDU2ekVtMXFTQ2VIaGNNV3FSVEtQeEE5V3lHWVU3dEFvM2hrNjltRzVUNjRnSS9MRnZVZ2JTWkdROUVJSVZCSjBYRGIvTXoyRGtvTDltcVRQZTk4dUVhclQvUWxqTlUwSXZhZ3p3PQ=="
+
+headers <- c(
+  `User-Agent` = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36" #Example User-Agent
+)
+
+
+
+res <- GET(url, add_headers(headers)) %>% 
+    content("text") %>%
+    fromJSON()
+```

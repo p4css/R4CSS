@@ -1,0 +1,280 @@
+---
+title: "ltn-scraper"
+author: "jilung"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Libraries
+
+-   `httr`：抓取網站資料（例如 RESTful API）。處理授權（OAuth）、cookies 等。
+-   `rvest`：擷取 HTML 元素（透過 CSS selectors 或 XPath）。提取特定資料（如表格、標題、連結等）。
+
+```{r}
+library(tidyverse)
+library(httr)
+library(rvest)
+```
+
+用 `browseURL(url)` 來開啟超鏈結，當成功開啟並顯示正常頁面時，代表該網頁可以被直接讀取；如果被導向 404 錯誤頁面或顯示「存取被拒」等訊息，那就代表該頁面無法被直接存取。這種情況可能是因為伺服器對爬蟲行為有防範措施，此時就可能需要在 HTTP 請求中加入一些標頭（header）資訊，例如：
+
+-   `User-Agent`：模擬一般使用者瀏覽器，例如 "Mozilla/5.0"，避免被辨識為機器人。
+
+-   `Referer`：指定來源頁面，讓伺服器以為是從某個正常來源點擊過來的。
+
+-   `Accept`、`Accept-Language` 等：模擬正常瀏覽器請求格式。
+
+使用 `httr` 套件可以自訂這些標頭
+
+```{r}
+url <- "https://search.ltn.com.tw/list?keyword=%E5%A0%B1%E7%A8%85"
+browseURL(url)
+```
+
+## Parsing HTML
+
+撰寫 HTML parser 的典型流程是：先用 `read_html()` 轉成可解析的 HTML 結構，再用 `html_nodes()` 或 `html_node()` 選取你要的節點，最後用 `html_text()` 或 `html_attr()` 擷取你要的資料。熟悉這三群函式的搭配使用，是進行網頁資料擷取與分析的基礎能力。
+
+1.  第一步是使用 `read_html()` 將 HTML 原始碼轉換成 R 可以處理的結構。這個函式會將網頁的 HTML 內容（不論是來自字串、本機檔案或 URL）轉換為一個 `xml_document` 類型的物件，也就是所謂的 HTML 樹狀結構。這個結構是後續節點選取與內容提取操作的基礎，因此 `read_html()` 是整個解析流程的起點。
+2.  第二步是從 HTML 結構中選取你感興趣的元素，這時會使用 `html_nodes()` 或 `html_node()`。`html_nodes()` 用來選取所有符合條件的節點，回傳一個節點集合；而 `html_node()` 則只會選取第一個符合條件的節點。這兩個函式都支援 CSS selector 或 XPath 作為查詢方式，讓使用者可以根據 HTML 的結構和標籤類型，精確地指定想要擷取的部分，例如標題、段落、圖片或連結等。
+3.  第三步則是從選取到的節點中擷取實際資料。此時通常會用到兩個函式：`html_text()` 與 `html_attr()`。`html_text()` 是用來擷取節點內部的文字內容，例如文章標題或段落文字；而 `html_attr()` 則是用來擷取節點的屬性值，例如 `<a>` 標籤中的 `href` 連結、`<img>` 標籤中的圖片來源 `src`，或其他 HTML 屬性。這兩種函式基本上對應了 HTML 元素中最常見的兩種資訊來源：一是節點包住的內容文字，二是屬性中的附加資料。
+
+```{r}
+url <- "https://search.ltn.com.tw/list?keyword=%E5%A0%B1%E7%A8%85"
+read_html(url) %>%
+    # html_node("#ec > section.Searchnews > div.page-name > ul > li:nth-child(1) > div > a.tit") %>%
+    # html_node("ul > li:nth-child(1) > div > a.tit") %>%
+    html_nodes("ul > li > div > a.tit") %>%
+    html_attr("href")
+```
+
+## Decompose url 
+
+**Option.** 你可以要求ChatGPT幫你拆解url問號後面的parameters：
+
+```{undefined eval=FALSE, include=FALSE}
+將這個url拆解成GET()要用的params和base_url
+url <- "https://search.ltn.com.tw/list?keyword=%E5%81%87%E6%96%B0%E8%81%9E&page=1&sort=date&type=all&start_time=20240101&end_time=20241231"
+```
+
+```{r}
+url <- "https://search.ltn.com.tw/list?keyword=%E5%81%87%E6%96%B0%E8%81%9E&page=1&sort=date&type=all&start_time=20240101&end_time=20241231"
+
+# Define base_url
+base_url <- "https://search.ltn.com.tw/list"
+
+# Define parameters
+params <- list(
+  keyword = "假新聞",
+  page = 1,
+  sort = "date",
+  type = "all",
+  start_time = "20240101",
+  end_time = "20241231"
+)
+
+# Send request
+res <- GET(
+  url = base_url,
+  query = params
+)
+
+res
+```
+
+## Get number of pages
+
+先把第一頁撈回來，就可以找到一共有幾頁。
+
+```{r}
+base_url <- "https://search.ltn.com.tw/list"
+
+params <- list(
+  keyword = "假新聞",
+  page = 1,
+  sort = "date",
+  type = "all",
+  start_time = "20240101",
+  end_time = "20241231"
+)
+
+res <- GET(base_url, query = params)
+
+```
+
+**Option.** 由於抓回來的內容不知道是什麼，可以先將其寫為一個在本機電腦可以打開的HTML檔（如下方的`test.html`）後，用`browseURL()`打開觀察。
+
+```{r}
+library(xml2)
+read_html(res) %>%
+    write_html("test.html")
+browseURL("test.html")
+```
+
+觀察網頁並取得總頁數。
+
+```{r}
+res$url
+mark_text <- read_html(res) %>%
+    html_node("div.mark") %>%
+    html_text(trim = TRUE)
+
+library(stringr)
+total_results <- str_match(mark_text, "約有 (\\d+) 項結果")[1, 2] %>%
+    as.numeric()
+total_pages <- ceiling(total_results/20)
+total_pages
+```
+
+```{r}
+library(httr)
+library(rvest)
+library(dplyr)
+library(lubridate)
+library(ggplot2)
+
+# 設定參數
+base_url <- "https://search.ltn.com.tw/list"
+keyword <- "假新聞"
+start_time <- "20240101"
+end_time <- "20241231"
+sort <- "date"
+type <- "all"
+
+params <- list(
+  keyword = keyword,
+  page = 1,
+  sort = sort,
+  type = type,
+  start_time = start_time,
+  end_time = end_time
+)
+
+# 第一次請求用來抓總頁數
+res <- GET(base_url, query = params)
+html <- read_html(res)
+mark_text <- html %>%
+    html_node("div.mark") %>%
+    html_text(trim = TRUE)
+
+total_pages <- 1
+if (!is.na(mark_text)) {
+    match <- str_match(mark_text, "約有\\s*(\\d+)\\s*項結果")
+    if (!is.na(match[2])) {
+        total_results <- as.numeric(match[2])
+        total_pages <- ceiling(total_results / 20)
+        
+        cat("Total pages:", total_pages, "\n")
+    }
+}
+```
+
+## Parse first page
+
+```{r}
+params <- list(
+  keyword = keyword,
+  page = 1,
+  sort = sort,
+  type = type,
+  start_time = start_time,
+  end_time = end_time
+)
+
+# 第一次請求用來抓總頁數
+res <- GET(base_url, query = params)
+
+titles <- read_html(res) %>%
+    html_nodes("ul.list.boxTitle li a.tit") %>%
+    html_text()
+
+links <- read_html(res) %>%
+    html_nodes("ul.list.boxTitle li a.tit") %>%
+    html_attr("href")
+
+categories <- read_html(res) %>%
+    html_nodes("ul.list.boxTitle li i.immtag") %>%
+    html_text()
+
+times <- read_html(res) %>%
+    html_nodes("ul.list.boxTitle li span.time") %>%
+    html_text()
+
+descriptions <- read_html(res) %>%
+    html_nodes("ul.list.boxTitle li p") %>%
+    html_text() 
+
+df <- tibble(titles, links, categories, times, descriptions)
+
+```
+
+```{r}
+all_df <- tibble()
+for(page in 1:3){
+    params <- list(
+      keyword = keyword,
+      page = page,
+      sort = sort,
+      type = type,
+      start_time = start_time,
+      end_time = end_time
+    )
+
+    # 第一次請求用來抓總頁數
+    res <- GET(base_url, query = params)
+    
+    titles <- read_html(res) %>%
+        html_nodes("ul.list.boxTitle li a.tit") %>%
+        html_text()
+    
+    links <- read_html(res) %>%
+        html_nodes("ul.list.boxTitle li a.tit") %>%
+        html_attr("href")
+    
+    categories <- read_html(res) %>%
+        html_nodes("ul.list.boxTitle li i.immtag") %>%
+        html_text()
+    
+    times <- read_html(res) %>%
+        html_nodes("ul.list.boxTitle li span.time") %>%
+        html_text()
+    
+    descriptions <- read_html(res) %>%
+        html_nodes("ul.list.boxTitle li p") %>%
+        html_text() 
+    
+    df <- tibble(titles, links, categories, times, descriptions)
+    all_df <- bind_rows(all_df, df)
+    print(dim(all_df))
+}
+```
+
+```{r}
+
+# 處理時間與畫圖
+library(lubridate)
+all_df <- all_df %>%
+    mutate(date = ymd(times, quiet = TRUE)) %>%
+    mutate(month = floor_date(date, unit = "months"))
+
+monthly_counts <- all_df %>%
+    count(month) %>%
+    arrange(month)
+
+ggplot(monthly_counts, aes(x = month, y = n)) +
+    geom_line() +
+    geom_point() +
+    labs(
+        title = "Trend of articles related to fake news",
+        x = "Month",
+        y = "Number of articles"
+    ) +
+    theme_minimal()
+
+ggsave("trend.png", dpi = 300, width = 10, height = 5)
+
+```

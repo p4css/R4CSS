@@ -13,7 +13,7 @@ library(tidyverse)
 
 -   其一稱為鏈結頁或索引頁，為文章的超鏈結，例如[https://www.ptt.cc/bbs/Boy-Girl/index.html](https://www.ptt.cc/bbs/Boy-Girl/index.html%EF%BC%89%E3%80%82)。
 
--   其二為每一篇文章的內容頁[https://www.ptt.cc/bbs/Boy-Girl/M.1523994970.A.71C.html。](https://www.ptt.cc/bbs/Boy-Girl/M.1523994970.A.71C.html。)
+-   其二為每一篇文章的內容頁<https://www.ptt.cc/bbs/Boy-Girl/M.1523994970.A.71C.html。>
 
 對於這種網頁，要設計兩階段的爬蟲，第一階段是把所有所需鏈結撈回來，第二階段是根據撈回來的鏈結去打撈文章，並把裡面的內文整理出來。對於第一階段而言，概念大概如下面的示意圖，其實爬取HTML的概念都差不多是這樣，但以下示意圖說明了用XPath或CSS Selector「分別」選取出整個頁面中的標題、超鏈結、時間、和作者，然後用`data.frame()`組合成一個`DataFrame`；Page 2也如此炮製，然後把Page 2的`DataFrame`用`bind_rows()`附加在Page 1的`DataFrame`後面。
 
