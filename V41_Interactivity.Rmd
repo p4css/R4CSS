@@ -1,8 +1,0 @@
-```{r include=FALSE}
-knitr::opts_chunk$set(cache = T, warning = F, message = F, 
-                      class.output = "output", out.width='100%', 
-                      fig.asp = 0.5, fig.align = 'center')
-library(tidyverse)
-```
-
-# Interactivity{#interactivity}
