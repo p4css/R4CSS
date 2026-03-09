@@ -119,7 +119,7 @@ library(jsonlite)
 url <- "https://www.ris.gov.tw/rs-opendata/api/v1/datastore/ODRP024/107?page=1"
 first_page <- fromJSON(content(GET(url), "text"))
 # head(first_page$responseData)
-head(first_page$responseData) %>% rename(戶長=headhousehold_count)
+head(first_page$responseData) # %>% View
 ```
 
 ### 取得臺北 YouBike (v2) 即時資料
@@ -131,7 +131,7 @@ url <- "https://tcgbusfs.blob.core.windows.net/dotapp/youbike/v2/youbike_immedia
 
 ubike.df <- fromJSON(content(GET(url),"text", encoding = "utf-8"))
 head(ubike.df) %>% select(1:6)
-ubike.df # %>% View
+# ubike.df # %>% View
 ```
 
 -   觀察[臺北市資料大平臺 (data.taipei)](https://data.taipei/dataset?qs=youbike)上關於Youbike的資料，你認為哪些資料是具有資料新聞價值的？
