@@ -1,0 +1,134 @@
+---
+title: "R03_6_POST_ibon"
+author: "Jilung Hsieh"
+date: "9/22/2019"
+output:
+  html_document:
+    highlight: zenburn
+    number_sections: yes
+    theme: cerulean
+    toc: yes
+    css: style.css
+editor_options:
+  chunk_output_type: inline
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(httr)
+library(rvest) 
+options(stringsAsFactors = F)
+```
+
+
+# Getting county
+
+## No pipeline
+
+```{r}
+url <- "http://www.ibon.com.tw/retail_inquiry.aspx#gsc.tab=0"
+# Getting and Parsing url to xml document
+doc <- read_html(url)
+
+# Selecting nodes of county names
+nodes <- html_nodes(doc, "#Class1 option")
+
+# Retrieve content of county names
+counties <- html_text(nodes)
+```
+
+## Pipeline
+```{r}
+
+# Writing as pipeline version
+url <- "http://www.ibon.com.tw/retail_inquiry.aspx#gsc.tab=0"
+# counties <- 
+
+# counties
+```
+
+# POST: Getting address of Taipei city
+- Is it possible to use `GET()` to get back Taipei city's ibon address?
+
+## Getting back html with `POST()`
+```{r}
+# Finding the url
+url <- "http://www.ibon.com.tw/retail_inquiry_ajax.aspx"
+
+# Using POST to send parameters
+res <- POST(url, body = list(strTargetField='COUNTY', 
+                             strKeyWords='台北市'))
+
+# httr::content() to convert response to textual data
+print(content(res, "text"))
+
+# cat() to save textual data to html file
+cat(content(res, "text"), file="temp1.html")
+
+# browseURL() to re-open the html in your browser
+browseURL("temp1.html")
+```
+
+## Retrieveing data in nodes
+```{r}
+# Converting response to text by content() and parsing to xml_document by read_html(), assign to var 'doc'
+doc <- read_html(content(res, "text"))
+
+# Selecting nodes
+addr.node <- html_nodes(doc, "table tr td:nth-child(3)")
+
+# Retrieving text from nodes
+addrs <- html_text(addr.node) %>% trimws()
+
+# Using html_table() function
+table.node <- html_node(doc, "table")
+df <- html_table(table.node)
+
+```
+
+
+
+# Getting and binding all counties' data
+
+```{r}
+all_addr <- c()
+url <- "http://www.ibon.com.tw/retail_inquiry_ajax.aspx"
+for(county in counties){
+    res <- POST(url, body = list(strTargetField='COUNTY', 
+                             strKeyWords=county))
+    doc <- read_html(content(res, "text"))
+    addr.node <- html_nodes(doc, "table tr td:nth-child(3)")
+    addrs <- html_text(addr.node) %>% trimws()    
+    print(sprintf("%s: %d stores", county, length(addrs)))
+    all_addr <- c(all_addr, addrs)
+}
+```
+
+
+# Cleaning data
+
+# Retrieving town names 
+```{r}
+length(all_addr)
+seven <- tibble(addr = all_addr) %>%
+    slice(-1) %>%
+    mutate(county = str_sub(addr, 1, 3)) %>% 
+    filter(!str_detect(addr, "地址")) %>%
+    mutate(addr = str_replace(addr, "楠梓加工區", "楠梓區")) %>%
+    mutate(town = str_replace(addr, ".*?[縣市](.{1,3}[鄉鎮市區]).*", "\\1")) %>% 
+    # mutate(town = ifelse(nchar(town)==4, str_sub(town, 1, 3), town)) %>%
+    # mutate(town = str_replace(town, "太麻里", "太麻里鄉"),
+    #        town = str_replace(town, "阿里山", "阿里山鄉"),
+    #        town = str_replace(town, "三地門", "三地門鄉")) %>% 
+    # filter(str_detect(town, "東區|南區|北區|中區|西區") & nchar(town)==3) %>%
+    mutate(townlen = nchar(town)) %>%
+    mutate(site_id = str_c(county, town))
+    # filter(townlen == 4) %>% count(town)
+
+seven
+```
+
