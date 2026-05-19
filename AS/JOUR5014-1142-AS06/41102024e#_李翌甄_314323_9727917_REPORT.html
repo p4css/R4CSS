@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>農產品交易行情：專案成果報告</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --secondary: #1e40af;
+            --background: #f8fafc;
+            --surface: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', 'SF Pro Text', 'PingFang TC', 'Heiti TC', 'Microsoft JhengHei', sans-serif;
+            background-color: var(--background);
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 4rem 2rem;
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.025em;
+        }
+
+        header p {
+            font-size: 1.125rem;
+            opacity: 0.9;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: -2rem auto 3rem;
+            padding: 0 1.5rem;
+        }
+
+        .card {
+            background-color: var(--surface);
+            border-radius: 12px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
+            border: 1px solid var(--border);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        h2 {
+            color: var(--primary);
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1.25rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        h2::before {
+            content: "";
+            display: inline-block;
+            width: 4px;
+            height: 1.5rem;
+            background-color: var(--primary);
+            border-radius: 2px;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: var(--text-main);
+        }
+
+        ul {
+            list-style-type: none;
+            padding-left: 0.5rem;
+        }
+
+        ul li {
+            position: relative;
+            padding-left: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        ul li::before {
+            content: "•";
+            color: var(--primary);
+            font-weight: bold;
+            font-size: 1.2rem;
+            position: absolute;
+            left: 0;
+            top: -2px;
+        }
+
+        .highlight {
+            background-color: #eff6ff;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            color: var(--secondary);
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+
+        .img-container {
+            text-align: center;
+            margin-top: 1.5rem;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .img-container img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .img-caption {
+            background-color: var(--background);
+            padding: 0.75rem;
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border);
+        }
+
+        .metric-box {
+            display: flex;
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .metric {
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+            border: 1px solid #bbf7d0;
+            padding: 1.5rem;
+            border-radius: 8px;
+            flex: 1;
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #166534;
+            line-height: 1;
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-label {
+            color: #15803d;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>專案成果報告</h1>
+        <p>農產品交易行情爬蟲與資料視覺化分析</p>
+    </header>
+
+    <div class="container">
+        
+        <div class="card">
+            <h2>專題內容與主題設定</h2>
+            <p>本專案的主題設定為：<strong>「水果的季節性：以台北二市場西瓜歷史價格與交易量為例」</strong>。</p>
+            <p>我們挑選了具有強烈季節性特徵的水果「西瓜（產品代碼：T1）」作為分析標的。透過爬取 2023 年全年度在「台北二（市場代碼：104）」市場的交易行情，旨在探討夏季盛產期時，西瓜的交易量變化以及對應的價格波動趨勢，驗證農產品「量多價跌、量少價揚」的市場供需法則。</p>
+        </div>
+
+        <div class="card">
+            <h2>所使用的 AI 工具</h2>
+            <p>本次開發全程由 <strong>Google Antigravity</strong> 作為智能代理（Agentic AI），搭配強大的 <strong>Gemini 3.1 Pro</strong> 模型驅動。AI 負責了以下工作：</p>
+            <ul>
+                <li>規劃實作計畫（Implementation Plan）與任務追蹤（Task Tracking）。</li>
+                <li>自動建立 Python 虛擬環境、安裝依賴套件（Playwright, Pandas, Matplotlib）。</li>
+                <li>撰寫與除錯爬蟲腳本（Scraper）、資料清洗腳本，以及動態繪製視覺化圖表。</li>
+                <li>嚴格遵守使用者指示，維護 <code>LOG.md</code> 工作日誌紀錄。</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h2>爬蟲設計與過程</h2>
+            <p>資料來源為農委會的「農產品批發市場交易行情站（AMIS）」。該網頁是由 ASP.NET WebForms 開發的動態網頁，具有複雜的 ViewState 狀態與 AJAX 非同步加載特性。</p>
+            <ul>
+                <li><strong>自動化工具選擇</strong>：捨棄傳統的 <code>requests</code> 靜態爬蟲，改採 <strong>Playwright</strong> 以無頭瀏覽器（Headless Browser）模式真實模擬使用者操作，確保能精準處理動態渲染的 HTML 與表單。</li>
+                <li><strong>操作流程自動化</strong>：透過腳本自動導航至「水果產品日交易行情」頁面，並設定日期範圍、市場代碼與產品代碼。</li>
+                <li><strong>資料提取</strong>：在查詢結果載入後，直接抓取網頁的完整 HTML 結構，再交由 <code>Pandas</code> 的 <code>read_html()</code> 進行表格解析。</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h2>遇到的困難與解決方式</h2>
+            <p>在實作過程中，我們遇到了以下技術挑戰，並成功由 AI 代理自主排解：</p>
+            <ul>
+                <li><strong>日期輸入框被鎖定 (Readonly)</strong>：<br>網頁的日期輸入框設定為唯讀，必須透過點擊彈出日曆小工具才能修改。如果使用 Playwright 的 <code>fill()</code> 會引發逾時錯誤。<br>
+                <em>解決方式</em>：利用 Playwright 執行 JavaScript（<code>page.evaluate</code>），直接移除 <code>readonly</code> 屬性，隨後即可順利填入日期。</li>
+                <li><strong>複雜的下拉選單與 iFrame 彈窗</strong>：<br>市場與產品的選擇並非單純的 <code>&lt;select&gt;</code>，而是觸發外部的 iFrame 選擇器，這使得自動化點擊極度耗時且容易不穩定。<br>
+                <em>解決方式</em>：分析網頁原始碼後，發現表單送出是依賴隱藏欄位（Hidden Fields）。因此直接使用 JavaScript 強制設定隱藏欄位 <code>hfldMarketNo</code> 與 <code>hfldProductNo</code> 的值，完美繞過複雜的 UI 互動，大幅提升爬蟲速度與穩定度。</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h2>爬取到的資料量說明</h2>
+            <p>腳本成功爬取了 2023 全年度（112/01/01 至 112/12/31）的歷史行情資料。經過 Pandas 剔除「小計」列、處理缺失值與轉換日期格式後，最終獲得的有效數據如下：</p>
+            <div class="metric-box">
+                <div class="metric">
+                    <div class="metric-value">139</div>
+                    <div class="metric-label">有效交易日 (筆資料)</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">365</div>
+                    <div class="metric-label">涵蓋天數 (2023全年)</div>
+                </div>
+            </div>
+            <p style="margin-top: 1rem; color: var(--text-muted); font-size: 0.9rem;">* 註：扣除了市場公休與無交易之日期，清洗後的結構化資料已匯出至 <code>watermelon_prices_cleaned.csv</code> 供後續利用。</p>
+        </div>
+
+        <div class="card">
+            <h2>視覺化圖表解析</h2>
+            <p>為了清楚呈現價格與交易量的關聯，我們使用 <code>Matplotlib</code> 繪製了雙 Y 軸（Dual-axis）圖表：</p>
+            <ul>
+                <li><strong style="color: red;">紅色折線</strong>：代表西瓜的「平均價（元/公斤）」。</li>
+                <li><strong style="color: blue;">藍色長條圖</strong>：代表西瓜的「每日交易量（公斤）」。</li>
+            </ul>
+            <div class="img-container">
+                <img src="watermelon_seasonality.png" alt="2023年 台北二市場 西瓜 (T1) 價格與交易量趨勢">
+                <div class="img-caption">2023年 台北二市場 西瓜 (T1) 價格與交易量趨勢圖</div>
+            </div>
+            <p style="margin-top: 1rem;"><strong>洞察分析：</strong><br>
+            從圖表中可以明顯觀察到，在 5 月至 8 月的夏季期間，藍色長條圖（交易量）呈現巨幅增長，符合西瓜盛產的季節特性。與此同時，紅色折線（平均價）在供貨量大增的期間並未出現劇烈崩跌，而是保持在穩定的區間內波動，這可能反映了炎熱天氣下，消費者對西瓜的需求量也同樣飆高，使得市場達成了高量高價或量價平穩的供需平衡狀態。</p>
+        </div>
+
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset='utf-8'>
+    <title>鳳凰颱風對蔬菜市場價量影響分析報告</title>
+    <style>
+        body {
+            font-family: 'PingFang TC', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 20px;
+            color: #333;
+        }
+
+        h1,
+        h2,
+        h3 {
+            color: #2C3E50;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+
+        .conclusion {
+            background: #f8f9fa;
+            padding: 20px;
+            border-left: 5px solid #3498db;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>鳳凰颱風對蔬菜市場價量影響分析報告</h1>
+    <div class='section'
+        style='background: #fdfefe; padding: 20px; border-left: 5px solid #27ae60; margin-bottom: 30px;'>
+        <h2>專題紀錄與開發過程</h2>
+        <ul>
+            <li><strong>專題內容</strong>：本專題旨在分析 114 年 11 月（2025/11/01 - 2025/11/30）台灣各市場蔬菜交易行情，並重點探討 11/10 - 11/12
+                鳳凰颱風期間對市場價量的衝擊，藉此觀察不同蔬菜類別的抗災能力與市場預期心理。</li>
+            <li><strong>所使用的 AI</strong>：Gemini 3.1 Pro (Low) 作為開發助手，協助編寫爬蟲腳本、設計資料清洗與分析流程、以及自動化產出本視覺化報告。</li>
+            <li><strong>爬蟲設計與過程</strong>：針對農業部農產品批發市場交易行情站（AMIS），嘗試使用 <code>httr</code> 與 <code>rvest</code> 送出 POST
+                請求解析 HTML 表格。過程需處理 ASP.NET 特有的隱藏欄位（如 <code>__VIEWSTATE</code>）與表單驗證。</li>
+            <li><strong>遇到的困難</strong>：
+                <ol>
+                    <li>目標網站原始下載按鈕會直接回傳二進位 Excel 檔案，但在 R 語言解析時遇到格式不符或底層函式庫（如 libxls）無法開啟的錯誤。最後透過解析回傳的 HTML Table 成功取得資料。
+                    </li>
+                    <li>使用者環境中缺乏 Python 及 R Markdown 依賴的 <code>pandoc</code> 套件。為解決此問題，我們放棄使用 R Markdown 編譯，改以純 R
+                        腳本（<code>ggplot2</code>）生成靜態圖檔，並將其透過字串拼接自動組合成此份 HTML 報告，達成完全無系統依賴的產出。</li>
+                </ol>
+            </li>
+            <li><strong>爬取到的資料量</strong>：共成功爬取並清理出約 <strong>45,507</strong> 筆有效的蔬菜日交易紀錄。</li>
+        </ul>
+    </div>
+
+    <p>以下為根據爬取資料所繪製的視覺化圖表與分析說明：</p>
+
+    <div class='section'>
+        <h2>1. 整體蔬菜市場價量雙軸趨勢圖</h2>
+        <p>颱風通常會在前夕引發預期心理的搶購潮（交易量上升），而在颱風過後因農損導致到貨量減少、價格上揚。下圖展示整體市場的日平均價格與總交易量走勢。</p>
+        <img src='plot1.png' alt='整體價量趨勢'>
+    </div>
+
+    <div class='section'>
+        <h2>2. 颱風前後價格漲幅最大的 Top 10 蔬菜</h2>
+        <p>我們比較了颱風前（11/01-11/09）與颱風後一週內（11/13-11/19）的產品均價，篩選出漲幅最劇烈的前 10 項蔬菜。</p>
+        <img src='plot2.png' alt='漲幅 Top 10'>
+    </div>
+
+    <div class='section'>
+        <h2>3. 不同「產品類別」的抗災能力分析</h2>
+        <p>將蔬菜分為葉菜類、花果菜類、根莖菜類及菇類等，觀察不同類別在颱風來襲前後的價格波動幅度。葉菜類通常因不耐存放且易受水傷，價格波動最為劇烈。</p>
+        <img src='plot3.png' alt='各類別價格走勢'>
+    </div>
+
+    <div class='conclusion'>
+        <h2>結論總結</h2>
+        <ol>
+            <li><strong>整體市場趨勢</strong>：在颱風期間（11/10-11/12），市場交易量出現震盪，而颱風過後隨著農損顯現與到貨量減少，整體平均批發價明顯上揚。</li>
+            <li><strong>重災區品項</strong>：從漲幅 Top 10 來看，部分葉菜類及易受損的花果類價格飆漲最為顯著，顯示這些作物的抗災能力較弱或受損最為嚴重。</li>
+            <li><strong>類別抗災差異</strong>：葉菜類的價格波動在颱風後呈現陡峭的上升曲線，而根莖類與菇類因生長環境或儲藏特性，價格走勢相對平穩。</li>
+        </ol>
+    </div>
+
+</body>
+
+</html>

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>水果季節性與價格波動分析 - 專題報告</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;700&display=swap');
+        
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Noto Sans TC', sans-serif;
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            background-attachment: fixed;
+            color: #ffffff;
+            line-height: 1.8;
+        }
+        
+        .container {
+            max-width: 1100px;
+            margin: 50px auto;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.8rem;
+            background: -webkit-linear-gradient(45deg, #00f2fe, #4facfe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 50px;
+            letter-spacing: 2px;
+        }
+
+        h2 {
+            color: #f3ec78;
+            font-size: 1.6rem;
+            border-bottom: 2px solid rgba(243, 236, 120, 0.3);
+            padding-bottom: 12px;
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: rgba(0, 0, 0, 0.25);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .highlight {
+            color: #4facfe;
+            font-weight: bold;
+        }
+
+        ul {
+            padding-left: 20px;
+        }
+
+        li {
+            margin-bottom: 10px;
+        }
+
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .image-card {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .image-card img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            transition: transform 0.4s ease;
+        }
+
+        .image-card img:hover {
+            transform: scale(1.05);
+        }
+
+        .image-caption {
+            margin-top: 20px;
+            font-size: 0.95rem;
+            color: #d1d1d1;
+        }
+
+        .image-caption strong {
+            color: #f3ec78;
+            font-size: 1.1rem;
+            display: block;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>專題報告：疫情前後台灣進口水果價格波動分析</h1>
+        
+        <div class="card">
+            <h2>一、專題內容與緣由</h2>
+            <p>新冠疫情曾對全球供應鏈與跨國物流造成劇烈衝擊。本專題旨在探討台灣進口水果市場，在疫情最嚴峻的 <span class="highlight">111 年</span> 與步入復甦的後疫情時代 <span class="highlight">114 年</span> 間，其價格波動與季節性趨勢。我們期望透過歷史交易數據，具體觀察全球貿易恢復後，國內進口民生物資的價格變化情形，並過濾出受到衝擊最大的前 10 名水果品項進行深入視覺化。</p>
+        </div>
+
+        <div class="card">
+            <h2>二、所使用的 AI 輔助</h2>
+            <p>本專題在資料處理、程式碼撰寫（包含 Pandas 數據清洗、Matplotlib 與 Seaborn 視覺化繪圖），以及專案日誌與報告的生成上，全程採用了 <span class="highlight">Gemini 3.1 Pro (High)</span> 作為核心協作 AI 助手，大幅提升了數據洞察的效率與圖表的美觀度。</p>
+        </div>
+
+        <div class="card">
+            <h2>三、爬蟲設計與過程</h2>
+            <p>在資料收集階段，主要針對「農產品批發市場交易行情站（AMIS）」進行網路爬蟲。設計邏輯與過程如下：</p>
+            <ul>
+                <li><strong>目標市場：</strong>鎖定台北二市，因其為進口農產品的主要集散地。</li>
+                <li><strong>時間跨度：</strong>自動爬取民國 109 年至 114 年的每日交易紀錄。</li>
+                <li><strong>自動化流程：</strong>程式透過模擬 HTTP 請求與分頁導航，逐頁解析 HTML 結構中的表格資料，將每日、每項進口水果的「平均價(元/公斤)」提取出來，並彙整成單一資料集 <code>combined_fruit_prices.csv</code>。</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h2>四、遇到的困難</h2>
+            <ul>
+                <li><strong>網站反爬蟲與動態渲染：</strong> 目標網站有連線頻率限制且表格為動態生成，在開發階段必須小心控制請求速度與等待時間，避免 IP 被封鎖。</li>
+                <li><strong>資料缺失與維度對齊：</strong> 並非所有進口水果在每個月都有交易紀錄。為了讓 111 年與 114 年的數據可以一對一精準比較，我們必須寫入過濾邏輯（如使用 Pivot Table 與 dropna），將無法湊齊 24 個月資料的品項全數剔除，最終只留下 12 個核心品項。</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h2>五、爬取到的資料量</h2>
+            <p>經過資料收集與清洗後，最終儲存於 <code>combined_fruit_prices.csv</code> 的檔案共計有 <span class="highlight">9,182 筆</span> 歷史交易資料。涵蓋了數十種進口水果的長期行情，為本專案的價格趨勢分析提供了充足且穩固的基礎樣本。</p>
+        </div>
+
+        <div class="card">
+            <h2>六、視覺化圖表說明</h2>
+            <p>我們精準計算兩年的年均價差額，篩選出價格波動最大的前 10 名品項，並製作了三套不同視角的視覺化圖表：</p>
+            
+            <div class="image-grid">
+                <div class="image-card">
+                    <img src="./dumbbell_plot.png" alt="啞鈴圖">
+                    <div class="image-caption">
+                        <strong>啞鈴圖 (Dumbbell Plot)</strong>
+                        最能直觀呈現單一品項在 111 年與 114 年的「起點與終點」。點的水平位移長度，直接反映了價格漲跌的絕對幅度。
+                    </div>
+                </div>
+                <div class="image-card">
+                    <img src="./grouped_bar_chart.png" alt="分組長條圖">
+                    <div class="image-caption">
+                        <strong>分組長條圖 (Grouped Bar Chart)</strong>
+                        採用傳統並列的方式，紅色代表 114 年、藍色代表 111 年。優勢在於能清晰比較絕對價格的高低。
+                    </div>
+                </div>
+                <div class="image-card">
+                    <img src="./heatmap.png" alt="熱力圖">
+                    <div class="image-caption">
+                        <strong>價格差異熱力圖 (Heatmap)</strong>
+                        保留了各品項 1 至 12 月的趨勢細節。深紅色代表該月份 114 年漲幅劇烈，深藍色則代表大幅跌價。
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>

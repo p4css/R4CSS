@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>台灣蔬菜價格差異分析 | 專案報告</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Noto+Sans+TC:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-bg: #0f172a;
+            --secondary-bg: #1e293b;
+            --accent-color: #38bdf8;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --card-border: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #020617 100%);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 60px;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: 900;
+            background: linear-gradient(to right, #38bdf8, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+        }
+
+        .section-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 8px;
+            height: 32px;
+            background-color: var(--accent-color);
+            border-radius: 4px;
+            margin-right: 15px;
+            box-shadow: 0 0 10px var(--accent-color);
+        }
+
+        /* Glassmorphism Card */
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 40px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            border-color: rgba(56, 189, 248, 0.3);
+        }
+
+        .project-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .detail-item h3 {
+            color: var(--accent-color);
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+        }
+
+        .detail-item p, .detail-item ul {
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .detail-item ul {
+            padding-left: 20px;
+        }
+
+        /* Chart Grid */
+        .chart-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 40px;
+        }
+
+        .chart-card {
+            background: var(--secondary-bg);
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid var(--card-border);
+        }
+
+        .chart-image {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .chart-info {
+            padding: 25px;
+        }
+
+        .chart-info h3 {
+            margin: 0 0 10px 0;
+            font-size: 1.5rem;
+            color: #f8fafc;
+        }
+
+        .chart-info p {
+            margin: 0;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        /* Multi-charts grid for basic trends */
+        .trends-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Data badge */
+        .badge {
+            display: inline-block;
+            padding: 5px 15px;
+            background: rgba(56, 189, 248, 0.1);
+            color: var(--accent-color);
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <div class="badge">執行完成 ✓</div>
+            <h1>台灣蔬菜價格差異分析</h1>
+            <p>台北二 vs 宜蘭市果菜市場行情比較報告</p>
+        </header>
+
+        <section class="card">
+            <h2 class="section-title">專案執行內容</h2>
+            <div class="project-details">
+                <div class="detail-item">
+                    <h3>📊 資料來源與擷取</h3>
+                    <p>使用 Python 爬蟲自動介接<strong>農業部開放資料 API</strong> (農產品交易行情)。抓取從 <strong>2025/05/11 至今</strong>的每日交易數據。具備自動重試與休眠機制，以應對伺服器連線不穩的情況。</p>
+                </div>
+                <div class="detail-item">
+                    <h3>🎯 目標與範圍</h3>
+                    <ul>
+                        <li><strong>目標市場</strong>：台北二、宜蘭市</li>
+                        <li><strong>觀測品項</strong>：甘藍、菠菜、空心菜、小白菜、洋蔥、馬鈴薯、胡蘿蔔</li>
+                        <li><strong>輸出欄位</strong>：日期、品項名稱、市場名稱、平均價格、交易量</li>
+                    </ul>
+                </div>
+                <div class="detail-item">
+                    <h3>🛠️ 資料清理與視覺化</h3>
+                    <p>將爬取的 CSV 數據進行民國年轉換與清洗。運用 Pandas、Matplotlib 與 Seaborn 產出時間序列折線圖，並針對價格波動、交易規模與價量關係進行進階的視覺化探索分析。</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2 class="section-title">進階視覺化探索洞察</h2>
+            <div class="chart-grid">
+                
+                <!-- Advanced Chart 1 -->
+                <div class="chart-card">
+                    <img src="images/advanced_1_boxplot.png" alt="價格分佈與波動比較" class="chart-image">
+                    <div class="chart-info">
+                        <h3>1. 價格分佈與波動比較 (Boxplot)</h3>
+                        <p>透過箱型圖可見，台北二的蔬菜均價普遍高於宜蘭市。而在離群值（極端高價）的表現上，台北二市場也更容易出現明顯的價格飆升，顯示其對供需變化的價格反應更為劇烈。</p>
+                    </div>
+                </div>
+
+                <!-- Advanced Chart 2 -->
+                <div class="chart-card">
+                    <img src="images/advanced_2_barchart.png" alt="總交易量比較" class="chart-image">
+                    <div class="chart-info">
+                        <h3>2. 兩地市場總交易量對比 (Bar Chart)</h3>
+                        <p>長條圖揭示了兩個市場在規模上的巨大落差。台北二市場的蔬菜吞吐總量是宜蘭市的數十倍之多，其中「高麗菜 (甘藍)」更佔據了極大的市場供給份額。</p>
+                    </div>
+                </div>
+
+                <!-- Advanced Chart 3 -->
+                <div class="chart-card">
+                    <img src="images/advanced_3_scatterplot.png" alt="價量關係散佈圖" class="chart-image">
+                    <div class="chart-info">
+                        <h3>3. 價量關係分析：量大價跌？ (Scatter Plot)</h3>
+                        <p>以高麗菜為例，觀察散佈圖與趨勢線：宜蘭市的價量關係較不顯著；而台北二市場在單日交易量極大時，其平均價格有明顯下降的趨勢，符合傳統經濟學中「量大價跌」的規律。</p>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <section class="card">
+            <h2 class="section-title">每日價格走勢圖精選</h2>
+            <div class="trends-grid">
+                <div class="chart-card">
+                    <img src="images/甘藍-初秋_price_trend.png" alt="高麗菜-初秋走勢" class="chart-image">
+                </div>
+                <div class="chart-card">
+                    <img src="images/小白菜-土白菜_price_trend.png" alt="小白菜走勢" class="chart-image">
+                </div>
+                <div class="chart-card">
+                    <img src="images/洋蔥-本產_price_trend.png" alt="洋蔥走勢" class="chart-image">
+                </div>
+                <div class="chart-card">
+                    <img src="images/馬鈴薯-本產_price_trend.png" alt="馬鈴薯走勢" class="chart-image">
+                </div>
+            </div>
+        </section>
+
+        <footer style="text-align: center; color: var(--text-muted); margin-top: 50px;">
+            <p>Generated by Antigravity | Advanced Agentic Coding Session</p>
+        </footer>
+    </div>
+
+</body>
+</html>

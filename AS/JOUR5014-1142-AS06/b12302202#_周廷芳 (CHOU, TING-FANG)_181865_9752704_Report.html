@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>颱風季台灣蔬菜價格波動分析</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #172033;
+      --muted: #5b6475;
+      --line: #d9dee8;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --accent: #2f7d32;
+      --accent-2: #977c00;
+      --typhoon: #ff9797;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: "Microsoft JhengHei", "Noto Sans TC", Arial, sans-serif;
+      line-height: 1.65;
+    }
+
+    header {
+      background: #ffffff;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .wrap {
+      width: min(1120px, calc(100% - 40px));
+      margin: 0 auto;
+    }
+
+    .hero {
+      padding: 42px 0 30px;
+    }
+
+    .eyebrow {
+      margin: 0 0 8px;
+      color: var(--accent);
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 36px;
+      line-height: 1.25;
+    }
+
+    .lead {
+      max-width: 860px;
+      margin: 14px 0 0;
+      color: var(--muted);
+      font-size: 18px;
+    }
+
+    main {
+      padding: 28px 0 56px;
+    }
+
+    section {
+      margin: 0 0 28px;
+      padding: 28px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+
+    h2 {
+      margin: 0 0 14px;
+      font-size: 25px;
+    }
+
+    h3 {
+      margin: 0 0 10px;
+      font-size: 20px;
+    }
+
+    p {
+      margin: 0 0 12px;
+    }
+
+    ul {
+      margin: 10px 0 0;
+      padding-left: 22px;
+    }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    .meta {
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcfe;
+    }
+
+    .meta strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 15px;
+      color: var(--muted);
+    }
+
+    figure {
+      margin: 20px 0 0;
+      padding: 0;
+    }
+
+    img {
+      display: block;
+      width: 100%;
+      height: auto;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fff;
+    }
+
+    figcaption {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .figure-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 18px;
+    }
+
+    .note {
+      border-left: 4px solid var(--typhoon);
+      padding: 12px 14px;
+      background: #fff7f7;
+      color: #5f2930;
+      border-radius: 4px;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .tag {
+      padding: 5px 9px;
+      border-radius: 999px;
+      background: #eef4ef;
+      color: #235a28;
+      font-size: 14px;
+    }
+
+    .tag.root {
+      background: #fff7d6;
+      color: #725b00;
+    }
+
+    footer {
+      padding: 22px 0 42px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    @media (max-width: 860px) {
+      .meta-grid,
+      .figure-grid,
+      .two-col {
+        grid-template-columns: 1fr;
+      }
+
+      section {
+        padding: 20px;
+      }
+
+      h1 {
+        font-size: 30px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap hero">
+      <p class="eyebrow">新聞資料處理與視覺呈現 Project</p>
+      <h1>颱風季台灣蔬菜價格波動分析</h1>
+      <p class="lead">本專案以台北第一果菜市場 2020 年以來 5-10 月的每週蔬菜交易資料為基礎，觀察平均價格、交易量與颱風事件之間的關係，並比較葉菜類與根莖類在颱風季的價格波動差異。</p>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section>
+      <h2>專案輸入與輸出</h2>
+      <p>資料來自農業部農產品批發市場交易行情資料。原始日資料經整理後，以每週為單位彙整平均價格與交易量；平均價格採交易量加權，交易量採週加總。</p>
+      <div class="meta-grid">
+        <div class="meta">
+          <strong>資料輸入</strong>
+          2020-2026 年、5-10 月、台北一市場、七種蔬菜週資料。
+        </div>
+        <div class="meta">
+          <strong>主要欄位</strong>
+          日期、品項名稱、市場名稱、平均價格、交易量。
+        </div>
+        <div class="meta">
+          <strong>分析輸出</strong>
+          折線圖、雙軸圖、波動熱圖、颱風前後比較圖、價量散點圖。
+        </div>
+      </div>
+      <div class="tag-row" aria-label="蔬菜分類">
+        <span class="tag">葉菜類：高麗菜</span>
+        <span class="tag">葉菜類：菠菜</span>
+        <span class="tag">葉菜類：空心菜</span>
+        <span class="tag">葉菜類：小白菜</span>
+        <span class="tag root">根莖類：洋蔥</span>
+        <span class="tag root">根莖類：馬鈴薯</span>
+        <span class="tag root">根莖類：胡蘿蔔</span>
+      </div>
+    </section>
+
+    <section>
+      <h2>平均價格與交易量的關係</h2>
+      <p>總覽折線圖可以先看出各蔬菜的價格與交易量在時間上的整體變化；價量散點圖則把每週資料放在同一張圖上，觀察「量少價高」是否可能存在。</p>
+      <figure>
+        <img src="vegetable_average_price_line_chart.png" alt="各蔬菜平均價格折線圖，含颱風事件標記">
+        <figcaption>平均價格折線圖顯示，菠菜、小白菜、空心菜等葉菜類在部分年份出現較明顯的尖峰；颱風事件以淡紅色虛線標示，方便對照事件前後價格變化。</figcaption>
+      </figure>
+      <figure>
+        <img src="vegetable_volume_line_chart.png" alt="各蔬菜交易量折線圖">
+        <figcaption>交易量折線圖呈現不同品項的市場規模差異。高麗菜等大宗蔬菜交易量較高，部分葉菜類在季節內交易量變化也較明顯。</figcaption>
+      </figure>
+      <figure>
+        <img src="explore_price_volume_scatter.png" alt="價格與交易量關係散點圖">
+        <figcaption>價量散點圖用 log10 交易量處理不同品項的量級差異。它可用來探索價格上升是否常伴隨交易量下降，作為供給受影響的初步線索。</figcaption>
+      </figure>
+    </section>
+
+    <section>
+      <h2>葉菜類與根莖類的不同趨勢</h2>
+      <p>葉菜類通常生長期較短、受天候影響較直接，因此價格波動可能更敏感；根莖類較容易儲藏或受進口供應影響，價格變化未必與颱風同步。</p>
+      <div class="two-col">
+        <figure>
+          <img src="explore_price_volatility_heatmap.png" alt="各蔬菜月別價格波動熱圖">
+          <figcaption>月別波動熱圖使用變異係數衡量價格不穩定程度。小白菜、菠菜與空心菜的波動格子較深，顯示葉菜類在颱風季更值得深入追蹤。</figcaption>
+        </figure>
+        <figure>
+          <img src="explore_typhoon_price_change_bars.png" alt="颱風前後三週平均價格變化長條圖">
+          <figcaption>颱風前後比較圖顯示，空心菜、小白菜、菠菜在事件後三週的平均價格漲幅較明顯；根莖類變化相對溫和。</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section>
+      <h2>颱風對平均價格及交易量的影響</h2>
+      <p class="note">本報告標示四個颱風事件：2023/07/26 杜蘇芮、2023/09/03 海葵、2024/07/24 凱米、2024/10/01 山陀兒。圖上的垂直虛線代表事件日期，並不等於因果證明；它提供的是事件時間點與市場變化的視覺對照。</p>
+      <p>雙軸圖將單一蔬菜的平均價格與交易量放在同一張圖中，可觀察颱風後是否出現「價格上升、交易量下降」或兩者不同步的情形。</p>
+      <div class="figure-grid">
+        <figure>
+          <img src="dual_axis_cabbage.png" alt="高麗菜平均價格與交易量雙軸折線圖">
+          <figcaption>高麗菜交易量大，價格波動相對其他葉菜類較平緩；颱風附近仍可觀察部分短期價格變動。</figcaption>
+        </figure>
+        <figure>
+          <img src="dual_axis_spinach.png" alt="菠菜平均價格與交易量雙軸折線圖">
+          <figcaption>菠菜價格尖峰較明顯，颱風事件後的價格變動值得作為重點討論對象。</figcaption>
+        </figure>
+        <figure>
+          <img src="dual_axis_water_spinach.png" alt="空心菜平均價格與交易量雙軸折線圖">
+          <figcaption>空心菜在颱風前後呈現較高敏感度，價格與交易量的同步或反向變化可用來推測供給衝擊。</figcaption>
+        </figure>
+        <figure>
+          <img src="dual_axis_bok_choy.png" alt="小白菜平均價格與交易量雙軸折線圖">
+          <figcaption>小白菜波動強，月別熱圖與颱風前後比較都指出它是可能受天候影響較大的品項。</figcaption>
+        </figure>
+        <figure>
+          <img src="dual_axis_onion.png" alt="洋蔥平均價格與交易量雙軸折線圖">
+          <figcaption>洋蔥屬根莖類，價格變化較不直接跟隨颱風事件，可能反映儲藏、進口或供應鏈調節。</figcaption>
+        </figure>
+        <figure>
+          <img src="dual_axis_potato.png" alt="馬鈴薯平均價格與交易量雙軸折線圖">
+          <figcaption>馬鈴薯的價格波動相對平穩，交易量變化與價格波動之間的關係不如葉菜類清楚。</figcaption>
+        </figure>
+        <figure>
+          <img src="dual_axis_carrot.png" alt="胡蘿蔔平均價格與交易量雙軸折線圖">
+          <figcaption>胡蘿蔔的颱風事件反應較溫和，適合作為葉菜類敏感度的對照組。</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section>
+      <h2>值得放進結論的觀察</h2>
+      <ul>
+        <li>葉菜類，尤其小白菜、空心菜與菠菜，價格波動比根莖類更明顯。</li>
+        <li>颱風事件後三週的平均價格比較，顯示多數品項為上升，其中葉菜類漲幅更突出。</li>
+        <li>交易量與價格不一定完全同步，因此後續可加入降雨量、產地受災資料或颱風路徑，讓分析從時間對照走向更接近因果判斷。</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">資料來源：農業部農產品批發市場交易行情資料。分析範圍：台北一市場，2020-2026 年 5-10 月週資料。</div>
+  </footer>
+</body>
+</html>

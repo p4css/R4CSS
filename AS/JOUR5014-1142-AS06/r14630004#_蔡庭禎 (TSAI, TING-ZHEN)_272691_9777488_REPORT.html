@@ -1,0 +1,87 @@
+
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>農產品價格地理空間影響分析報告</title>
+    <style>
+        body {
+            font-family: 'Microsoft JhengHei', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f7fa;
+            color: #333;
+        }
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #2980b9;
+            margin-top: 30px;
+        }
+        .highlight {
+            background-color: #e8f4f8;
+            padding: 15px;
+            border-left: 5px solid #3498db;
+            margin: 20px 0;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 20px auto;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .analysis-text {
+            font-size: 1.1em;
+            color: #444;
+            padding: 10px;
+            background-color: #fef9e7;
+            border-left: 5px solid #f1c40f;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>專題報告</h1>
+        
+        <div class="highlight">
+            <strong>專題題目：</strong>從水果產地（屏東/高雄）與消費市場（台北二）價格看地理空間對價格的影響。<br>
+            <strong>使用的 AI 工具：</strong>Google Antigravity IDE (Gemini 3.1 Pro)。
+        </div>
+
+        <h2>爬蟲設計與過程</h2>
+        <p>本次專案採用 <strong>Playwright</strong> 搭配非同步 (async) 模式進行動態網頁模擬爬取。有別於傳統的靜態 HTML 請求，AMIS 農產品交易行情網站採用了 ASP.NET 的動態載入與複雜的 <code>__doPostBack</code> 機制，因此透過真實的瀏覽器渲染與互動，能精準地模擬使用者的行為來取得資料。</p>
+
+        <h2>遇到的困難與解決方式</h2>
+        <ul>
+            <li><strong>處理了網站隱藏 iframe 與動態載入的選項問題：</strong>AMIS 網站的對話框實際上是載入了獨立的 <code>iframe</code>。我們將定位器精準切換至對應的 <code>frame_locator</code>，並確保精確關閉視窗（點擊 <code>#btnConfirm</code>），以防上層的 overlay 阻擋後續點擊操作。</li>
+            <li><strong>克服大項產品 radio button 的點擊先後順序：</strong>由於「芒果」與「西瓜」被歸類在「大項產品」下，原本預設的選單中並無此選項。我們透過控制 Playwright 點擊大項產品 radio button，並等待網頁重新載入選項，確保後台正確載入芒果與西瓜資料。</li>
+            <li><strong>針對日期欄位 readonly 的限制：</strong>網頁上的日期輸入框帶有 <code>readonly</code> 屬性，無法直接使用常規方法輸入。為此，我們改用 <code>page.evaluate()</code> 直接在瀏覽器環境中執行 JavaScript，強制賦值，成功繞過了前端的限制。</li>
+        </ul>
+
+        <h2>爬取到的資料量</h2>
+        <p>經清洗與過濾後，本次針對指定條件（台北二與高雄市之芒果、西瓜）共成功抓取了 <strong>14</strong> 筆有效明細資料。</p>
+
+        <h2>資料視覺化圖表與說明</h2>
+        <img src="price_trends.png" alt="台北二與高雄市之芒果與西瓜平均價格比較">
+        <div class="analysis-text">
+            <strong>分析說明：</strong><br>
+            從圖表中可明顯看出，無論是芒果或西瓜，消費地（台北二）的平均價格均顯著高於產地或鄰近產地的市場（高雄市）。這印證了農產品在運銷過程中，因運輸成本、耗損以及消費地物價水準等地理空間因素，對最終市場價格造成了疊加與推升的效果。
+        </div>
+    </div>
+</body>
+</html>

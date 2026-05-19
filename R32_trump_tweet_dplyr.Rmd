@@ -261,11 +261,11 @@ tweet_words <- tweets %>%
     mutate(text = str_replace_all(text, "https://t.co/[A-Za-z\\d]+|&amp;", "")) %>% 
     # unnest_tokens(word, text) %>%
     # unnest_tokens(word, text, token = "regex", pattern = "[^A-Za-z\\d#@']") %>%
-    mutate(word = str_split(text, " ")) %>%
+    mutate(word = str_split(text, " ")) %>% #  -> nested structure
     select(id, text, word, everything()) %>% 
     unnest(word) %>%
     filter(!word %in% stop_words$word) %>%
-    filter(str_detect(word, "[a-z]"))
+    filter(str_detect(word, "[a-zA-Z]"))
 # View(tweet_words)
 ```
 

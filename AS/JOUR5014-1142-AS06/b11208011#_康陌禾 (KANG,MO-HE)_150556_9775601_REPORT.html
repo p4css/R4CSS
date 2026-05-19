@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>台北一市場香蕉價格季節性分析</title>
+  <style>
+    body {
+      margin: 0;
+      background: #f7f7f4;
+      color: #202124;
+      font-family: -apple-system, BlinkMacSystemFont, "Noto Sans TC", "Microsoft JhengHei", Arial, sans-serif;
+      line-height: 1.7;
+    }
+    main {
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 40px 24px 56px;
+    }
+    header {
+      border-bottom: 3px solid #2f6f4e;
+      margin-bottom: 28px;
+      padding-bottom: 18px;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 32px;
+      line-height: 1.25;
+    }
+    h2 {
+      margin-top: 34px;
+      border-left: 6px solid #2f6f4e;
+      padding-left: 12px;
+      font-size: 22px;
+    }
+    h3 {
+      margin-top: 24px;
+      font-size: 18px;
+    }
+    p {
+      margin: 10px 0;
+    }
+    a {
+      color: #1d4ed8;
+    }
+    .meta {
+      color: #555;
+      margin: 0;
+    }
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin: 16px 0 20px;
+    }
+    .stat {
+      background: #ffffff;
+      border: 1px solid #deded8;
+      border-radius: 8px;
+      padding: 14px 16px;
+    }
+    .stat strong {
+      display: block;
+      color: #2f6f4e;
+      font-size: 24px;
+      line-height: 1.2;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 14px 0;
+      background: #ffffff;
+    }
+    th, td {
+      border: 1px solid #d8d8d0;
+      padding: 10px 12px;
+      text-align: left;
+    }
+    th {
+      background: #e8efe8;
+      font-weight: 700;
+    }
+    figure {
+      margin: 24px 0;
+      background: #ffffff;
+      border: 1px solid #deded8;
+      border-radius: 8px;
+      padding: 16px;
+    }
+    figure img {
+      display: block;
+      max-width: 100%;
+      height: auto;
+      margin: 0 auto;
+    }
+    figcaption {
+      margin-top: 10px;
+      color: #555;
+      font-size: 14px;
+    }
+    code {
+      background: #ecece8;
+      padding: 2px 5px;
+      border-radius: 4px;
+    }
+    ul {
+      padding-left: 1.4rem;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>台北一市場香蕉價格季節性分析</h1>
+      <p class="meta">Assignment 6 ｜ 使用 AI 擷取與分析農產品交易行情資料</p>
+      <p class="meta">資料期間：2024-05-14 至 2026-05-14 ｜ 市場：台北一 ｜ 作物：香蕉</p>
+    </header>
+
+    <section>
+      <h2>研究題目與目的</h2>
+      <p>
+        本專題以農業部農產品交易行情資料為來源，分析台北一市場香蕉在近兩年內的批發交易價格變化。
+        研究問題是：香蕉價格是否呈現明顯的時間變化或季節性？交易量與平均價格之間是否有可觀察的關係？
+      </p>
+    </section>
+
+    <section>
+      <h2>使用的 AI 與工具</h2>
+      <ul>
+        <li>Codex：協助解讀作業要求、建立專案規則、撰寫資料下載程式、檢查資料品質、產生圖表與撰寫報告。</li>
+        <li>Python：用於呼叫官方開放資料 API、整理 CSV、計算統計值與產生視覺化圖表。</li>
+        <li>Matplotlib：用於製作價格趨勢圖、每月平均價圖與價格交易量關係圖。</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>資料來源與取得方式</h2>
+      <p>
+        原始資料來自農業部農產品交易行情開放資料。資料集說明頁指出，資料包含交易日期、種類代碼、作物代號、
+        作物名稱、市場代號、市場名稱、上價、中價、下價、平均價與交易量等欄位。
+      </p>
+      <p>
+        資料集頁面：
+        <a href="https://data.gov.tw/dataset/8066">https://data.gov.tw/dataset/8066</a>
+      </p>
+      <p>
+        本專題使用的 API：
+        <code>https://data.moa.gov.tw/Service/OpenData/FromM/FarmTransData.aspx</code>
+      </p>
+      <p>
+        查詢條件設定為市場名稱 <code>台北一</code>、作物名稱 <code>香蕉</code>，日期範圍為
+        <code>2024-05-14</code> 至 <code>2026-05-14</code>。
+      </p>
+    </section>
+
+    <section>
+      <h2>爬蟲設計與處理流程</h2>
+      <ol>
+        <li>先檢查 AMIS 與政府開放資料平台，確認是否有官方 API 可用。</li>
+        <li>使用官方 API 取代直接解析網頁，降低網頁版面變動造成的錯誤。</li>
+        <li>透過 Python 程式分批下載資料，並設定市場、作物與日期條件。</li>
+        <li>只保留市場名稱為「台北一」且作物名稱精確為「香蕉」的資料。</li>
+        <li>將民國日期轉換為西元日期，並輸出成 CSV 檔。</li>
+        <li>再讀取 CSV 進行缺漏值檢查、基礎統計與視覺化。</li>
+      </ol>
+    </section>
+
+    <section>
+      <h2>資料量與品質檢查</h2>
+      <div class="summary-grid">
+        <div class="stat"><strong>584</strong>資料筆數</div>
+        <div class="stat"><strong>0</strong>缺漏值</div>
+        <div class="stat"><strong>7,912,679 kg</strong>交易量總和</div>
+        <div class="stat"><strong>48.10</strong>平均價格均值（元/公斤）</div>
+      </div>
+      <p>
+        資料品質檢查結果顯示，所有欄位皆無缺漏值。資料中的市場名稱只有「台北一」，
+        作物名稱只有「香蕉」，表示篩選條件正確。
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>項目</th>
+            <th>最小值</th>
+            <th>最大值</th>
+            <th>平均值</th>
+            <th>中位數</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>平均價（元/公斤）</td>
+            <td>14.8</td>
+            <td>138.7</td>
+            <td>48.10</td>
+            <td>40.75</td>
+          </tr>
+          <tr>
+            <td>上價（元/公斤）</td>
+            <td>24.6</td>
+            <td>170.3</td>
+            <td>62.41</td>
+            <td>53.65</td>
+          </tr>
+          <tr>
+            <td>中價（元/公斤）</td>
+            <td>12.8</td>
+            <td>136.6</td>
+            <td>47.51</td>
+            <td>39.8</td>
+          </tr>
+          <tr>
+            <td>下價（元/公斤）</td>
+            <td>6.8</td>
+            <td>113.7</td>
+            <td>35.55</td>
+            <td>29.75</td>
+          </tr>
+          <tr>
+            <td>交易量（公斤）</td>
+            <td>3,121</td>
+            <td>30,704</td>
+            <td>13,549.11</td>
+            <td>13,278</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>視覺化圖表</h2>
+      <figure>
+        <img src="charts/daily_average_price_trend.png" alt="Daily average banana price trend">
+        <figcaption>
+          圖一：每日平均價格趨勢。香蕉平均價格在近兩年間有明顯波動，部分期間出現快速上升。
+        </figcaption>
+      </figure>
+
+      <figure>
+        <img src="charts/monthly_average_price.png" alt="Monthly average banana price">
+        <figcaption>
+          圖二：每月平均價格。月平均價格可以協助觀察不同月份之間是否存在季節性差異。
+        </figcaption>
+      </figure>
+
+      <figure>
+        <img src="charts/price_vs_volume.png" alt="Banana price versus transaction volume">
+        <figcaption>
+          圖三：交易量與平均價格關係。此圖用於觀察交易量較高或較低時，價格是否也有明顯變化。
+        </figcaption>
+      </figure>
+    </section>
+
+    <section>
+      <h2>遇到的困難</h2>
+      <ul>
+        <li>一開始需要先確認 AMIS 網站是否必須使用網頁爬蟲，後來發現政府開放資料平台已有可用 API。</li>
+        <li>API 使用民國年格式，因此下載後需要轉換成西元日期，方便後續排序、統計與畫圖。</li>
+        <li>作物名稱包含多種香蕉細項，例如「香蕉-其他」與「香蕉-芭蕉紅芭蕉」，因此本專題只保留作物名稱精確等於「香蕉」的資料，避免分析主題混雜。</li>
+        <li>圖表輸出時中文字型可能因環境不同而顯示不穩定，因此圖表標題與座標採英文，中文說明放在報告文字中。</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>初步結論</h2>
+      <p>
+        從近兩年的資料來看，台北一市場香蕉的平均價格波動幅度相當大，最低平均價為 14.8 元/公斤，
+        最高平均價為 138.7 元/公斤，顯示香蕉批發價格可能受到季節、供給量、天候或市場需求影響。
+      </p>
+      <p>
+        每月平均價格圖顯示，不同月份之間的價格並不完全一致，適合進一步延伸分析季節性因素。
+        交易量與價格散點圖則可作為觀察供需關係的基礎；若要得到更嚴謹的結論，後續可以加入產地、颱風事件、
+        節慶需求或更多年份資料進行比較。
+      </p>
+    </section>
+
+    <section>
+      <h2>產出檔案</h2>
+      <ul>
+        <li><code>INSTRUCTIONS.md</code>：專案規則與 AI 執行要求。</li>
+        <li><code>LOG.md</code>：依老師格式記錄所有重要操作。</li>
+        <li><code>data/banana_taipei_first_2024-05-14_to_2026-05-14.csv</code>：下載後整理的資料集。</li>
+        <li><code>data/banana_data_summary.json</code>：資料品質與統計摘要。</li>
+        <li><code>charts/*.png</code>：視覺化圖表。</li>
+        <li><code>REPORT.html</code>：本報告。</li>
+      </ul>
+    </section>
+  </main>
+</body>
+</html>

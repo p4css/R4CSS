@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>農產品交易行情分析報告</title>
+  <style>
+    body {
+      font-family: "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 2rem;
+      color: #333;
+      line-height: 1.8;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 2rem;
+      margin-bottom: 0.3rem;
+    }
+
+    h2 {
+      border-left: 5px solid #4a7c4e;
+      padding-left: 0.8rem;
+      margin-top: 2.5rem;
+      color: #2d5a31;
+    }
+
+    h3 {
+      color: #555;
+      margin-top: 1.5rem;
+    }
+
+    .cover-meta {
+      text-align: center;
+      color: #666;
+      margin-bottom: 3rem;
+      font-size: 0.95rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+    }
+
+    th {
+      background-color: #4a7c4e;
+      color: white;
+      padding: 0.6rem 1rem;
+    }
+
+    td {
+      border: 1px solid #ddd;
+      padding: 0.6rem 1rem;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f5f5f5;
+    }
+
+    .chart-block {
+      text-align: center;
+      margin: 1.5rem 0;
+      padding: 1rem;
+      background: #f9f9f9;
+      border: 1px dashed #bbb;
+      border-radius: 6px;
+    }
+
+    .chart-block img {
+      max-width: 100%;
+      height: auto;
+    }
+
+    .chart-caption {
+      font-size: 0.9rem;
+      color: #555;
+      margin-top: 0.5rem;
+    }
+
+    .placeholder {
+      color: #aaa;
+      font-style: italic;
+    }
+
+    code {
+      background: #eee;
+      padding: 0.1rem 0.4rem;
+      border-radius: 3px;
+      font-family: monospace;
+    }
+
+    pre {
+      background: #f4f4f4;
+      padding: 1rem;
+      border-radius: 6px;
+      overflow-x: auto;
+      font-size: 0.88rem;
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+      margin: 1rem 0;
+    }
+
+    .stat-card {
+      background: #e8f5e9;
+      border-radius: 8px;
+      padding: 1rem;
+      text-align: center;
+    }
+
+    .stat-card .num {
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: #2d5a31;
+    }
+
+    .stat-card .label {
+      font-size: 0.85rem;
+      color: #555;
+    }
+
+    .difficulty-table td:first-child {
+      font-weight: bold;
+      width: 30%;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ===== 封面 ===== -->
+  <h1>小吃店的「燙青菜」為什麼老是只有這幾種？</h1>
+  <div class="cover-meta">
+    <p>以大台北地區為例，從農產品批發市場交易資料，探討常見蔬菜之價格、價格穩定性與交易量</p>
+    <p><strong>資料來源：</strong> <a href="https://amis.afa.gov.tw/main/Main.aspx">
+        農業部農糧署 | 農產品批發交易市場行情站</a></p>
+    <p><strong>使用 AI：</strong>Claude Code</p>
+    <p><strong>完成日期：</strong>2026-05-14</p>
+  </div>
+
+  <!-- ===== 一、研究背景與題目說明 ===== -->
+  <h2>一、研究背景與題目說明</h2>
+  <p>
+    在台北的外食文化中，小吃店與平價餐廳供應的燙青菜幾乎清一色是某些蔬菜，
+    即便市場上可供選擇的蔬菜種類多達數百種，
+    這個現象背後的驅動因素是什麼？
+  </p>
+  <p>
+    本研究的核心假設是：餐廳選擇燙青菜種類時，考量的不僅僅是「便宜」，更在乎
+    <strong>價格的可預測性</strong>（不會今天 20 元、下週 80 元）與
+    <strong>供貨的穩定性</strong>（每次去市場都買得到）。
+    以此三個維度—— <strong>均價、價格變異性、供貨連續性</strong>——分析大台北地區批發市場的蔬菜交易資料，
+    檢視是否能找到使特定蔬菜脫穎而出的量化特徵。
+  </p>
+  <p>
+    <strong>研究對象：</strong>大台北地區四個批發市場（台北一、台北二、三重區、板橋區）的所有蔬菜品項<br>
+    <strong>時間範圍：</strong>2024 年 5 月至 2026 年 5 月（近兩年，共 25 個月）<br>
+    <strong>選擇兩年的原因：</strong>單年資料只能說明「某一年穩定」，兩年資料才能驗證跨年一致性，
+    更有說服力地支持「此蔬菜至少連續兩年都穩定」的結論。
+  </p>
+
+  <h3>1.3 研究對象：為何選這幾種蔬菜代表「外食常見燙青菜」？</h3>
+  <p>
+    網路上討論台灣外食餐廳燙青菜的文章（例如 <a
+      href="https://tw.news.yahoo.com/%E5%8F%B0%E4%BA%BA%E6%89%8D%E6%87%82%E7%87%99%E9%9D%92%E8%8F%9C%E4%BB%A3%E7%A2%BC-%E9%AB%98%E5%A4%A7%E7%A9%BA%E5%9C%B0%E8%B1%86-%E7%B6%B2%E9%85%B8%E6%9C%80%E5%BE%8C-%E9%81%93%E6%A0%B9%E6%9C%AC%E4%B8%8D%E9%85%8D-171634938.html"
+      target="_blank">Yahoo 新聞</a>中的「<strong>高大空地豆</strong>」說法）
+    普遍提到五類：高麗菜（高）、大陸妹（大）、空心菜（空）、地瓜葉（地）、豆芽（豆）。
+    作者個人的外食觀察中，<strong>小白菜</strong>同樣頻繁出現，因此一併列入研究對象。
+    豆芽進一步細分為綠豆芽與黃豆芽，形成本研究的七個分析標的。
+  </p>
+  <p>
+    批發市場使用的品項名稱與日常俗稱不盡相同。本研究參考<a href="https://twfood.cc" target="_blank">當季好蔬果</a>的作物名稱對照，
+    並以各細分品種中<strong>日均交易量最大</strong>者作為代表品項（除萵苣類別下交易量第一為油麥菜（LI5）外），選定如下：
+  </p>
+  <table>
+    <tr>
+      <th>通俗名</th>
+      <th>批發市場代碼與名稱</th>
+      <th>均價（元/kg）</th>
+      <th>日均量（kg）</th>
+    </tr>
+    <tr>
+      <td>高麗菜</td>
+      <td>LA1 甘藍 初秋</td>
+      <td>16.65</td>
+      <td>186,418</td>
+    </tr>
+    <tr>
+      <td>小白菜</td>
+      <td>LB2 小白菜 蚵仔白</td>
+      <td>23.07</td>
+      <td>33,454</td>
+    </tr>
+    <tr>
+      <td>地瓜葉</td>
+      <td>LO1 甘薯葉</td>
+      <td>30.92</td>
+      <td>29,285</td>
+    </tr>
+    <tr>
+      <td>空心菜</td>
+      <td>LF2 蕹菜 小葉</td>
+      <td>40.88</td>
+      <td>20,102</td>
+    </tr>
+    <tr>
+      <td>綠豆芽</td>
+      <td>SX1 芽菜類 綠豆芽</td>
+      <td>12.68</td>
+      <td>13,171</td>
+    </tr>
+    <tr>
+      <td>大陸妹</td>
+      <td>LI3 萵苣菜 本島圓葉</td>
+      <td>37.88</td>
+      <td>6,172</td>
+    </tr>
+    <tr>
+      <td>黃豆芽</td>
+      <td>SX2 芽菜類 黃豆芽</td>
+      <td>20.01</td>
+      <td>1,002</td>
+    </tr>
+  </table>
+  <p>
+    以上七種品項在資料期間的供貨率均為 1.00，代表兩年間幾乎每天都有交易紀錄，
+    是分析「全年供貨是否穩定」的適合對象。
+  </p>
+
+  <!-- ===== 二、資料來源說明 ===== -->
+  <h2>二、資料來源說明</h2>
+  <p>
+    本報告資料來源為農業部農糧署
+    <a href="https://amis.afa.gov.tw/main/Main.aspx" target="_blank">「農產品批發市場交易行情站」</a>
+  </p>
+  <table>
+    <tr>
+      <th>項目</th>
+      <th>說明</th>
+    </tr>
+    <tr>
+      <td>查詢作物</td>
+      <td>蔬菜類（全部品項，不預先篩選）</td>
+    </tr>
+    <tr>
+      <td>查詢市場</td>
+      <td>台北一（代碼 109）、台北二（104）、板橋區（220）、三重區（241）</td>
+    </tr>
+    <tr>
+      <td>查詢時間範圍</td>
+      <td>民國 113 年 5 月 1 日 ～ 民國 115 年 5 月 14 日（共 25 個月）</td>
+    </tr>
+    <tr>
+      <td>資料更新頻率</td>
+      <td>每日更新</td>
+    </tr>
+    <tr>
+      <td>資料格式</td>
+      <td>HTML 表格（爬取後轉存 CSV）</td>
+    </tr>
+  </table>
+
+  <h3>2.1 為何選用「農產品批發市場交易行情站」而非「田間好幫手」的 JSON API</h3>
+  <p>
+    農業部另有提供「田間好幫手」的<a href="https://data.moa.gov.tw/Service/OpenData/FromM/FarmTransData.aspx" target="_blank">開放資料
+      API</a>，
+    格式為 JSON，使用較為方便。然而實測後發現，該 API 的蔬菜交易資料僅涵蓋台北二市場，
+    台北一、三重區、板橋區均無資料回傳，因此改採
+    <a href="https://amis.afa.gov.tw/main/Main.aspx" target="_blank">「農產品批發市場交易行情站」</a>
+    的 HTML 介面進行爬取。
+  </p>
+
+  <h3>2.2 價格欄位定義</h3>
+  <p>
+    資料來源：<a href="https://uptogo.com.tw/財經/產業分析/上價中價下價是什麼意思？/" target="_blank">uptogo.com.tw</a>
+  </p>
+  <p>台灣農產品批發市場每日公佈四種價格，計算方式均採<strong>加權平均</strong>（非極端值）：</p>
+  <table>
+    <tr>
+      <th>欄位</th>
+      <th>計算基礎</th>
+      <th>意涵</th>
+    </tr>
+    <tr>
+      <td>上價</td>
+      <td>當日總交易量中，最高價格前 20% 交易的加權均值</td>
+      <td>優等品行情</td>
+    </tr>
+    <tr>
+      <td>中價</td>
+      <td>扣除最高與最低各 20% 後，中間 60% 交易的加權均值</td>
+      <td>大宗批發主流價，零售商進貨主要參考</td>
+    </tr>
+    <tr>
+      <td>下價</td>
+      <td>當日總交易量中，最低價格後 20% 交易的加權均值</td>
+      <td>低階品行情</td>
+    </tr>
+    <tr>
+      <td>平均價</td>
+      <td>全部交易的加權均值</td>
+      <td>整體市場行情代表值，本研究主要指標</td>
+    </tr>
+  </table>
+  <p>
+    本研究以<strong>平均價</strong>作為主要分析指標，並額外計算
+    <strong>上下價差率</strong>＝（上價 − 下價）／平均價，作為同品項品質分散程度的輔助指標。
+  </p>
+
+  <!-- ===== 三、爬蟲設計與流程 ===== -->
+  <h2>三、爬蟲設計與流程</h2>
+  <h3>3.1 網站技術分析</h3>
+  <p>
+    「農產品批發市場交易行情站」採用 <strong>ASP.NET WebForms</strong> 架構，具有以下技術挑戰：
+  </p>
+  <ul>
+    <li>每次 GET 頁面都產生新的 <code>__VIEWSTATE</code>、<code>__EVENTVALIDATION</code>、<code>__VIEWSTATEGENERATOR</code>
+      隱藏欄位，POST 查詢時必須攜帶最新值</li>
+    <li>下拉選單具有<strong>級聯相依性</strong>：需先切換「全部產品」選項，才能在後續查詢中取得所有蔬菜品項</li>
+    <li>查詢結果透過 <strong>ASP.NET UpdatePanel</strong> 以 AJAX Delta 格式回傳，格式為 <code>長度|類型|id|內容|</code>，需自行解析</li>
+  </ul>
+  <p>
+    本研究使用手機版介面（<code>/m_veg/VegProdDayTransInfo.aspx</code>）而非桌面版，
+    因為手機版 HTML 結構較精簡，解析更穩定。實作上採用 <code>requests.Session()</code>，
+    不需啟動瀏覽器（Playwright），大幅降低執行開銷。
+  </p>
+
+  <h3>3.2 三步驟爬取流程</h3>
+  <p>每個月份執行一次完整的三步驟，共執行 25 次迭代（25 個月）：</p>
+  <table>
+    <tr>
+      <th>步驟</th>
+      <th>HTTP 方法</th>
+      <th>目的</th>
+    </tr>
+    <tr>
+      <td>步驟一</td>
+      <td>GET 頁面</td>
+      <td>取得初始 ViewState 三個隱藏欄位</td>
+    </tr>
+    <tr>
+      <td>步驟二</td>
+      <td>POST（切換產品範圍）</td>
+      <td>觸發「全部產品」選項的 AJAX 事件，取得更新後的 ViewState</td>
+    </tr>
+    <tr>
+      <td>步驟三</td>
+      <td>POST（執行查詢）</td>
+      <td>攜帶日期範圍與市場代碼查詢，解析 Delta 回應中的 HTML 表格</td>
+    </tr>
+  </table>
+  <p>每步驟後加入 <code>time.sleep(1～2)</code>，避免對政府伺服器造成過大壓力。</p>
+  <p>
+    <strong>斷點續爬機制：</strong>每個月份的資料即時儲存至 <code>data/monthly/{民國年月}.csv</code>，
+    下次執行時自動跳過已完成月份，網路中斷後可無縫續爬。
+  </p>
+
+  <h3>3.3 程式碼摘要</h3>
+  <pre>
+# Delta 格式解析（ASP.NET AJAX 回應）
+def parse_delta(text: str) -> dict:
+    """格式：{長度}|{類型}|{id}|{內容}|...，依長度切割取出各區塊"""
+    result = {}
+    i = 0
+    while i < len(text):
+        p1 = text.index('|', i)
+        length = int(text[i:p1]);  i = p1 + 1
+        p2 = text.index('|', i)
+        type_ = text[i:p2];        i = p2 + 1
+        p3 = text.index('|', i)
+        id_   = text[i:p3];        i = p3 + 1
+        content = text[i:i + length]
+        i += length + 1
+        result[(type_, id_)] = content
+    return result
+
+# 找到含有 &lt;table&gt; 的 updatePanel，用 pandas 解析
+for (type_, id_), content in delta.items():
+    if type_ == 'updatePanel' and '&lt;table' in content:
+        dfs = pd.read_html(io.StringIO(content), header=0)
+        ...
+  </pre>
+
+  <!-- ===== 四、遇到的困難與解決方式 ===== -->
+  <h2>四、遇到的困難與解決方式</h2>
+
+  爬蟲過程並沒有遇到任何困難，但在做資料處理與分析時，遇到不少決策上的困難。
+
+  <h3>4.1 蔬菜品項應該合併還是獨立分析？</h3>
+  <p>
+    原始資料中，同一種蔬菜往往細分為多個品項：例如花椰菜分為白花、青花、荷蘭等多個品種，
+    甘藍則有初秋、改良種、改良尖、進口等十餘個細分。
+    一開始不確定分析時是否應該將這些細分品種合併為同一個「高麗菜」或「花椰菜」來計算均價與 CV，
+    還是各自保持獨立。
+  </p>
+  <p>
+    最終決定<strong>保留全部細分品項，不做合併</strong>。
+    原因是同一蔬菜的不同品種，價格差距可能很大，若強制合併，會掩蓋這些實際上對採購決策有意義的差異。
+    在選擇燙青菜的「代表品項」時，則參考<a href="https://twfood.cc" target="_blank">當季好蔬果</a>的作物名稱對照，
+    並以各細分品種中<strong>日均交易量最大</strong>的作為代表品項。
+  </p>
+
+  <h3>4.2 品項太多，不知道該用什麼標準來篩選與計算</h3>
+  <p>
+    資料共涵蓋 412 個細分品項，分析時反覆遇到同一個根本困難：
+    <strong>沒有一個單一指標能同時公平地涵蓋所有品項的差異</strong>，
+    每選一個標準，都會對某些品項產生系統性的優勢或劣勢。這個困難具體表現在以下幾個問題上：
+  </p>
+  <ul>
+    <li>
+      <strong>視覺化要顯示哪些品項？</strong>
+      原本以總交易量（公斤數）取前 40 名，但冬瓜、南瓜等瓜類本身就比葉菜重，
+      光靠重量累積也許就能排比較前面，但這不代表市場重要性更高。因此改以供貨率（availability）為主要排序依據，
+      供貨率是純粹的天數比例，與蔬菜重量無關。
+    </li>
+    <li>
+      <strong>日均交易量能公平比較不同蔬菜嗎？</strong>
+      以為「總交易量（公斤數） ÷ 供貨天數」能讓品項間公平比較，後來發現它只解決了供貨天數差異的問題，
+      不同蔬菜之間仍存在重量特性本身的差距。因此將日均交易量降為次要指標，僅用於供貨率相同時的次排序，
+      以及 Scatter plot 氣泡大小的相對呈現。
+    </li>
+  </ul>
+
+  <!-- ===== 五、爬取資料量統計 ===== -->
+  <h2>五、爬取資料量統計</h2>
+  <div class="stat-grid">
+    <div class="stat-card">
+      <div class="num">442,115</div>
+      <div class="label">有效資料筆數</div>
+    </div>
+    <div class="stat-card">
+      <div class="num">4</div>
+      <div class="label">涵蓋市場數</div>
+    </div>
+    <div class="stat-card">
+      <div class="num">412</div>
+      <div class="label">蔬菜品項數</div>
+    </div>
+    <div class="stat-card">
+      <div class="num">25</div>
+      <div class="label">爬取月份數</div>
+    </div>
+  </div>
+  <p>
+    資料期間：2024 年 5 月 ～ 2026 年 5 月 14 日。
+    原始爬取 442,151 筆，清理後移除平均價為 0 或空值、交易量為 0 或空值的列，
+    保留 442,115 筆有效紀錄。
+  </p>
+  <p>
+    412 個蔬菜品項包含各品種細分（如「甘藍 初秋」、「甘藍 改良種」各自獨立），
+    進口品項亦與國產分開計算，以完整反映市場的品質與來源分布。
+  </p>
+
+  <!-- ===== 六、分析方法說明 ===== -->
+  <h2>六、分析方法說明</h2>
+  <p>對每個品項計算以下六項指標：</p>
+  <table>
+    <tr>
+      <th>指標</th>
+      <th>計算方式</th>
+      <th>意涵</th>
+      <th>分年？</th>
+    </tr>
+    <tr>
+      <td><code>wavg_price</code></td>
+      <td>交易量加權均價</td>
+      <td>整體市場實際成交行情的代表值</td>
+      <td>全期 + 第一年 + 第二年</td>
+    </tr>
+    <tr>
+      <td><code>price_cv_y1/y2</code></td>
+      <td>各年 std(每日均價) / mean(每日均價)</td>
+      <td>每日價格波動程度，兩年各自計算</td>
+      <td>✅ 分年</td>
+    </tr>
+    <tr>
+      <td><code>avg_daily_volume</code></td>
+      <td>總交易量 ÷ 供貨天數</td>
+      <td>日均供應量，消除蔬菜單位重量差異的偏差</td>
+      <td>全期</td>
+    </tr>
+    <tr>
+      <td><code>availability</code></td>
+      <td>有交易日數 ÷ 資料期間總日數</td>
+      <td>供貨連續性（0 ～ 1）</td>
+      <td>全期</td>
+    </tr>
+    <tr>
+      <td><code>price_spread_ratio</code></td>
+      <td>每日（上價 − 下價）／均價，取均值</td>
+      <td>品質分散程度，值越低品質越均一</td>
+      <td>全期</td>
+    </tr>
+  </table>
+
+  <h3>6.1 wavg_price（交易量加權均價）說明</h3>
+  <p>
+    資料中每一列代表「某天、某市場、某品項」的交易紀錄，但各列的交易量差異懸殊。
+    若直接對所有列的均價取算術平均，交易量極少的日期（例如僅 3,000 公斤）
+    會與交易量龐大的日期（例如 80,000 公斤）佔有相同權重，導致結果失真。
+  </p>
+  <p>舉例：某品項連續三天的資料如下：</p>
+  <table>
+    <tr>
+      <th>日期</th>
+      <th>均價（元/kg）</th>
+      <th>交易量（kg）</th>
+    </tr>
+    <tr>
+      <td>2024/05/01</td>
+      <td>22</td>
+      <td>80,000</td>
+    </tr>
+    <tr>
+      <td>2024/05/02</td>
+      <td>24</td>
+      <td>3,000</td>
+    </tr>
+    <tr>
+      <td>2024/05/03</td>
+      <td>23</td>
+      <td>75,000</td>
+    </tr>
+  </table>
+  <p>
+    <strong>算術平均</strong>＝（22 + 24 + 23）÷ 3 ＝ <strong>23.0 元</strong><br>
+    → 5 月 2 日僅 3,000 公斤，卻與其他天等權，高估了實際成交行情。
+  </p>
+  <p>
+    <strong>交易量加權均價</strong>＝ Σ（均價 × 交易量）÷ Σ 交易量<br>
+    ＝（22×80,000 + 24×3,000 + 23×75,000）÷（80,000 + 3,000 + 75,000）<br>
+    ＝ 3,557,000 ÷ 158,000 ≈ <strong>22.5 元</strong><br>
+    → 量大的日期（22 元、23 元）佔較多權重，結果更接近「市場實際花多少錢買這個菜」。
+  </p>
+  <p>
+    加權均價的直覺意義是：<em>「把這個品項兩年所有交易加總後，平均每公斤花了多少錢？」</em>
+    這才是評估蔬菜市場行情的合理基準。
+  </p>
+  <h3>6.2 price_cv_y1 / price_cv_y2（價格變異係數）說明</h3>
+  <p>
+    變異係數（Coefficient of Variation，CV）＝ 標準差 ÷ 平均價，衡量價格相對於自身均值的波動程度。
+  </p>
+  <p>
+    <strong>計算方式（以第一年為例）：</strong><br>
+    取該品項第一年所有每日均價（約 1,200 列），以<strong>不加權的算術平均</strong>作為 mean，
+    計算這些日均價圍繞 mean 的標準差，再相除得到 CV。
+  </p>
+  <p>
+    <strong>為什麼 CV 的 mean 用算術平均，而非交易量加權平均？</strong><br>
+    <code>wavg_price</code> 問的是「這個品項每公斤實際成交多少錢」，量大的日子代表更多真實交易，
+    應佔較高權重。但 CV 問的是不同問題：<strong>「這個品項的價格每天有多容易跳動？」</strong><br>
+    對每天到批發市場採購的餐廳老闆而言，不管那天全市場交易量是 3,000 公斤還是 80,000 公斤，
+    他面對的都是「今天的報價」。量小的日子和量大的日子，在採購決策上各佔一天、一票，
+    因此 CV 的計算中每天等權，才能真實反映餐廳老闆所體驗到的價格不可預測程度。
+  </p>
+  <p>
+    <strong>為什麼不直接用標準差？</strong><br>
+    標準差的大小受價格水準影響，不同價位的蔬菜無法直接比較。例如：<br>
+    胡蘿蔔：均價 16 元、標準差 4.5 元 → CV ＝ 0.28（穩定）<br>
+    青蔥：　均價 87 元、標準差 25 元　→ CV ＝ 0.29（同樣穩定）<br>
+    標準差差了六倍，但 CV 幾乎相同——代表兩者相對自身均價的波動程度其實相近。
+    CV 消除了價格水準的影響，讓不同品項的穩定性得以公平比較。
+  </p>
+  <p>
+    <strong>為什麼分兩年計算？</strong><br>
+    若將兩年資料合併計算，整體 CV 會同時反映：①每日波動、②季節規律、③年際整體漲跌。
+    例如甘藍 初秋第一年均價 20.5 元、第二年均價 12.9 元（整體下跌），
+    兩年合併後 CV 偏高，但這不代表它「每天忽高忽低」，而是兩年間整體跌了一次價。
+    分兩年計算後，<code>price_cv_y1</code> 與 <code>price_cv_y2</code> 各自反映「該年內」的波動，
+    若兩年的 CV 都低，才能說這個品項<em>跨年一致穩定</em>，結論更具說服力。
+  </p>
+
+  <h3>6.3 avg_daily_volume（日均交易量）說明</h3>
+  <p>
+    日均交易量 ＝ 兩年總交易量（公斤）÷ 供貨天數
+  </p>
+  <p>
+    <strong>解決的問題：交易頻率偏差。</strong><br>
+    若直接比較總交易量，供貨天數多的品項（例如交易 700 天）光靠累積就能遠超供貨較少的品項（例如 300 天），
+    即使後者每次出現時交易規模更大。除以實際供貨天數後，
+    得到的是「每次出現時大約賣多少」，反映的是<strong>每次進貨的實際規模</strong>，
+    而非供貨天數多寡帶來的累積效果。
+  </p>
+  <p>
+    <strong>此指標並不消除跨品項的重量差異。</strong><br>
+    日均交易量的單位仍是公斤，冬瓜每天平均 50,000 公斤、小白菜每天 8,000 公斤，
+    這個差距有一部分仍來自蔬菜本身的重量特性，而非需求量的真實差距。
+    因此視覺化篩選時以<strong>供貨率（availability）</strong>作為主要排序依據——
+    供貨率是純粹的天數比例，與公斤無關，才能真正避開重量偏差。
+    <code>avg_daily_volume</code> 僅作為供貨率相同時的次排序標準，
+    以及散點圖中的點大小（對數正規化），用來呈現各品項交易規模的相對大小。
+  </p>
+
+  <h3>6.4 availability（供貨率）說明</h3>
+  <p>
+    供貨率 ＝ 有交易日數 ÷ 資料期間總日數（約 745 天）
+  </p>
+  <p>
+    <strong>為什麼不直接用 trade_days（供貨天數）？</strong><br>
+    不同品項進入資料庫的時間點可能不同：新品種可能只有後半段才出現，
+    老品種可能某段時間停產。若直接比較天數，新品種天然吃虧。
+    改用「比率」後，分母統一為兩年期間的總天數，不同品項的供貨頻率才有可比性。
+  </p>
+  <p>
+    供貨率為 1.00 代表這個品項在整個兩年期間幾乎每天都有交易；
+    0.50 代表約一半的日子有賣、一半沒有。
+    對餐廳而言，供貨率越高代表「去市場幾乎每次都買得到」，採購風險越低。
+  </p>
+
+  <h3>6.5 price_spread_ratio（上下價差率）說明</h3>
+  <p>
+    上下價差率 ＝ （上價 − 下價）÷ 平均價，對每日資料計算後取兩年均值。
+  </p>
+  <p>
+    上價代表當日最高 20% 交易的加權均值（優等品），下價代表最低 20% 的加權均值（次級品）。
+    兩者的差距除以均價，得到一個與價格水準無關的相對比率。
+  </p>
+  <p>
+    <strong>這個指標衡量的是同一天、同一市場裡，同一品項的品質有多分散。</strong><br>
+    比率低（例如 0.30）：當天各批貨品質相近，買到的東西差異不大，採購風險低。<br>
+    比率高（例如 1.20）：當天同一品項有人賣 10 元、有人賣 60 元，品質良莠不齊，
+    餐廳難以掌握進貨品質。
+  </p>
+  <p>
+    此指標為結構性特徵，不分年計算，因為品質分散程度主要取決於蔬菜本身的特性
+    （例如甘藍容易因採收成熟度不同而品質差異大），不太受年份影響。
+  </p>
+
+  <p>
+    <strong>篩選邏輯：</strong>四張圖各有不同的篩選條件——
+    散點圖（圖一）顯示 108 個供貨率 ＝ 1.00 的品項；
+    均價排行（圖二）從同樣 108 個品項中取均價最低的 45 種；
+    CV 排行（圖三）從 108 個品項中取 CV 最低的 20 種；
+    季節熱圖（圖四）僅顯示本研究關注的 7 種常見燙青菜。
+    以供貨率 ＝ 1.00 作為基礎篩選門檻，是為了確保進入分析的品項在整個兩年期間幾乎每天都有交易，
+    避免季節性或短期品項干擾結果；同時規避以總交易量（公斤數）排序時，
+    重型蔬菜（瓜類、根莖類）因單位重量大而獲得不公平優勢的問題。
+  </p>
+
+  <!-- ===== 七、視覺化圖表說明 ===== -->
+  <h2>七、視覺化圖表說明</h2>
+
+  <h3>圖一：價格、穩定性與日均供應量分布散點圖</h3>
+  <div class="chart-block">
+    <div style="width:100%;height:620px;overflow:hidden;">
+<div> <script>window.PlotlyConfig = {MathJaxConfig: 'local'};</script>
+<script charset="utf-8" crossorigin="anonymous" integrity="sha256-fHbNLP+GlIXN+efbQec78UkemUz3NJp7UmfGxC1tNxs=" src="https://cdn.plot.ly/plotly-3.5.0.min.js"></script> <div class="plotly-graph-div" id="67dbd66d-de18-488d-b980-67ffb8be7fdc" style="height:580px; width:100%;"></div> <script>                window.PLOTLYENV=window.PLOTLYENV || {};                                if (document.getElementById("67dbd66d-de18-488d-b980-67ffb8be7fdc")) {                    Plotly.newPlot(                        "67dbd66d-de18-488d-b980-67ffb8be7fdc",                        [{"customdata":[["SA3 \u863f\u8514 \u77f8\u4ed4",70252.0,0.602,0.537],["LC1 \u5305\u5fc3\u767d \u5305\u767d",60772.0,0.55,0.522],["FJ3 \u756a\u8304 \u725b\u756a\u8304",50450.0,0.441,0.577],["FD1 \u82b1\u80e1\u74dc",46985.0,0.411,0.527],["SB2 \u80e1\u863f\u8514 \u6e05\u6d17",45150.0,0.278,0.288],["FF1 \u7d72\u74dc",40535.0,0.467,0.435],["LI5 \u8435\u82e3\u83dc \u6cb9\u9ea5\u83dc",32537.0,0.789,0.729],["FY6 \u7389\u7c73 \u751c\u8edf\u6bbc",30436.0,0.529,0.544],["LD1 \u9752\u6c5f\u767d\u83dc \u5c0f\u6897",27972.0,0.667,0.771],["SE6 \u9752\u8525 \u7c89\u8525",27212.0,0.614,1.023],["FI2 \u8304\u5b50 \u9ebb\u8378\u8304",26160.0,0.528,0.537],["FB1 \u82b1\u6930\u83dc \u9752\u6897",25350.0,0.755,0.735],["FY5 \u7389\u7c73 \u7cef\u7c73\u9ed1",24728.0,0.568,0.524],["FC1 \u80e1\u74dc \u9ed1\u523a",24117.0,0.414,0.431],["FG1 \u82e6\u74dc \u767d\u5927\u7c73",19631.0,0.417,0.318],["SC1 \u99ac\u9234\u85af \u672c\u7522",18554.0,0.222,0.133],["SD9 \u6d0b\u8525 \u9032\u53e3",17753.0,0.347,0.286],["SD1 \u6d0b\u8525 \u672c\u7522",16252.0,0.335,0.348],["LC9 \u5305\u5fc3\u767d \u9032\u53e3",16222.0,0.436,0.457],["SO1 \u7518\u85af \u81fa\u8fb257\u865f",15740.0,0.35,0.359],["LN1 \u6cb9\u83dc",14462.0,0.711,0.761],["FT1 \u5357\u74dc \u6728\u74dc\u5f62",14014.0,0.331,0.37],["FT5 \u5357\u74dc \u9752\u5982\u610f",13681.0,0.456,0.593],["FN1 \u654f\u8c46 \u767d\u8c46",12890.0,0.408,0.444],["MJ1 \u674f\u9b91\u83c7",12637.0,0.278,0.308],["FH3 \u6241\u84b2 \u82b1\u84b2",12629.0,0.464,0.613],["LK3 \u82a5\u85cd\u83dc \u82a5\u85cd\u82bd",11371.0,0.512,0.536],["FK5 \u751c\u6912 \u9752\u6912",11196.0,0.519,0.49],["SH5 \u7af9\u7b4d \u70cf\u6bbc\u7da0",10967.0,0.401,0.489],["LG2 \u82b9\u83dc \u767d\u6897",10257.0,0.833,0.828],["LM2 \u83a7\u83dc \u767d\u83a7\u83dc",9570.0,0.454,0.451],["OX1 \u5176\u4ed6",9128.0,0.389,0.422],["SB1 \u80e1\u863f\u8514 \u672a\u6d17",8925.0,0.353,0.24],["LB1 \u5c0f\u767d\u83dc \u571f\u767d\u83dc",7672.0,0.719,0.751],["SG2 \u5927\u849c \u8edf\u6897",7149.0,0.468,0.649],["SQ1 \u832d\u767d\u7b4d \u5e36\u6bbc",7016.0,0.287,0.252],["FG0 \u82e6\u74dc \u5176\u4ed6",6668.0,0.492,0.359],["FM2 \u83dc\u8c46 \u9752\u8272",6209.0,0.467,0.42],["SF4 \u97ed\u83dc \u9752\u982d",6034.0,0.415,0.386],["FY4 \u7389\u7c73 \u7389\u7c73\u7b4d",5243.0,0.5,0.708],["SP1 \u8591 \u8001\u8591",4952.0,0.261,0.296],["FH4 \u6241\u84b2 \u68a8\u5b50\u84b2",4931.0,0.513,0.623],["FA1 \u9ec3\u79cb\u8475",4460.0,1.014,0.575],["LP2 \u4e5d\u5c64\u5854",4093.0,0.544,0.635],["ME1 \u91d1\u7d72\u83c7 \u91d1\u91dd\u83c7",3974.0,0.591,0.38],["FV4 \u8fa3\u6912 \u671d\u5929\u6912",3888.0,0.579,0.605],["LT3 \u6d77\u83dc \u6c34\u84ee",3883.0,0.278,0.327],["FU1 \u96bc\u4eba\u74dc",3838.0,0.454,0.436],["LP1 \u82ab\u837d",3820.0,1.304,0.912],["LC0 \u5305\u5fc3\u767d \u5176\u4ed6",3797.0,0.609,0.764],["MD1 \u6fd5\u9999\u83c7",3709.0,0.397,0.412],["SP2 \u8591 \u5ae9\u8591",3596.0,0.341,0.374],["SP3 \u8591 \u7c89\u8591",3591.0,0.242,0.418],["LI8 \u8435\u82e3\u83dc \u6c34\u8015",3588.0,0.518,0.441],["SU2 \u85af\u8577 \u767d\u85af\u8577",3495.0,0.267,0.316],["SG6 \u5927\u849c \u849c\u4ec1",3189.0,0.232,0.189],["FN5 \u654f\u8c46 \u919c\u8c46",3145.0,0.372,0.439],["SQ3 \u832d\u767d\u7b4d \u53bb\u6bbc",3101.0,0.239,0.201],["LB3 \u5c0f\u767d\u83dc \u5976\u6cb9\u767d",3084.0,0.634,0.69],["SC9 \u99ac\u9234\u85af \u9032\u53e3",2980.0,0.406,0.452],["LK2 \u82a5\u85cd\u83dc",2894.0,0.686,0.712],["FV1 \u8fa3\u6912 \u7d05\u5c0f",2616.0,0.482,0.472],["FY9 \u7389\u7c73 \u9032\u53e3",2482.0,0.435,0.32],["ME2 \u91d1\u7d72\u83c7 \u76d2\u88dd",2432.0,0.472,0.412],["LJ4 \u82a5\u83dc \u5c0f\u82a5\u83dc",2347.0,0.548,0.572],["LI6 \u8435\u82e3\u83dc \u863f\u7f8e",2277.0,0.88,0.721],["MC1 \u6fd5\u6728\u8033",2269.0,0.436,0.439],["FG4 \u82e6\u74dc \u7fe0\u7da0",2068.0,0.56,0.53],["SE1 \u9752\u8525 \u65e5\u8525",2063.0,0.792,0.667],["LE1 \u7687\u5bae\u83dc \u5c0f\u8449",2053.0,0.393,0.462],["FD0 \u82b1\u80e1\u74dc \u5176\u4ed6",1959.0,0.407,0.46],["FV6 \u8fa3\u6912 \u7cef\u7c73\u6912",1931.0,0.449,0.374],["FZ1 \u843d\u82b1\u751f \u751f",1842.0,0.354,0.358],["SV9 \u8606\u7b4d \u9032\u53e3",1777.0,0.34,0.284],["LN2 \u6cb9\u83dc \u5c0f\u677e\u83dc",1730.0,0.712,0.716],["MX1 \u5176\u4ed6\u83c7\u985e",1476.0,0.528,0.346],["FK6 \u751c\u6912 \u6c34\u679c\u5f69\u6912",1399.0,0.278,0.258],["SF2 \u97ed\u83dc \u97ed\u83dc\u9ec3",1306.0,0.346,0.328],["SV2 \u8606\u7b4d \u7da0\u8606\u7b4d",1221.0,0.366,0.455],["SF3 \u97ed\u83dc \u97ed\u83dc\u82b1",1215.0,0.344,0.397],["FF2 \u7d72\u74dc \u89d2\u74dc",1202.0,0.936,1.152],["SH7 \u7af9\u7b4d \u53bb\u6bbc",1063.0,0.443,0.569],["SE5 \u9752\u8525 \u7d05\u8525\u982d",986.0,0.356,0.338],["SG7 \u5927\u849c \u849c\u74e3",979.0,0.34,0.261],["MA2 \u6d0b\u83c7 \u76d2\u88dd",890.0,0.595,0.595],["MI1 \u79c0\u73cd\u83c7",827.0,0.364,0.35],["LI0 \u8435\u82e3\u83dc \u5176\u4ed6",819.0,0.572,0.661],["FI3 \u8304\u5b50 \u65e5\u672c\u7a2e",770.0,1.135,0.782],["FV2 \u8fa3\u6912 \u9752\u5c0f",616.0,0.659,0.647],["MK1 \u9d3b\u559c\u83c7",606.0,0.494,0.417],["LE2 \u7687\u5bae\u83dc \u5927\u8449",596.0,0.435,0.427],["MA1 \u6d0b\u83c7",373.0,0.414,0.421],["MK2 \u9d3b\u559c\u83c7 \u76d2\u88dd",345.0,0.457,0.319],["SX3 \u82bd\u83dc\u985e \u8c4c\u8c46\u82bd",342.0,0.106,0.058],["SX4 \u82bd\u83dc\u985e \u82dc\u84ff\u82bd",284.0,0.174,0.185],["LV1 \u5df4\u897f\u5229",283.0,0.947,0.944],["OD1 \u863f\u8514\u4e7e",264.0,0.049,0.086],["LT2 \u6d77\u83dc \u6d77\u5e36",229.0,0.171,0.207],["FV0 \u8fa3\u6912 \u5176\u4ed6",142.0,0.764,0.6],["MK0 \u9d3b\u559c\u83c7 \u5176\u4ed6",111.0,0.251,0.155],["OG2 \u719f\u7b4d \u7bad\u7af9\u7b4d",108.0,0.062,0.033]],"hovertemplate":"\u003cb\u003e%{customdata[0]}\u003c\u002fb\u003e\u003cbr\u003e\u5747\u50f9\uff1a%{x:.1f} \u5143\u002fkg\u003cbr\u003eCV \u7b2c\u4e00\u5e74\uff1a%{customdata[2]}\u003cbr\u003eCV \u7b2c\u4e8c\u5e74\uff1a%{customdata[3]}\u003cbr\u003eCV \u5169\u5e74\u5747\uff1a%{y:.3f}\u003cbr\u003e\u65e5\u5747\u4ea4\u6613\u91cf\uff1a%{customdata[1]:,.0f} kg\u003cextra\u003e\u003c\u002fextra\u003e","marker":{"color":"#9C9C9C","line":{"width":0},"opacity":0.55,"size":{"dtype":"f8","bdata":"A6zd6DVhRUBiVJmLk\u002f1EQP2Pv42hfURAW+5CM7dMRECxDB4PVzFEQI04bsg650NAnZYHxylQQ0C3QNpmRCJDQI7Dvb0\u002f6EJA+2nSak3VQkDG7X0bNbpCQMpbiviXpEJAR3yQjIOTQkBMvFFlUoJCQGBJ2oTh9EFAbEE8cRXOQUB+EHd0wa9BQKDMm1AJc0FA6wvRR8dxQUC9Sr6aCV1BQLoMEfHSIkFAOjlOfjANQUCAbfwQrPxAQIB7QS6600BAFQJeHhvGQEAcxHy0sMVAQNLlLYWMfUBA4EabEuJyQEC+mSk4r2RAQG0bPFO8NkBAYmr\u002fIBIHQEAXKsEpFs0\u002fQDJPreBDrj9Aqph+kj\u002fePkDd+mKeJX0+QEIbjqZTYz5AOt0YG3EdPkA+M7twdLs9QImCYfwQlD1A30lGifHSPEAzZlEDoIQ8QCukVfuYfjxAk7nK3I70O0Dw2wTCtn47QEy41VIWVjtAJebzQ\u002fA3O0D9UuNxYjY7QKDMq1VZJjtAuk+rgvgfO0CiQW5NjRc7QI8k+M9K9zpA\u002ftvuUuvMOkA2RZLb18o6QGeY5PuwyTpAmn708r+lOkB1jyxxqSc6QMJRpfdlFDpApkKZtTwBOkAGiTVZifk5QGAjtBuxyjlAP+ntex2iOUCv9MHZdRc5QCNjH8QlzzhApMUcFIqzOEDgB\u002fL3PII4QA88SRYNWThA3iUY8OtTOEBYfWTNttQ3QMnuTAAx0TdAQL68iCrKN0BK9fM4V4o3QFSfrQtUdjdAeUpbudI1N0CLys7sPgQ3QPA5wN9\u002f3zZAA71yNL8ENkB+bK9JP7s1QJrTYFxvXTVAQZMkQRIANUAImBzYWvo0QNtmY7uQ6zRA7jYeobVCNEDmKXhkadozQF5ZWoiR0TNAqr8pAmBOM0B0ghUE5OgyQJBggK7P3DJACTj6GD6HMkAtHj3F8FQxQKz2CCalPjFAuNBi4ZsoMUAfGKdLdkwtQNiX31z0dCxAXOHoer9YLECALrE0p14qQJB6Hj24WSpAEPB2STmYKUAqhsjUlQsoQHPrtDX27SJAQ1PacrpQIEAAAAAAAAAgQA=="}},"mode":"markers","name":"\u5176\u4ed6\u54c1\u9805","x":{"dtype":"f8","bdata":"BiAaaLF7JUBwKfDhkggsQHdsFNLzXUpAW6MeQxQSSEA1KcADfyUwQJGrVIl4ej5ABoF6Gs7qNkAWtH7QYTw3QPbJsjc2YTlAyWmfs16uUECvkCp7X8lAQBgWsRyxgkBAIxGRkqIjNEA3Dwa8wLI5QPK44w3\u002fp0pAd46N6D68NEAeuiyg7sg8QG8VVkmCdTJAgRg+BZetPkBELcymGwA2QBXUCVk5nDZA4FM7eCD\u002fNkDk+Sj4hwlJQHE9N9nJ9FdA6smKbYpzTEBAw6yyNMQyQLsc6bsgo0lARLXL8HuCR0CCTjumBUtHQFX+k0oK4kdAvtD2W3GWQkBE0mRGL65CQAHUzgngFS9Ag10DT7r2OUASTrpFrRhUQCJ1uU26wVNAN3y\u002fBXsrR0BQ5JtYeI9KQLF4pQxfR0pA5wvgZCUOOkA6\u002fktZlotOQP59+ANgojVAUnBPGFedT0ALQ+hGADFHQJTRJloUKj9AgrG0qUYjU0CV94ElQ6ZeQEMmWnF1eTJA4fLxDoLdUUA0PGXuTQtKQPSlxHOx0lhAeWXeIbggS0Biceq9xApJQPIxZfflEVBAaXR2GNZLTEDnxzmYr6VfQFkDxtDLHlBA73TQgkyiYUA5M53uD7c4QPihxsguuTxACo9soH+wPkAw4Qj81ERTQGC9dNpIMF5AFeZa9ThBREAhVBfRLoE5QKgYdnaD3kJAxOde\u002fa+HUECxpKPNcH5GQF6uFHh0P2ZAd6L9dZ3fSUDJFpeGPx5NQFqITkuUQFVAj6fi4PvCR0DhLzN6SDFqQGFU7Qu4zjtA6u6+VMSEWEAUh2hoUZ5cQHvLC\u002f996GFAJUSa1jf0ZUD6JJytacZeQJs4pai5R1JA6WKdSOz6QEDXL2THq8ROQPzmjYNapWBAF7nQOOQpaEDIAg4xRe5SQDSBXmN\u002fU1hATcDn4q9wPkAcHABqiFlMQN3Gkdds\u002fVVAHX\u002fJgxpnQECp6KoCP5ReQNdfRByuNGdAOAkwdq\u002f\u002fU0BbTpAme7JRQGMnln4mQF9A2FWQleiTQEBjke+GbRBLQPsEYJPhClNA5PJX\u002fssuZ0BwDgOH1\u002fhTQA=="},"y":{"dtype":"f8","bdata":"xJN0z4044j\u002fk1XWOnCjhPymiNZnfTOA\u002fhFcEJIQI3j+a5rLFphnSP614Xtlo2tw\u002fthQZnzVJ6D93Ya7AZC3hP\u002fpiw2i0\u002f+Y\u002fG7EMGTgy6j\u002fuz3v+OwjhP+Na8HND1uc\u002ffSiUGjF84T8elWQ2Ag3bP+aD3sk3hNc\u002fCtlg7nipxj\u002fKZ4eTCDzUP2Kwz8Vo3NU\u002fQk\u002fgiMmO3D8Y7hNi3bDWP5X+gDNJjuc\u002fUF2Xbztu1j8ER5bxXsngP6zNJPgDSds\u002fDpPEC1LA0j9qh31tqTvhPxSe52dHw+A\u002f045KFZIk4D+cmMKKmn3cP11NKitakeo\u002fLEsxdazw3D\u002fa0Q27o\u002fPZPy1Ymq5G+9I\u002fck9JhOCD5z+xZDM6o+HhP6AoGiLiO9E\u002fTAY558k92z94HRDpEGTcP16YwJKXoNk\u002fWDeDu1xV4z\u002f5byXlS9TRP\u002fYVhs6CMOI\u002fnEmwSups6T\u002ftK\u002fya1N\u002fiP7qGngOwCt8\u002fmAap19fw4j8sWXLW5VnTP15SOZ4bd9w\u002fAc1DqoS58T\u002fbRa1ojPjlP5j54Z7H49k\u002fiHtjKqXn1j9lXQUGkx3VP3WOkTGWsN4\u002f5DLv6Iik0j8ap5\u002faK+3KP5X+FiDa9Nk\u002fUV8Be30nzD9G+7+sHzHlP6Sfgkylc9s\u002fawJcYopc5j9YdqOcHY7eP+S3NI+yK9g\u002fUiaO+qNE3D\u002fETRs4AO3hPyjv5pmWnuk\u002fquZFVoQA3D8YnQQRaW\u002fhP6Jaq42xWOc\u002f1gcwwXxi2z+Y5wwU98HbP0RKcb2CUto\u002fdtCRcNPO1j\u002f\u002fKmXcd\u002fzTPwqvhktX2OY\u002f6YxQrAPw2z8Boiaj9SPRPyIdGwilktU\u002ffliT4dBJ2j+p5zPysrfXPzMmP82xs\u002fA\u002fpWeuVCgz4D8GA5VmozHWP5x8APdePNM\u002f4mMOdScM4z\u002fyv8dDsNvWP4Lf9S4tueM\u002fYOqEHbWq7j9KWEypp+jkPzmU+v03KN0\u002f5BG+8F+O2z8Az0N82bjaP7MwGFha0Ng\u002fhl\u002fy0ZnttD\u002fa9JSC+gXHP1QjLF4MQu4\u002f4vPp6WMxsT\u002fKSpIOGzfIP+T6s1Mt0eU\u002flCyXbQr7yT9aG61fjmSoPw=="},"type":"scatter"},{"customdata":[["LA1 \u7518\u85cd \u521d\u79cb",186418.0,0.562,0.822],["LB2 \u5c0f\u767d\u83dc \u86b5\u4ed4\u767d",33454.0,0.748,0.831],["LO1 \u7518\u85af\u8449",29285.0,0.433,0.47],["LF2 \u8579\u83dc \u5c0f\u8449",20102.0,0.43,0.461],["SX1 \u82bd\u83dc\u985e \u7da0\u8c46\u82bd",13171.0,0.357,0.246],["LI3 \u8435\u82e3\u83dc \u672c\u5cf6\u5713\u8449",6172.0,0.546,0.477],["SX2 \u82bd\u83dc\u985e \u9ec3\u8c46\u82bd",1002.0,0.022,0.056]],"hovertemplate":"\u003cb\u003e%{customdata[0]}\u003c\u002fb\u003e\u003cbr\u003e\u5747\u50f9\uff1a%{x:.1f} \u5143\u002fkg\u003cbr\u003eCV \u7b2c\u4e00\u5e74\uff1a%{customdata[2]}\u003cbr\u003eCV \u7b2c\u4e8c\u5e74\uff1a%{customdata[3]}\u003cbr\u003eCV \u5169\u5e74\u5747\uff1a%{y:.3f}\u003cbr\u003e\u65e5\u5747\u4ea4\u6613\u91cf\uff1a%{customdata[1]:,.0f} kg\u003cextra\u003e\u003c\u002fextra\u003e","marker":{"color":"#3C927A","line":{"color":"white","width":1},"opacity":0.9,"size":{"dtype":"f8","bdata":"AAAAAAAASEDCSpg5RGNDQBAAbq7GB0NAFMFPqSwFQkB1n0HOluJAQDYB3bROsz1AVu3cwIjxM0A="}},"mode":"markers+text","name":"\u5e38\u898b\u71d9\u9752\u83dc","text":["\u7518\u85cd \u521d\u79cb","\u5c0f\u767d\u83dc \u86b5\u4ed4\u767d","\u7518\u85af\u8449","\u8579\u83dc \u5c0f\u8449","\u82bd\u83dc\u985e \u7da0\u8c46\u82bd","\u8435\u82e3\u83dc \u672c\u5cf6\u5713\u8449","\u82bd\u83dc\u985e \u9ec3\u8c46\u82bd"],"textfont":{"color":"#0E3532","family":"Noto Sans TC, Microsoft JhengHei, PingFang TC, sans-serif","size":12},"textposition":"top right","x":{"dtype":"f8","bdata":"9YrSDZ2mMEBUQ0MVTxI3QFizDn376j5ApPfr8jZxREAKcr6wFl4pQI3hMGwH8UJAVAu+qxcCNEA="},"y":{"dtype":"f8","bdata":"wpwsZQ8k5j9Q0in4I0PpP7wFcJhc5Nw\u002feY18rfOA3D9WyxuPG0zTP\u002fihFxeuXuA\u002fl6YFl+gLpD8="},"type":"scatter"}],                        {"template":{"data":{"histogram2dcontour":[{"type":"histogram2dcontour","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"choropleth":[{"type":"choropleth","colorbar":{"outlinewidth":0,"ticks":""}}],"histogram2d":[{"type":"histogram2d","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"heatmap":[{"type":"heatmap","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"contourcarpet":[{"type":"contourcarpet","colorbar":{"outlinewidth":0,"ticks":""}}],"contour":[{"type":"contour","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"surface":[{"type":"surface","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"mesh3d":[{"type":"mesh3d","colorbar":{"outlinewidth":0,"ticks":""}}],"scatter":[{"fillpattern":{"fillmode":"overlay","size":10,"solidity":0.2},"type":"scatter"}],"parcoords":[{"type":"parcoords","line":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterpolargl":[{"type":"scatterpolargl","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"bar":[{"error_x":{"color":"#2a3f5f"},"error_y":{"color":"#2a3f5f"},"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"scattergeo":[{"type":"scattergeo","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterpolar":[{"type":"scatterpolar","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"scattergl":[{"type":"scattergl","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatter3d":[{"type":"scatter3d","line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattermap":[{"type":"scattermap","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattermapbox":[{"type":"scattermapbox","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterternary":[{"type":"scatterternary","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattercarpet":[{"type":"scattercarpet","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"carpet":[{"aaxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"baxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"type":"carpet"}],"table":[{"cells":{"fill":{"color":"#EBF0F8"},"line":{"color":"white"}},"header":{"fill":{"color":"#C8D4E3"},"line":{"color":"white"}},"type":"table"}],"barpolar":[{"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"pie":[{"automargin":true,"type":"pie"}]},"layout":{"autotypenumbers":"strict","colorway":["#636efa","#EF553B","#00cc96","#ab63fa","#FFA15A","#19d3f3","#FF6692","#B6E880","#FF97FF","#FECB52"],"font":{"color":"#2a3f5f"},"hovermode":"closest","hoverlabel":{"align":"left"},"paper_bgcolor":"white","plot_bgcolor":"#E5ECF6","polar":{"bgcolor":"#E5ECF6","angularaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"radialaxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"ternary":{"bgcolor":"#E5ECF6","aaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"baxis":{"gridcolor":"white","linecolor":"white","ticks":""},"caxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"sequential":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"sequentialminus":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"diverging":[[0,"#8e0152"],[0.1,"#c51b7d"],[0.2,"#de77ae"],[0.3,"#f1b6da"],[0.4,"#fde0ef"],[0.5,"#f7f7f7"],[0.6,"#e6f5d0"],[0.7,"#b8e186"],[0.8,"#7fbc41"],[0.9,"#4d9221"],[1,"#276419"]]},"xaxis":{"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","automargin":true,"zerolinewidth":2},"yaxis":{"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","automargin":true,"zerolinewidth":2},"scene":{"xaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2},"yaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2},"zaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2}},"shapedefaults":{"line":{"color":"#2a3f5f"}},"annotationdefaults":{"arrowcolor":"#2a3f5f","arrowhead":0,"arrowwidth":1},"geo":{"bgcolor":"white","landcolor":"#E5ECF6","subunitcolor":"white","showland":true,"showlakes":true,"lakecolor":"white"},"title":{"x":0.05},"mapbox":{"style":"light"}}},"shapes":[{"line":{"color":"#9E7A4E","dash":"dot","width":1.5},"type":"line","x0":50.079295520535446,"x1":50.079295520535446,"xref":"x","y0":0,"y1":1,"yref":"y domain"},{"line":{"color":"#493018","dash":"dot","width":1.5},"type":"line","x0":0,"x1":1,"xref":"x domain","y0":0.4449680042378857,"y1":0.4449680042378857,"yref":"y"}],"annotations":[{"font":{"color":"#9E7A4E","size":11},"showarrow":false,"text":"\u5747\u50f9\u4e2d\u4f4d\u6578 50.1 \u5143","x":50.079295520535446,"xanchor":"left","xref":"x","y":1,"yanchor":"top","yref":"y domain"},{"font":{"color":"#493018","size":11},"showarrow":false,"text":"CV \u4e2d\u4f4d\u6578 0.44","x":1,"xanchor":"right","xref":"x domain","y":0.4449680042378857,"yanchor":"top","yref":"y"}],"font":{"family":"Noto Sans TC, Microsoft JhengHei, PingFang TC, sans-serif","color":"#262626","size":13},"hoverlabel":{"font":{"family":"Noto Sans TC, Microsoft JhengHei, PingFang TC, sans-serif","size":13},"bgcolor":"white","bordercolor":"#D8D8D8"},"title":{"font":{"size":17,"color":"#262626"},"text":"\u5927\u53f0\u5317\u852c\u83dc\u6279\u767c\u5e02\u5834\uff1a\u50f9\u683c\u3001\u7a69\u5b9a\u6027\u8207\u65e5\u5747\u4f9b\u61c9\u91cf\u003cbr\u003e\u003csup\u003e\u5168\u5e74\u7121\u9593\u65b7\u4f9b\u8ca8\u54c1\u9805 108 \u7a2e\uff5c2024.05\u20132026.05\uff5c\u5713\u5708\u5927\u5c0f = \u65e5\u5747\u4ea4\u6613\u91cf\u003c\u002fsup\u003e","x":0.02,"xanchor":"left"},"xaxis":{"title":{"text":"\u4ea4\u6613\u91cf\u52a0\u6b0a\u5747\u50f9\uff08\u5143\u002f\u516c\u65a4\uff09"},"gridcolor":"#E2E2E2","linecolor":"#D8D8D8","zeroline":false},"yaxis":{"title":{"text":"CV\uff08\u8d8a\u4f4e\u8d8a\u7a69\u5b9a\uff09"},"gridcolor":"#E2E2E2","linecolor":"#D8D8D8","zeroline":false},"legend":{"x":0.98,"y":0.98,"xanchor":"right","yanchor":"top","bgcolor":"rgba(255,255,255,0.85)","bordercolor":"#D8D8D8","borderwidth":1},"margin":{"l":60,"r":40,"t":90,"b":60},"paper_bgcolor":"rgba(0,0,0,0)","plot_bgcolor":"rgba(0,0,0,0)","height":580},                        {"displayModeBar": true, "responsive": true, "modeBarButtonsToRemove": ["lasso2d", "select2d"]}                    )                };            </script> </div>
+</div></iframe>
+  </div>
+  <p>
+    此圖顯示 108 個供貨率 ＝ 1.00 的品項，X 軸為交易量加權均價（元/公斤）、Y 軸為兩年 CV 平均值
+    （越低代表越穩定），圓圈大小依日均交易量對數正規化。
+  </p>
+  <p>
+    <strong>七種燙青菜全部落在均價中位數（50.1 元）的左側</strong>，最貴的空心菜（40.9 元）也低於中位數，
+    顯示「便宜」是這些蔬菜的共同特徵。高麗菜（甘藍 初秋）日均交易量達 186,418 公斤，
+    是圖中最大的圓圈，反映其在大台北批發市場的壓倒性供應規模。
+  </p>
+  <p>
+    然而，七種燙青菜在 Y 軸的分布相當分散。黃豆芽 CV 僅 0.039，是全場 108 個品項中最穩定的，
+    圓圈幾乎貼著 X 軸；而小白菜的 CV 約 0.79、高麗菜約 0.69，兩者的價格波動程度在全場屬於偏高水準。
+    這個現象說明：<strong>便宜且全年供貨是七種燙青菜的共同基礎，但各自的價格穩定性差異極大。</strong>
+    這也引出一個值得思考的問題——如果個別燙青菜的價格波動那麼大，
+    餐廳是如何維持燙青菜整體成本的穩定的？
+  </p>
+
+  <h3>圖二：年際均價比較長條圖</h3>
+  <div class="chart-block">
+    <div style="width:100%;height:980px;overflow:hidden;">
+<div> <script>window.PlotlyConfig = {MathJaxConfig: 'local'};</script>
+<script charset="utf-8" crossorigin="anonymous" integrity="sha256-fHbNLP+GlIXN+efbQec78UkemUz3NJp7UmfGxC1tNxs=" src="https://cdn.plot.ly/plotly-3.5.0.min.js"></script> <div class="plotly-graph-div" id="3261201c-95e2-4117-9b65-30a89db6d3e7" style="height:950px; width:100%;"></div> <script>                window.PLOTLYENV=window.PLOTLYENV || {};                                if (document.getElementById("3261201c-95e2-4117-9b65-30a89db6d3e7")) {                    Plotly.newPlot(                        "3261201c-95e2-4117-9b65-30a89db6d3e7",                        [{"customdata":[["SA3 \u863f\u8514 \u77f8\u4ed4",11.264232506456606],["SX1 \u82bd\u83dc\u985e \u7da0\u8c46\u82bd",12.647106561641518],["LC1 \u5305\u5fc3\u767d \u5305\u767d",15.505781377932967],["SB1 \u80e1\u863f\u8514 \u672a\u6d17",15.277105532006749],["SB2 \u80e1\u863f\u8514 \u6e05\u6d17",15.90073338952162],["LA1 \u7518\u85cd \u521d\u79cb",20.47332422628382],["SD1 \u6d0b\u8525 \u672c\u7522",18.586238840993072],["FU1 \u96bc\u4eba\u74dc",20.334962059625617],["FH3 \u6241\u84b2 \u82b1\u84b2",21.736090929179884],["SX2 \u82bd\u83dc\u985e \u9ec3\u8c46\u82bd",19.990927349681623],["FY5 \u7389\u7c73 \u7cef\u7c73\u9ed1",21.21102189427438],["SC1 \u99ac\u9234\u85af \u672c\u7522",20.85864471486336],["FH4 \u6241\u84b2 \u68a8\u5b50\u84b2",24.093706468595663],["SO1 \u7518\u85af \u81fa\u8fb257\u865f",23.94435929188064],["LN1 \u6cb9\u83dc",24.31881676652688],["LI5 \u8435\u82e3\u83dc \u6cb9\u9ea5\u83dc",23.098914137365853],["FT1 \u5357\u74dc \u6728\u74dc\u5f62",26.878118243858182],["LB2 \u5c0f\u767d\u83dc \u86b5\u4ed4\u767d",25.659672965730923],["FY6 \u7389\u7c73 \u751c\u8edf\u6bbc",25.34625974047919],["LB3 \u5c0f\u767d\u83dc \u5976\u6cb9\u767d",27.99658203956518],["LD1 \u9752\u6c5f\u767d\u83dc \u5c0f\u6897",28.16156083214555],["LJ4 \u82a5\u83dc \u5c0f\u82a5\u83dc",28.99436170750332],["FC1 \u80e1\u74dc \u9ed1\u523a",26.683315230370265],["LB1 \u5c0f\u767d\u83dc \u571f\u767d\u83dc",27.116900475165277],["FY4 \u7389\u7c73 \u7389\u7c73\u7b4d",24.27410348771208],["LN2 \u6cb9\u83dc \u5c0f\u677e\u83dc",28.42516266877539],["SC9 \u99ac\u9234\u85af \u9032\u53e3",30.721596493176943],["SD9 \u6d0b\u8525 \u9032\u53e3",30.153856369611653],["FI3 \u8304\u5b50 \u65e5\u672c\u7a2e",37.60831633586068],["FF1 \u7d72\u74dc",31.829568559244688],["LC9 \u5305\u5fc3\u767d \u9032\u53e3",30.989451527799982],["LK2 \u82a5\u85cd\u83dc",35.006718717320105],["LO1 \u7518\u85af\u8449",34.43689989328531],["ME1 \u91d1\u7d72\u83c7 \u91d1\u91dd\u83c7",33.93202168063635],["LE2 \u7687\u5bae\u83dc \u5927\u8449",34.72744543081561],["FB1 \u82b1\u6930\u83dc \u9752\u6897",37.60056073270076],["OD1 \u863f\u8514\u4e7e",33.08131286808777],["FI2 \u8304\u5b50 \u9ebb\u8378\u8304",37.14031489768077],["SH7 \u7af9\u7b4d \u53bb\u6bbc",32.84087453797336],["LM2 \u83a7\u83dc \u767d\u83a7\u83dc",40.96765521538445],["OX1 \u5176\u4ed6",35.40996606201367],["LI6 \u8435\u82e3\u83dc \u863f\u7f8e",36.132258287720894],["LI3 \u8435\u82e3\u83dc \u672c\u5cf6\u5713\u8449",39.28000368831596],["ME2 \u91d1\u7d72\u83c7 \u76d2\u88dd",43.80836884659264],["LF2 \u8579\u83dc \u5c0f\u8449",44.72392667632291]],"hovertemplate":"\u003cb\u003e%{customdata[0]}\u003c\u002fb\u003e\u003cbr\u003e\u7b2c\u4e00\u5e74\u5747\u50f9\uff1a%{x:.1f} \u5143\u002fkg\u003cextra\u003e\u003c\u002fextra\u003e","marker":{"color":["#4A4A4A","#3C927A","#4A4A4A","#4A4A4A","#4A4A4A","#3C927A","#4A4A4A","#4A4A4A","#4A4A4A","#3C927A","#4A4A4A","#4A4A4A","#4A4A4A","#4A4A4A","#4A4A4A","#4A4A4A","#4A4A4A","#3C927A","#4A4A4A","#4A4A4A","#4A4A4A","#4A4A4A","#4A4A4A","#4A4A4A","#4A4A4A","#4A4A4A","#4A4A4A","#4A4A4A","#4A4A4A","#4A4A4A","#4A4A4A","#4A4A4A","#3C927A","#4A4A4A","#4A4A4A","#4A4A4A","#4A4A4A","#4A4A4A","#4A4A4A","#4A4A4A","#4A4A4A","#4A4A4A","#3C927A","#4A4A4A","#3C927A"],"opacity":0.85},"name":"\u7b2c\u4e00\u5e74\uff082024.05\u20132025.04\uff09","orientation":"h","x":{"dtype":"f8","bdata":"34qre0mHJkD+jR6NUUspQLtL2sb1Ai9A8wS7xuCNLkA40kTtLM0vQCRLyMYreTRAz7WpvxOWMkAqftMSwFU0QLm1g3RwvDVAM5gvaq39M0AApuaHBTY1QKw42SPQ2zRAwgqqJf0XOEATTdKHwfE3QECmwfmdUThAMBnZb1IZN0BQZHNbzOA6QKHe1VPgqDlAkkd1eqRYOUCjtiMAIP87QDNh+gxcKTxAGR8mfY7+PECLTDe\u002f7a46QMO4hTDtHTtAY3FrpStGOEDR3u1112w8QG8aO4y6uD5AasOLIWMnPkB0EkhP3c1CQOu+55pe1D9Az+AAskz9PkCZlK8o3IBBQKWk8FXsN0FAgL+GfEz3QEAkfY\u002fuHF1BQBQbkSzfzEJAKZfGdWiKQEAaV6zW9ZFCQD5R4Maha0BApfBHINx7REDJaJbEebRBQG8x7tbtEEJAyAkuKdejQ0A+nF+heOdFQCPBG6GpXEZA"},"y":["\u863f\u8514 \u77f8\u4ed4","\u82bd\u83dc\u985e \u7da0\u8c46\u82bd","\u5305\u5fc3\u767d \u5305\u767d","\u80e1\u863f\u8514 \u672a\u6d17","\u80e1\u863f\u8514 \u6e05\u6d17","\u7518\u85cd \u521d\u79cb","\u6d0b\u8525 \u672c\u7522","\u96bc\u4eba\u74dc","\u6241\u84b2 \u82b1\u84b2","\u82bd\u83dc\u985e \u9ec3\u8c46\u82bd","\u7389\u7c73 \u7cef\u7c73\u9ed1","\u99ac\u9234\u85af \u672c\u7522","\u6241\u84b2 \u68a8\u5b50\u84b2","\u7518\u85af \u81fa\u8fb257\u865f","\u6cb9\u83dc","\u8435\u82e3\u83dc \u6cb9\u9ea5\u83dc","\u5357\u74dc \u6728\u74dc\u5f62","\u5c0f\u767d\u83dc \u86b5\u4ed4\u767d","\u7389\u7c73 \u751c\u8edf\u6bbc","\u5c0f\u767d\u83dc \u5976\u6cb9\u767d","\u9752\u6c5f\u767d\u83dc \u5c0f\u6897","\u82a5\u83dc \u5c0f\u82a5\u83dc","\u80e1\u74dc \u9ed1\u523a","\u5c0f\u767d\u83dc \u571f\u767d\u83dc","\u7389\u7c73 \u7389\u7c73\u7b4d","\u6cb9\u83dc \u5c0f\u677e\u83dc","\u99ac\u9234\u85af \u9032\u53e3","\u6d0b\u8525 \u9032\u53e3","\u8304\u5b50 \u65e5\u672c\u7a2e","\u7d72\u74dc","\u5305\u5fc3\u767d \u9032\u53e3","\u82a5\u85cd\u83dc","\u7518\u85af\u8449","\u91d1\u7d72\u83c7 \u91d1\u91dd\u83c7","\u7687\u5bae\u83dc \u5927\u8449","\u82b1\u6930\u83dc \u9752\u6897","\u863f\u8514\u4e7e","\u8304\u5b50 \u9ebb\u8378\u8304","\u7af9\u7b4d \u53bb\u6bbc","\u83a7\u83dc \u767d\u83a7\u83dc","\u5176\u4ed6","\u8435\u82e3\u83dc \u863f\u7f8e","\u8435\u82e3\u83dc \u672c\u5cf6\u5713\u8449","\u91d1\u7d72\u83c7 \u76d2\u88dd","\u8579\u83dc \u5c0f\u8449"],"type":"bar"},{"customdata":[["SA3 \u863f\u8514 \u77f8\u4ed4",10.245298991664452],["SX1 \u82bd\u83dc\u985e \u7da0\u8c46\u82bd",12.720511342587267],["LC1 \u5305\u5fc3\u767d \u5305\u767d",12.522912308454009],["SB1 \u80e1\u863f\u8514 \u672a\u6d17",15.818574969358783],["SB2 \u80e1\u863f\u8514 \u6e05\u6d17",16.389958412325804],["LA1 \u7518\u85cd \u521d\u79cb",12.855573285557492],["SD1 \u6d0b\u8525 \u672c\u7522",18.33935934304768],["FU1 \u96bc\u4eba\u74dc",16.808710951472396],["FH3 \u6241\u84b2 \u82b1\u84b2",16.167359728528243],["SX2 \u82bd\u83dc\u985e \u9ec3\u8c46\u82bd",20.02474795635847],["FY5 \u7389\u7c73 \u7cef\u7c73\u9ed1",19.27077027506537],["SC1 \u99ac\u9234\u85af \u672c\u7522",20.624691250452],["FH4 \u6241\u84b2 \u68a8\u5b50\u84b2",18.797397938698257],["SO1 \u7518\u85af \u81fa\u8fb257\u865f",20.39815626750035],["LN1 \u6cb9\u83dc",20.679647241997287],["LI5 \u8435\u82e3\u83dc \u6cb9\u9ea5\u83dc",22.72310180417327],["FT1 \u5357\u74dc \u6728\u74dc\u5f62",13.7496509654884],["LB2 \u5c0f\u767d\u83dc \u86b5\u4ed4\u767d",20.77769104392736],["FY6 \u7389\u7c73 \u751c\u8edf\u6bbc",21.54762323451062],["LB3 \u5c0f\u767d\u83dc \u5976\u6cb9\u767d",21.90999702791336],["LD1 \u9752\u6c5f\u767d\u83dc \u5c0f\u6897",22.836840712465147],["LJ4 \u82a5\u83dc \u5c0f\u82a5\u83dc",21.869156205446902],["FC1 \u80e1\u74dc \u9ed1\u523a",24.692778272843054],["LB1 \u5c0f\u767d\u83dc \u571f\u767d\u83dc",24.692684589289343],["FY4 \u7389\u7c73 \u7389\u7c73\u7b4d",33.09285209786603],["LN2 \u6cb9\u83dc \u5c0f\u677e\u83dc",27.162061787274283],["SC9 \u99ac\u9234\u85af \u9032\u53e3",27.07652495664142],["SD9 \u6d0b\u8525 \u9032\u53e3",27.24556498430155],["FI3 \u8304\u5b50 \u65e5\u672c\u7a2e",24.19559164733179],["FF1 \u7d72\u74dc",29.15758207696211],["LC9 \u5305\u5fc3\u767d \u9032\u53e3",29.8570160359862],["LK2 \u82a5\u85cd\u83dc",25.646956324646958],["LO1 \u7518\u85af\u8449",27.746668504059176],["ME1 \u91d1\u7d72\u83c7 \u91d1\u91dd\u83c7",28.36708820392981],["LE2 \u7687\u5bae\u83dc \u5927\u8449",31.073576090101483],["FB1 \u82b1\u6930\u83dc \u9752\u6897",29.413942748836195],["OD1 \u863f\u8514\u4e7e",33.22636716321404],["FI2 \u8304\u5b50 \u9ebb\u8378\u8304",30.54247290393244],["SH7 \u7af9\u7b4d \u53bb\u6bbc",35.17923550308361],["LM2 \u83a7\u83dc \u767d\u83a7\u83dc",34.10272463357148],["OX1 \u5176\u4ed6",39.12158762531953],["LI6 \u8435\u82e3\u83dc \u863f\u7f8e",39.42304810174048],["LI3 \u8435\u82e3\u83dc \u672c\u5cf6\u5713\u8449",36.269510388237904],["ME2 \u91d1\u7d72\u83c7 \u76d2\u88dd",37.371304205967846],["LF2 \u8579\u83dc \u5c0f\u8449",37.32954641845152]],"hovertemplate":"\u003cb\u003e%{customdata[0]}\u003c\u002fb\u003e\u003cbr\u003e\u7b2c\u4e8c\u5e74\u5747\u50f9\uff1a%{x:.1f} \u5143\u002fkg\u003cextra\u003e\u003c\u002fextra\u003e","marker":{"color":["#CDCDCD","#99ECC9","#CDCDCD","#CDCDCD","#CDCDCD","#99ECC9","#CDCDCD","#CDCDCD","#CDCDCD","#99ECC9","#CDCDCD","#CDCDCD","#CDCDCD","#CDCDCD","#CDCDCD","#CDCDCD","#CDCDCD","#99ECC9","#CDCDCD","#CDCDCD","#CDCDCD","#CDCDCD","#CDCDCD","#CDCDCD","#CDCDCD","#CDCDCD","#CDCDCD","#CDCDCD","#CDCDCD","#CDCDCD","#CDCDCD","#CDCDCD","#99ECC9","#CDCDCD","#CDCDCD","#CDCDCD","#CDCDCD","#CDCDCD","#CDCDCD","#CDCDCD","#CDCDCD","#CDCDCD","#99ECC9","#CDCDCD","#99ECC9"],"opacity":0.85},"name":"\u7b2c\u4e8c\u5e74\uff082025.05\u20132026.05\uff09","orientation":"h","x":{"dtype":"f8","bdata":"luFV1Jd9JEBlntnc5nApQL\u002f4fim7CylAu3AlQhyjL0BKvYNQ1GMwQPWZobMNtilAWfv\u002fQOBWMkCxfVCuB88wQD2yUBbYKjBA1TPP4VUGNEB7ImQzUUUzQOfJCsTrnzRAWZt0RSLMMkCHnLOR7WU0QOgxlVz9rTRAUZooMx25NkAAYFhA0n8rQGMPoMIWxzRAu8BKCTGMNUBXWLKQ9eg1QMj\u002fYzE71jZAiYJlBYHeNUCDPbnqWbE4QOBw+cZTsThAjNnZk+KLQEA8RpzhfCk7QEwauiOXEztAL57IWN0+O0AqqVBLEjI4QO\u002f8ikxXKD1AUrUmZ2XbPUCOTADunqU5QC3jxaolvztAPKAWfvldPEDgwPTh1RI\u002fQPWq6Cb4aT1AQXJlmfmcQEAhWxWB34o+QFsDYDDxlkFAcNeuFCYNQUA\u002fLO0ukI9DQBzOsHAmtkNAALX\u002fUH8iQkDkv27lhq9CQLHhuJMuqkJA"},"y":["\u863f\u8514 \u77f8\u4ed4","\u82bd\u83dc\u985e \u7da0\u8c46\u82bd","\u5305\u5fc3\u767d \u5305\u767d","\u80e1\u863f\u8514 \u672a\u6d17","\u80e1\u863f\u8514 \u6e05\u6d17","\u7518\u85cd \u521d\u79cb","\u6d0b\u8525 \u672c\u7522","\u96bc\u4eba\u74dc","\u6241\u84b2 \u82b1\u84b2","\u82bd\u83dc\u985e \u9ec3\u8c46\u82bd","\u7389\u7c73 \u7cef\u7c73\u9ed1","\u99ac\u9234\u85af \u672c\u7522","\u6241\u84b2 \u68a8\u5b50\u84b2","\u7518\u85af \u81fa\u8fb257\u865f","\u6cb9\u83dc","\u8435\u82e3\u83dc \u6cb9\u9ea5\u83dc","\u5357\u74dc \u6728\u74dc\u5f62","\u5c0f\u767d\u83dc \u86b5\u4ed4\u767d","\u7389\u7c73 \u751c\u8edf\u6bbc","\u5c0f\u767d\u83dc \u5976\u6cb9\u767d","\u9752\u6c5f\u767d\u83dc \u5c0f\u6897","\u82a5\u83dc \u5c0f\u82a5\u83dc","\u80e1\u74dc \u9ed1\u523a","\u5c0f\u767d\u83dc \u571f\u767d\u83dc","\u7389\u7c73 \u7389\u7c73\u7b4d","\u6cb9\u83dc \u5c0f\u677e\u83dc","\u99ac\u9234\u85af \u9032\u53e3","\u6d0b\u8525 \u9032\u53e3","\u8304\u5b50 \u65e5\u672c\u7a2e","\u7d72\u74dc","\u5305\u5fc3\u767d \u9032\u53e3","\u82a5\u85cd\u83dc","\u7518\u85af\u8449","\u91d1\u7d72\u83c7 \u91d1\u91dd\u83c7","\u7687\u5bae\u83dc \u5927\u8449","\u82b1\u6930\u83dc \u9752\u6897","\u863f\u8514\u4e7e","\u8304\u5b50 \u9ebb\u8378\u8304","\u7af9\u7b4d \u53bb\u6bbc","\u83a7\u83dc \u767d\u83a7\u83dc","\u5176\u4ed6","\u8435\u82e3\u83dc \u863f\u7f8e","\u8435\u82e3\u83dc \u672c\u5cf6\u5713\u8449","\u91d1\u7d72\u83c7 \u76d2\u88dd","\u8579\u83dc \u5c0f\u8449"],"type":"bar"}],                        {"template":{"data":{"histogram2dcontour":[{"type":"histogram2dcontour","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"choropleth":[{"type":"choropleth","colorbar":{"outlinewidth":0,"ticks":""}}],"histogram2d":[{"type":"histogram2d","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"heatmap":[{"type":"heatmap","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"contourcarpet":[{"type":"contourcarpet","colorbar":{"outlinewidth":0,"ticks":""}}],"contour":[{"type":"contour","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"surface":[{"type":"surface","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"mesh3d":[{"type":"mesh3d","colorbar":{"outlinewidth":0,"ticks":""}}],"scatter":[{"fillpattern":{"fillmode":"overlay","size":10,"solidity":0.2},"type":"scatter"}],"parcoords":[{"type":"parcoords","line":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterpolargl":[{"type":"scatterpolargl","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"bar":[{"error_x":{"color":"#2a3f5f"},"error_y":{"color":"#2a3f5f"},"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"scattergeo":[{"type":"scattergeo","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterpolar":[{"type":"scatterpolar","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"scattergl":[{"type":"scattergl","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatter3d":[{"type":"scatter3d","line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattermap":[{"type":"scattermap","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattermapbox":[{"type":"scattermapbox","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterternary":[{"type":"scatterternary","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattercarpet":[{"type":"scattercarpet","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"carpet":[{"aaxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"baxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"type":"carpet"}],"table":[{"cells":{"fill":{"color":"#EBF0F8"},"line":{"color":"white"}},"header":{"fill":{"color":"#C8D4E3"},"line":{"color":"white"}},"type":"table"}],"barpolar":[{"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"pie":[{"automargin":true,"type":"pie"}]},"layout":{"autotypenumbers":"strict","colorway":["#636efa","#EF553B","#00cc96","#ab63fa","#FFA15A","#19d3f3","#FF6692","#B6E880","#FF97FF","#FECB52"],"font":{"color":"#2a3f5f"},"hovermode":"closest","hoverlabel":{"align":"left"},"paper_bgcolor":"white","plot_bgcolor":"#E5ECF6","polar":{"bgcolor":"#E5ECF6","angularaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"radialaxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"ternary":{"bgcolor":"#E5ECF6","aaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"baxis":{"gridcolor":"white","linecolor":"white","ticks":""},"caxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"sequential":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"sequentialminus":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"diverging":[[0,"#8e0152"],[0.1,"#c51b7d"],[0.2,"#de77ae"],[0.3,"#f1b6da"],[0.4,"#fde0ef"],[0.5,"#f7f7f7"],[0.6,"#e6f5d0"],[0.7,"#b8e186"],[0.8,"#7fbc41"],[0.9,"#4d9221"],[1,"#276419"]]},"xaxis":{"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","automargin":true,"zerolinewidth":2},"yaxis":{"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","automargin":true,"zerolinewidth":2},"scene":{"xaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2},"yaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2},"zaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2}},"shapedefaults":{"line":{"color":"#2a3f5f"}},"annotationdefaults":{"arrowcolor":"#2a3f5f","arrowhead":0,"arrowwidth":1},"geo":{"bgcolor":"white","landcolor":"#E5ECF6","subunitcolor":"white","showland":true,"showlakes":true,"lakecolor":"white"},"title":{"x":0.05},"mapbox":{"style":"light"}}},"font":{"family":"Noto Sans TC, Microsoft JhengHei, PingFang TC, sans-serif","color":"#262626","size":13},"hoverlabel":{"font":{"family":"Noto Sans TC, Microsoft JhengHei, PingFang TC, sans-serif","size":13},"bgcolor":"white","bordercolor":"#D8D8D8"},"title":{"font":{"size":17,"color":"#262626"},"text":"\u5927\u53f0\u5317\u852c\u83dc\u6279\u767c\u5e02\u5834\uff1a\u5e74\u969b\u5747\u50f9\u6bd4\u8f03\u003cbr\u003e\u003csup\u003e\u5168\u5e74\u7121\u9593\u65b7\u4f9b\u8ca8\u54c1\u9805\u4e2d\u5747\u50f9\u6700\u4f4e 45 \u7a2e\uff5c\u7531\u4f4e\u5230\u9ad8\u6392\u5217\uff5c\u7da0\u8272\u70ba\u5e38\u898b\u71d9\u9752\u83dc\u003c\u002fsup\u003e","x":0.02,"xanchor":"left"},"xaxis":{"title":{"text":"\u4ea4\u6613\u91cf\u52a0\u6b0a\u5747\u50f9\uff08\u5143\u002f\u516c\u65a4\uff09"},"gridcolor":"#E2E2E2","linecolor":"#D8D8D8","zeroline":false},"yaxis":{"tickfont":{"size":11},"gridcolor":"#E2E2E2","linecolor":"#D8D8D8","zeroline":false},"legend":{"x":0.98,"y":0.02,"xanchor":"right","yanchor":"bottom","bgcolor":"rgba(255,255,255,0.85)","bordercolor":"#D8D8D8","borderwidth":1},"margin":{"l":130,"r":40,"t":90,"b":60},"paper_bgcolor":"rgba(0,0,0,0)","plot_bgcolor":"rgba(0,0,0,0)","barmode":"group","height":950},                        {"displayModeBar": true, "responsive": true, "modeBarButtonsToRemove": ["lasso2d", "select2d"]}                    )                };            </script> </div>
+</div></iframe>
+  </div>
+  <p>
+    此圖從供貨率 ＝ 1.00 的 108 個品項中，選取均價最低的 45 種，依全期加權均價由低到高橫向排列；
+    深色長條為第一年（2024.05—2025.04），淺色長條為第二年（2025.05—2026.05）。
+  </p>
+  <p>
+    七種燙青菜全數都有出現在圖中，驗證了前一張圖的「低價」結論。
+    從年際變化來看，<strong>葉菜類第二年普遍比第一年便宜</strong>：
+    高麗菜從 20.47 元降至 12.86 元（−37%）、地瓜葉從 34.44 元降至 27.75 元（−19%）、
+    小白菜從 25.66 元降至 20.78 元（−19%）。
+    相比之下，<strong>豆芽類的年際價格幾乎不變</strong>：
+    綠豆芽 12.65 → 12.72 元、黃豆芽 19.99 → 20.02 元，兩年差距均不到 1%。
+  </p>
+  <p>
+    推測豆芽的價格穩定可能與其<strong>受控環境栽培</strong>的特性有關——豆芽通常在室內以水耕方式培育，
+    生長週期短（5–7 天），受氣候與季節的直接影響較小。
+    葉菜類的年際波動幅度，則可能來自氣候、天災（颱風、寒流）或供需關係的變動；
+    由於本資料僅有兩年，難以判斷第二年的降價是長期趨勢還是單一年份的特殊現象，此處以保守態度呈現。
+  </p>
+
+  <h3>圖三：價格穩定性排行（CV 最低 20 種）</h3>
+  <div class="chart-block">
+    <div style="width:100%;height:600px;overflow:hidden;">
+<div> <script>window.PlotlyConfig = {MathJaxConfig: 'local'};</script>
+<script charset="utf-8" crossorigin="anonymous" integrity="sha256-fHbNLP+GlIXN+efbQec78UkemUz3NJp7UmfGxC1tNxs=" src="https://cdn.plot.ly/plotly-3.5.0.min.js"></script> <div class="plotly-graph-div" id="588a0ab3-1bd5-420d-99c4-1a6c7afe2121" style="height:560px; width:100%;"></div> <script>                window.PLOTLYENV=window.PLOTLYENV || {};                                if (document.getElementById("588a0ab3-1bd5-420d-99c4-1a6c7afe2121")) {                    Plotly.newPlot(                        "588a0ab3-1bd5-420d-99c4-1a6c7afe2121",                        [{"customdata":[["SX2 \u82bd\u83dc\u985e \u9ec3\u8c46\u82bd",0.0224935717396662],["OG2 \u719f\u7b4d \u7bad\u7af9\u7b4d",0.062330767706444],["OD1 \u863f\u8514\u4e7e",0.048557161712835],["SX3 \u82bd\u83dc\u985e \u8c4c\u8c46\u82bd",0.1055106535257507],["SC1 \u99ac\u9234\u85af \u672c\u7522",0.2215077954190332],["SX4 \u82bd\u83dc\u985e \u82dc\u84ff\u82bd",0.1743324913020234],["LT2 \u6d77\u83dc \u6d77\u5e36",0.1710778001720561],["MK0 \u9d3b\u559c\u83c7 \u5176\u4ed6",0.250536184445478],["SG6 \u5927\u849c \u849c\u4ec1",0.2315970594146161],["SQ3 \u832d\u767d\u7b4d \u53bb\u6bbc",0.2387292035826163],["FK6 \u751c\u6912 \u6c34\u679c\u5f69\u6912",0.2778307265034638],["SQ1 \u832d\u767d\u7b4d \u5e36\u6bbc",0.2867558947303232],["SP1 \u8591 \u8001\u8591",0.2613399672086567],["SB2 \u80e1\u863f\u8514 \u6e05\u6d17",0.277991766718264],["SU2 \u85af\u8577 \u767d\u85af\u8577",0.2666870422372304],["MJ1 \u674f\u9b91\u83c7",0.2778619040201217],["SB1 \u80e1\u863f\u8514 \u672a\u6d17",0.3533918378070017],["SG7 \u5927\u849c \u849c\u74e3",0.3399624445818117],["SX1 \u82bd\u83dc\u985e \u7da0\u8c46\u82bd",0.3572075256572155],["LT3 \u6d77\u83dc \u6c34\u84ee",0.2777780200576019]],"hovertemplate":"\u003cb\u003e%{customdata[0]}\u003c\u002fb\u003e\u003cbr\u003e\u7b2c\u4e00\u5e74 CV\uff1a%{x:.3f}\u003cextra\u003e\u003c\u002fextra\u003e","marker":{"color":["#3C927A","#4A4A4A","#4A4A4A","#4A4A4A","#4A4A4A","#4A4A4A","#4A4A4A","#4A4A4A","#4A4A4A","#4A4A4A","#4A4A4A","#4A4A4A","#4A4A4A","#4A4A4A","#4A4A4A","#4A4A4A","#4A4A4A","#4A4A4A","#3C927A","#4A4A4A"],"opacity":0.85},"name":"\u7b2c\u4e00\u5e74 CV","orientation":"h","x":{"dtype":"f8","bdata":"Duj3C44Ilz9F4aqB0emvP5QfFvt73Kg\u002fxs5FBr8Cuz+QIJEQXlrMP9fdYu6GUMY\u002f4MFnmuDlxT\u002fiG6rryAjQP76MBPL4pM0\u002fMGX+tK2Ozj\u002fHAAqH+sfRP0NTc2U1WtI\u002fECETRcu50D9eLqf6ncrRP4pBK4dmEdE\u002fkoakS33I0T9ue4PM+J3WP8g2VtfxwdU\u002f8kwl9Hzc1j9oe+x1HcfRPw=="},"y":["\u82bd\u83dc\u985e \u9ec3\u8c46\u82bd","\u719f\u7b4d \u7bad\u7af9\u7b4d","\u863f\u8514\u4e7e","\u82bd\u83dc\u985e \u8c4c\u8c46\u82bd","\u99ac\u9234\u85af \u672c\u7522","\u82bd\u83dc\u985e \u82dc\u84ff\u82bd","\u6d77\u83dc \u6d77\u5e36","\u9d3b\u559c\u83c7 \u5176\u4ed6","\u5927\u849c \u849c\u4ec1","\u832d\u767d\u7b4d \u53bb\u6bbc","\u751c\u6912 \u6c34\u679c\u5f69\u6912","\u832d\u767d\u7b4d \u5e36\u6bbc","\u8591 \u8001\u8591","\u80e1\u863f\u8514 \u6e05\u6d17","\u85af\u8577 \u767d\u85af\u8577","\u674f\u9b91\u83c7","\u80e1\u863f\u8514 \u672a\u6d17","\u5927\u849c \u849c\u74e3","\u82bd\u83dc\u985e \u7da0\u8c46\u82bd","\u6d77\u83dc \u6c34\u84ee"],"type":"bar"},{"customdata":[["SX2 \u82bd\u83dc\u985e \u9ec3\u8c46\u82bd",0.0558131383801757],["OG2 \u719f\u7b4d \u7bad\u7af9\u7b4d",0.032953597335715],["OD1 \u863f\u8514\u4e7e",0.0857626102595929],["SX3 \u82bd\u83dc\u985e \u8c4c\u8c46\u82bd",0.0579903492752588],["SC1 \u99ac\u9234\u85af \u672c\u7522",0.132585978223812],["SX4 \u82bd\u83dc\u985e \u82dc\u84ff\u82bd",0.1854074107378371],["LT2 \u6d77\u83dc \u6d77\u5e36",0.2072855842940534],["MK0 \u9d3b\u559c\u83c7 \u5176\u4ed6",0.155411126023192],["SG6 \u5927\u849c \u849c\u4ec1",0.1891287282246698],["SQ3 \u832d\u767d\u7b4d \u53bb\u6bbc",0.2011810843911906],["FK6 \u751c\u6912 \u6c34\u679c\u5f69\u6912",0.2578088634300461],["SQ1 \u832d\u767d\u7b4d \u5e36\u6bbc",0.2518040824251953],["SP1 \u8591 \u8001\u8591",0.2958251286463406],["SB2 \u80e1\u863f\u8514 \u6e05\u6d17",0.2876395143052667],["SU2 \u85af\u8577 \u767d\u85af\u8577",0.3158977727403601],["MJ1 \u674f\u9b91\u83c7",0.3081147185462148],["SB1 \u80e1\u863f\u8514 \u672a\u6d17",0.2397815144548321],["SG7 \u5927\u849c \u849c\u74e3",0.2611570569379528],["SX1 \u82bd\u83dc\u985e \u7da0\u8c46\u82bd",0.2458329592565424],["LT3 \u6d77\u83dc \u6c34\u84ee",0.3269458329021821]],"hovertemplate":"\u003cb\u003e%{customdata[0]}\u003c\u002fb\u003e\u003cbr\u003e\u7b2c\u4e8c\u5e74 CV\uff1a%{x:.3f}\u003cextra\u003e\u003c\u002fextra\u003e","marker":{"color":["#99ECC9","#CDCDCD","#CDCDCD","#CDCDCD","#CDCDCD","#CDCDCD","#CDCDCD","#CDCDCD","#CDCDCD","#CDCDCD","#CDCDCD","#CDCDCD","#CDCDCD","#CDCDCD","#CDCDCD","#CDCDCD","#CDCDCD","#CDCDCD","#99ECC9","#CDCDCD"],"opacity":0.85},"name":"\u7b2c\u4e8c\u5e74 CV","orientation":"h","x":{"dtype":"f8","bdata":"J1kPKIqTrD9uVa89S9+gP\u002fvXSNaJ9LU\u002fjuA9O+mwrT+DkTDMk\u002fjAP90LxxZuu8c\u002fs9O8glWIyj9lIdoDg+TDP3bBOsNeNcg\u002fclkEQU3AyT87Q0O\u002f8H\u002fQP\u002f39wN6OHdA\u002f4r43hczu0j\u002fWnr6Qr2jSPz4ks0qrN9Q\u002fiZ\u002fkyya40z\u002fYaWIhKbHOP2\u002fCqhbMttA\u002fdZMkVHR3zz\u002fvNvg2ruzUPw=="},"y":["\u82bd\u83dc\u985e \u9ec3\u8c46\u82bd","\u719f\u7b4d \u7bad\u7af9\u7b4d","\u863f\u8514\u4e7e","\u82bd\u83dc\u985e \u8c4c\u8c46\u82bd","\u99ac\u9234\u85af \u672c\u7522","\u82bd\u83dc\u985e \u82dc\u84ff\u82bd","\u6d77\u83dc \u6d77\u5e36","\u9d3b\u559c\u83c7 \u5176\u4ed6","\u5927\u849c \u849c\u4ec1","\u832d\u767d\u7b4d \u53bb\u6bbc","\u751c\u6912 \u6c34\u679c\u5f69\u6912","\u832d\u767d\u7b4d \u5e36\u6bbc","\u8591 \u8001\u8591","\u80e1\u863f\u8514 \u6e05\u6d17","\u85af\u8577 \u767d\u85af\u8577","\u674f\u9b91\u83c7","\u80e1\u863f\u8514 \u672a\u6d17","\u5927\u849c \u849c\u74e3","\u82bd\u83dc\u985e \u7da0\u8c46\u82bd","\u6d77\u83dc \u6c34\u84ee"],"type":"bar"},{"customdata":[["SX2 \u82bd\u83dc\u985e \u9ec3\u8c46\u82bd",0.0047305755284075],["OG2 \u719f\u7b4d \u7bad\u7af9\u7b4d",0.0011718677007851],["OD1 \u863f\u8514\u4e7e",0.0512000672427291],["SX3 \u82bd\u83dc\u985e \u8c4c\u8c46\u82bd",0.0418262923798868],["SC1 \u99ac\u9234\u85af \u672c\u7522",0.8277119692075912],["SX4 \u82bd\u83dc\u985e \u82dc\u84ff\u82bd",0.0102955655557911],["LT2 \u6d77\u83dc \u6d77\u5e36",0.0723056630154252],["MK0 \u9d3b\u559c\u83c7 \u5176\u4ed6",0.576429979368131],["SG6 \u5927\u849c \u849c\u4ec1",0.1419228305220455],["SQ3 \u832d\u767d\u7b4d \u53bb\u6bbc",0.7093972141253656],["FK6 \u751c\u6912 \u6c34\u679c\u5f69\u6912",0.8769987614810945],["SQ1 \u832d\u767d\u7b4d \u5e36\u6bbc",0.5360246081410283],["SP1 \u8591 \u8001\u8591",0.8917454009332795],["SB2 \u80e1\u863f\u8514 \u6e05\u6d17",0.8943093109259515],["SU2 \u85af\u8577 \u767d\u85af\u8577",0.6978613237027389],["MJ1 \u674f\u9b91\u83c7",0.947208098047914],["SB1 \u80e1\u863f\u8514 \u672a\u6d17",0.632697939513094],["SG7 \u5927\u849c \u849c\u74e3",0.8478825924936058],["SX1 \u82bd\u83dc\u985e \u7da0\u8c46\u82bd",0.0801346644343597],["LT3 \u6d77\u83dc \u6c34\u84ee",0.3194035870497681]],"hovertemplate":"\u003cb\u003e%{customdata[0]}\u003c\u002fb\u003e\u003cbr\u003e\u4e0a\u4e0b\u50f9\u5dee\u7387\uff1a%{x:.3f}\u003cextra\u003e\u003c\u002fextra\u003e","marker":{"color":"#0E3532","line":{"color":"white","width":1},"size":8,"symbol":"diamond"},"mode":"markers","name":"\u4e0a\u4e0b\u50f9\u5dee\u7387","x":{"dtype":"f8","bdata":"Aej4Ml5gcz8vnc5cKzNTP2SWuCzlNqo\u002fc+PEe0FqpT++I8jPnXzqP6j62GrXFYU\u002fWYP3uZ+Csj8TPrpIHXLiP5Hv0v2GKsI\u002fsVdRyWGz5j+nM+a0XxDsP04kOhQdJ+E\u002fLr2rpi2J7D+g7V2PLp7sPwBKTkXhVOY\u002fq+hzW4dP7j8Gks6\u002fDz\u002fkP4pys6zaIes\u002foYEFk7SDtD9epSa+G3HUPw=="},"xaxis":"x2","y":["\u82bd\u83dc\u985e \u9ec3\u8c46\u82bd","\u719f\u7b4d \u7bad\u7af9\u7b4d","\u863f\u8514\u4e7e","\u82bd\u83dc\u985e \u8c4c\u8c46\u82bd","\u99ac\u9234\u85af \u672c\u7522","\u82bd\u83dc\u985e \u82dc\u84ff\u82bd","\u6d77\u83dc \u6d77\u5e36","\u9d3b\u559c\u83c7 \u5176\u4ed6","\u5927\u849c \u849c\u4ec1","\u832d\u767d\u7b4d \u53bb\u6bbc","\u751c\u6912 \u6c34\u679c\u5f69\u6912","\u832d\u767d\u7b4d \u5e36\u6bbc","\u8591 \u8001\u8591","\u80e1\u863f\u8514 \u6e05\u6d17","\u85af\u8577 \u767d\u85af\u8577","\u674f\u9b91\u83c7","\u80e1\u863f\u8514 \u672a\u6d17","\u5927\u849c \u849c\u74e3","\u82bd\u83dc\u985e \u7da0\u8c46\u82bd","\u6d77\u83dc \u6c34\u84ee"],"type":"scatter"}],                        {"template":{"data":{"histogram2dcontour":[{"type":"histogram2dcontour","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"choropleth":[{"type":"choropleth","colorbar":{"outlinewidth":0,"ticks":""}}],"histogram2d":[{"type":"histogram2d","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"heatmap":[{"type":"heatmap","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"contourcarpet":[{"type":"contourcarpet","colorbar":{"outlinewidth":0,"ticks":""}}],"contour":[{"type":"contour","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"surface":[{"type":"surface","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"mesh3d":[{"type":"mesh3d","colorbar":{"outlinewidth":0,"ticks":""}}],"scatter":[{"fillpattern":{"fillmode":"overlay","size":10,"solidity":0.2},"type":"scatter"}],"parcoords":[{"type":"parcoords","line":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterpolargl":[{"type":"scatterpolargl","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"bar":[{"error_x":{"color":"#2a3f5f"},"error_y":{"color":"#2a3f5f"},"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"scattergeo":[{"type":"scattergeo","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterpolar":[{"type":"scatterpolar","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"scattergl":[{"type":"scattergl","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatter3d":[{"type":"scatter3d","line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattermap":[{"type":"scattermap","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattermapbox":[{"type":"scattermapbox","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterternary":[{"type":"scatterternary","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattercarpet":[{"type":"scattercarpet","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"carpet":[{"aaxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"baxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"type":"carpet"}],"table":[{"cells":{"fill":{"color":"#EBF0F8"},"line":{"color":"white"}},"header":{"fill":{"color":"#C8D4E3"},"line":{"color":"white"}},"type":"table"}],"barpolar":[{"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"pie":[{"automargin":true,"type":"pie"}]},"layout":{"autotypenumbers":"strict","colorway":["#636efa","#EF553B","#00cc96","#ab63fa","#FFA15A","#19d3f3","#FF6692","#B6E880","#FF97FF","#FECB52"],"font":{"color":"#2a3f5f"},"hovermode":"closest","hoverlabel":{"align":"left"},"paper_bgcolor":"white","plot_bgcolor":"#E5ECF6","polar":{"bgcolor":"#E5ECF6","angularaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"radialaxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"ternary":{"bgcolor":"#E5ECF6","aaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"baxis":{"gridcolor":"white","linecolor":"white","ticks":""},"caxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"sequential":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"sequentialminus":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"diverging":[[0,"#8e0152"],[0.1,"#c51b7d"],[0.2,"#de77ae"],[0.3,"#f1b6da"],[0.4,"#fde0ef"],[0.5,"#f7f7f7"],[0.6,"#e6f5d0"],[0.7,"#b8e186"],[0.8,"#7fbc41"],[0.9,"#4d9221"],[1,"#276419"]]},"xaxis":{"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","automargin":true,"zerolinewidth":2},"yaxis":{"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","automargin":true,"zerolinewidth":2},"scene":{"xaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2},"yaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2},"zaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2}},"shapedefaults":{"line":{"color":"#2a3f5f"}},"annotationdefaults":{"arrowcolor":"#2a3f5f","arrowhead":0,"arrowwidth":1},"geo":{"bgcolor":"white","landcolor":"#E5ECF6","subunitcolor":"white","showland":true,"showlakes":true,"lakecolor":"white"},"title":{"x":0.05},"mapbox":{"style":"light"}}},"font":{"family":"Noto Sans TC, Microsoft JhengHei, PingFang TC, sans-serif","color":"#262626","size":13},"hoverlabel":{"font":{"family":"Noto Sans TC, Microsoft JhengHei, PingFang TC, sans-serif","size":13},"bgcolor":"white","bordercolor":"#D8D8D8"},"title":{"font":{"size":17,"color":"#262626"},"text":"\u5927\u53f0\u5317\u852c\u83dc\u6279\u767c\u5e02\u5834\uff1a\u5e74\u969b\u50f9\u683c\u7a69\u5b9a\u6027\u6bd4\u8f03\u003cbr\u003e\u003csup\u003e\u5168\u5e74\u7121\u9593\u65b7\u4f9b\u8ca8\u54c1\u9805\u4e2d CV \u6700\u4f4e 20 \u7a2e\uff5cCV \u7531\u4f4e\u5230\u9ad8\uff5c\u25c6 \u4e0a\u4e0b\u50f9\u5dee\u7387\uff08\u4e0a\u8ef8\uff09\uff5c\u7da0\u8272\u70ba\u5e38\u898b\u71d9\u9752\u83dc\u003c\u002fsup\u003e","x":0.02,"xanchor":"left"},"xaxis":{"title":{"text":"CV\uff08\u8d8a\u4f4e\u8d8a\u7a69\u5b9a\uff09"},"gridcolor":"#E2E2E2","linecolor":"#D8D8D8","zeroline":false},"xaxis2":{"title":{"text":"\u4e0a\u4e0b\u50f9\u5dee\u7387"},"overlaying":"x","side":"top","showgrid":false,"linecolor":"#D8D8D8","color":"#808080"},"yaxis":{"tickfont":{"size":11},"gridcolor":"#E2E2E2","linecolor":"#D8D8D8","zeroline":false},"legend":{"x":0.98,"y":0.02,"xanchor":"right","yanchor":"bottom","bgcolor":"rgba(255,255,255,0.85)","bordercolor":"#D8D8D8","borderwidth":1},"margin":{"l":130,"r":40,"t":90,"b":60},"paper_bgcolor":"rgba(0,0,0,0)","plot_bgcolor":"rgba(0,0,0,0)","barmode":"group","height":560},                        {"displayModeBar": true, "responsive": true, "modeBarButtonsToRemove": ["lasso2d", "select2d"]}                    )                };            </script> </div>
+</div></iframe>
+  </div>
+  <p>
+    此圖從供貨率 ＝ 1.00 的 108 個品項中，取兩年 CV 平均值最低的 20 種，
+    以深色長條顯示第一年 CV、淺色長條顯示第二年 CV，並以菱形（◆）標記上下價差率。
+  </p>
+  <p>
+    細看這 20 種「最穩定」的品項，可以發現一個有趣的規律：
+    幾乎所有成員都屬於<strong>生長環境不直接暴露於颱風、高溫</strong>的類別——
+    <strong>芽菜類</strong>（黃豆芽 CV＝0.039、豌豆芽、苜蓿芽、綠豆芽）推測在室內水耕，
+    不受氣候影響；
+    <strong>菇類</strong>（鴻喜菇、杏鮑菇）在室內太空包環境栽培；
+    <strong>根莖與地下類</strong>（胡蘿蔔、薑、馬鈴薯、大蒜、茭白筍等）藏於地下或近地面，
+    受直接衝擊較小；
+    <strong>海菜類</strong>（海帶、水蓮）在海中或水中養殖；
+    <strong>加工品</strong>（蘿蔔乾）已不受鮮度影響。
+    以上推測僅根據作物特性和資料規律，尚未驗證。
+  </p>
+  <p>
+    七種燙青菜中，只有黃豆芽（CV＝0.039）和綠豆芽（CV≈0.30）進入最低 20 名，
+    其餘五種（高麗菜、小白菜、地瓜葉、空心菜、大陸妹）均不在列，
+    說明常見燙青菜整體屬於「<strong>便宜但價格波動較大</strong>」的類型。
+    一種可能的解釋是：對小吃店而言，多種便宜葉菜並非固定選一種，
+    而是形成一個<strong>動態替換池</strong>——當某種葉菜在特定季節偏貴時，
+    便轉換成同樣便宜的其他品項，靠多品項的組合來平滑整體採購成本的波動。
+  </p>
+
+  <h3>圖四：燙青菜月均價季節性熱圖</h3>
+  <div class="chart-block">
+    <div style="width:100%;height:580px;overflow:hidden;">
+<div> <script>window.PlotlyConfig = {MathJaxConfig: 'local'};</script>
+<script charset="utf-8" crossorigin="anonymous" integrity="sha256-fHbNLP+GlIXN+efbQec78UkemUz3NJp7UmfGxC1tNxs=" src="https://cdn.plot.ly/plotly-3.5.0.min.js"></script> <div class="plotly-graph-div" id="c78a5185-01da-4f39-892f-6de7b1e7a6d3" style="height:520px; width:100%;"></div> <script>                window.PLOTLYENV=window.PLOTLYENV || {};                                if (document.getElementById("c78a5185-01da-4f39-892f-6de7b1e7a6d3")) {                    Plotly.newPlot(                        "c78a5185-01da-4f39-892f-6de7b1e7a6d3",                        [{"colorbar":{"len":0.75,"thickness":14,"tickfont":{"size":11},"title":{"font":{"size":12},"side":"right","text":"\u6f32\u8dcc\u5e45\uff08%\uff09"}},"colorscale":[[0.0,"#4A4A4A"],[0.3,"#D8D8D8"],[0.5,"#F9F9F9"],[0.7,"#99ECC9"],[1.0,"#0E3532"]],"hovertemplate":"%{text}\u003cextra\u003e\u003c\u002fextra\u003e","text":[["\u8579\u83dc \u5c0f\u8449\u003cbr\u003e2024\u002f05\u003cbr\u003e-2.5%","\u8579\u83dc \u5c0f\u8449\u003cbr\u003e2024\u002f06\u003cbr\u003e-41.8%","\u8579\u83dc \u5c0f\u8449\u003cbr\u003e2024\u002f07\u003cbr\u003e-3.7%","\u8579\u83dc \u5c0f\u8449\u003cbr\u003e2024\u002f08\u003cbr\u003e+15.2%","\u8579\u83dc \u5c0f\u8449\u003cbr\u003e2024\u002f09\u003cbr\u003e-10.9%","\u8579\u83dc \u5c0f\u8449\u003cbr\u003e2024\u002f10\u003cbr\u003e+28.7%","\u8579\u83dc \u5c0f\u8449\u003cbr\u003e2024\u002f11\u003cbr\u003e+76.7%","\u8579\u83dc \u5c0f\u8449\u003cbr\u003e2024\u002f12\u003cbr\u003e+43.2%","\u8579\u83dc \u5c0f\u8449\u003cbr\u003e2025\u002f01\u003cbr\u003e+19.7%","\u8579\u83dc \u5c0f\u8449\u003cbr\u003e2025\u002f02\u003cbr\u003e+35.8%","\u8579\u83dc \u5c0f\u8449\u003cbr\u003e2025\u002f03\u003cbr\u003e+9.7%","\u8579\u83dc \u5c0f\u8449\u003cbr\u003e2025\u002f04\u003cbr\u003e-35.3%","\u8579\u83dc \u5c0f\u8449\u003cbr\u003e2025\u002f05\u003cbr\u003e-46.9%","\u8579\u83dc \u5c0f\u8449\u003cbr\u003e2025\u002f06\u003cbr\u003e-37.4%","\u8579\u83dc \u5c0f\u8449\u003cbr\u003e2025\u002f07\u003cbr\u003e-2.8%","\u8579\u83dc \u5c0f\u8449\u003cbr\u003e2025\u002f08\u003cbr\u003e+14.5%","\u8579\u83dc \u5c0f\u8449\u003cbr\u003e2025\u002f09\u003cbr\u003e-34.5%","\u8579\u83dc \u5c0f\u8449\u003cbr\u003e2025\u002f10\u003cbr\u003e-2.2%","\u8579\u83dc \u5c0f\u8449\u003cbr\u003e2025\u002f11\u003cbr\u003e+3.6%","\u8579\u83dc \u5c0f\u8449\u003cbr\u003e2025\u002f12\u003cbr\u003e-31.9%","\u8579\u83dc \u5c0f\u8449\u003cbr\u003e2026\u002f01\u003cbr\u003e+20.1%","\u8579\u83dc \u5c0f\u8449\u003cbr\u003e2026\u002f02\u003cbr\u003e-5.6%","\u8579\u83dc \u5c0f\u8449\u003cbr\u003e2026\u002f03\u003cbr\u003e-0.9%","\u8579\u83dc \u5c0f\u8449\u003cbr\u003e2026\u002f04\u003cbr\u003e-4.9%","\u8579\u83dc \u5c0f\u8449\u003cbr\u003e2026\u002f05\u003cbr\u003e-19.8%"],["\u7518\u85af\u8449\u003cbr\u003e2024\u002f05\u003cbr\u003e-14.4%","\u7518\u85af\u8449\u003cbr\u003e2024\u002f06\u003cbr\u003e-26.2%","\u7518\u85af\u8449\u003cbr\u003e2024\u002f07\u003cbr\u003e+8.7%","\u7518\u85af\u8449\u003cbr\u003e2024\u002f08\u003cbr\u003e+39.2%","\u7518\u85af\u8449\u003cbr\u003e2024\u002f09\u003cbr\u003e+11.8%","\u7518\u85af\u8449\u003cbr\u003e2024\u002f10\u003cbr\u003e+55.5%","\u7518\u85af\u8449\u003cbr\u003e2024\u002f11\u003cbr\u003e+58.7%","\u7518\u85af\u8449\u003cbr\u003e2024\u002f12\u003cbr\u003e+68.0%","\u7518\u85af\u8449\u003cbr\u003e2025\u002f01\u003cbr\u003e-3.1%","\u7518\u85af\u8449\u003cbr\u003e2025\u002f02\u003cbr\u003e-5.4%","\u7518\u85af\u8449\u003cbr\u003e2025\u002f03\u003cbr\u003e-29.7%","\u7518\u85af\u8449\u003cbr\u003e2025\u002f04\u003cbr\u003e-33.7%","\u7518\u85af\u8449\u003cbr\u003e2025\u002f05\u003cbr\u003e-35.6%","\u7518\u85af\u8449\u003cbr\u003e2025\u002f06\u003cbr\u003e-26.7%","\u7518\u85af\u8449\u003cbr\u003e2025\u002f07\u003cbr\u003e+7.6%","\u7518\u85af\u8449\u003cbr\u003e2025\u002f08\u003cbr\u003e+59.6%","\u7518\u85af\u8449\u003cbr\u003e2025\u002f09\u003cbr\u003e-20.1%","\u7518\u85af\u8449\u003cbr\u003e2025\u002f10\u003cbr\u003e+10.9%","\u7518\u85af\u8449\u003cbr\u003e2025\u002f11\u003cbr\u003e-9.9%","\u7518\u85af\u8449\u003cbr\u003e2025\u002f12\u003cbr\u003e-22.1%","\u7518\u85af\u8449\u003cbr\u003e2026\u002f01\u003cbr\u003e-15.7%","\u7518\u85af\u8449\u003cbr\u003e2026\u002f02\u003cbr\u003e-34.3%","\u7518\u85af\u8449\u003cbr\u003e2026\u002f03\u003cbr\u003e-33.2%","\u7518\u85af\u8449\u003cbr\u003e2026\u002f04\u003cbr\u003e-21.8%","\u7518\u85af\u8449\u003cbr\u003e2026\u002f05\u003cbr\u003e-22.9%"],["\u7518\u85cd \u521d\u79cb\u003cbr\u003e2024\u002f05\u003cbr\u003e+6.5%","\u7518\u85cd \u521d\u79cb\u003cbr\u003e2024\u002f06\u003cbr\u003e+22.0%","\u7518\u85cd \u521d\u79cb\u003cbr\u003e2024\u002f07\u003cbr\u003e+51.1%","\u7518\u85cd \u521d\u79cb\u003cbr\u003e2024\u002f08\u003cbr\u003e+73.3%","\u7518\u85cd \u521d\u79cb\u003cbr\u003e2024\u002f09\u003cbr\u003e+85.0%","\u7518\u85cd \u521d\u79cb\u003cbr\u003e2024\u002f10\u003cbr\u003e+73.3%","\u7518\u85cd \u521d\u79cb\u003cbr\u003e2024\u002f11\u003cbr\u003e+39.0%","\u7518\u85cd \u521d\u79cb\u003cbr\u003e2024\u002f12\u003cbr\u003e+58.0%","\u7518\u85cd \u521d\u79cb\u003cbr\u003e2025\u002f01\u003cbr\u003e-38.0%","\u7518\u85cd \u521d\u79cb\u003cbr\u003e2025\u002f02\u003cbr\u003e-60.2%","\u7518\u85cd \u521d\u79cb\u003cbr\u003e2025\u002f03\u003cbr\u003e-74.9%","\u7518\u85cd \u521d\u79cb\u003cbr\u003e2025\u002f04\u003cbr\u003e-72.3%","\u7518\u85cd \u521d\u79cb\u003cbr\u003e2025\u002f05\u003cbr\u003e-64.5%","\u7518\u85cd \u521d\u79cb\u003cbr\u003e2025\u002f06\u003cbr\u003e-34.4%","\u7518\u85cd \u521d\u79cb\u003cbr\u003e2025\u002f07\u003cbr\u003e+6.7%","\u7518\u85cd \u521d\u79cb\u003cbr\u003e2025\u002f08\u003cbr\u003e+104.9%","\u7518\u85cd \u521d\u79cb\u003cbr\u003e2025\u002f09\u003cbr\u003e+105.0%","\u7518\u85cd \u521d\u79cb\u003cbr\u003e2025\u002f10\u003cbr\u003e+45.1%","\u7518\u85cd \u521d\u79cb\u003cbr\u003e2025\u002f11\u003cbr\u003e-25.5%","\u7518\u85cd \u521d\u79cb\u003cbr\u003e2025\u002f12\u003cbr\u003e-61.2%","\u7518\u85cd \u521d\u79cb\u003cbr\u003e2026\u002f01\u003cbr\u003e-63.2%","\u7518\u85cd \u521d\u79cb\u003cbr\u003e2026\u002f02\u003cbr\u003e-72.4%","\u7518\u85cd \u521d\u79cb\u003cbr\u003e2026\u002f03\u003cbr\u003e-76.4%","\u7518\u85cd \u521d\u79cb\u003cbr\u003e2026\u002f04\u003cbr\u003e-58.1%","\u7518\u85cd \u521d\u79cb\u003cbr\u003e2026\u002f05\u003cbr\u003e-6.6%"],["\u8435\u82e3\u83dc \u672c\u5cf6\u5713\u8449\u003cbr\u003e2024\u002f05\u003cbr\u003e-8.6%","\u8435\u82e3\u83dc \u672c\u5cf6\u5713\u8449\u003cbr\u003e2024\u002f06\u003cbr\u003e-48.9%","\u8435\u82e3\u83dc \u672c\u5cf6\u5713\u8449\u003cbr\u003e2024\u002f07\u003cbr\u003e+36.3%","\u8435\u82e3\u83dc \u672c\u5cf6\u5713\u8449\u003cbr\u003e2024\u002f08\u003cbr\u003e+64.6%","\u8435\u82e3\u83dc \u672c\u5cf6\u5713\u8449\u003cbr\u003e2024\u002f09\u003cbr\u003e+16.1%","\u8435\u82e3\u83dc \u672c\u5cf6\u5713\u8449\u003cbr\u003e2024\u002f10\u003cbr\u003e+92.1%","\u8435\u82e3\u83dc \u672c\u5cf6\u5713\u8449\u003cbr\u003e2024\u002f11\u003cbr\u003e+62.9%","\u8435\u82e3\u83dc \u672c\u5cf6\u5713\u8449\u003cbr\u003e2024\u002f12\u003cbr\u003e+7.2%","\u8435\u82e3\u83dc \u672c\u5cf6\u5713\u8449\u003cbr\u003e2025\u002f01\u003cbr\u003e-52.7%","\u8435\u82e3\u83dc \u672c\u5cf6\u5713\u8449\u003cbr\u003e2025\u002f02\u003cbr\u003e-49.2%","\u8435\u82e3\u83dc \u672c\u5cf6\u5713\u8449\u003cbr\u003e2025\u002f03\u003cbr\u003e-21.9%","\u8435\u82e3\u83dc \u672c\u5cf6\u5713\u8449\u003cbr\u003e2025\u002f04\u003cbr\u003e-47.2%","\u8435\u82e3\u83dc \u672c\u5cf6\u5713\u8449\u003cbr\u003e2025\u002f05\u003cbr\u003e-56.9%","\u8435\u82e3\u83dc \u672c\u5cf6\u5713\u8449\u003cbr\u003e2025\u002f06\u003cbr\u003e-10.5%","\u8435\u82e3\u83dc \u672c\u5cf6\u5713\u8449\u003cbr\u003e2025\u002f07\u003cbr\u003e+18.0%","\u8435\u82e3\u83dc \u672c\u5cf6\u5713\u8449\u003cbr\u003e2025\u002f08\u003cbr\u003e+62.0%","\u8435\u82e3\u83dc \u672c\u5cf6\u5713\u8449\u003cbr\u003e2025\u002f09\u003cbr\u003e+10.4%","\u8435\u82e3\u83dc \u672c\u5cf6\u5713\u8449\u003cbr\u003e2025\u002f10\u003cbr\u003e+25.2%","\u8435\u82e3\u83dc \u672c\u5cf6\u5713\u8449\u003cbr\u003e2025\u002f11\u003cbr\u003e+8.3%","\u8435\u82e3\u83dc \u672c\u5cf6\u5713\u8449\u003cbr\u003e2025\u002f12\u003cbr\u003e-28.3%","\u8435\u82e3\u83dc \u672c\u5cf6\u5713\u8449\u003cbr\u003e2026\u002f01\u003cbr\u003e-23.0%","\u8435\u82e3\u83dc \u672c\u5cf6\u5713\u8449\u003cbr\u003e2026\u002f02\u003cbr\u003e-33.4%","\u8435\u82e3\u83dc \u672c\u5cf6\u5713\u8449\u003cbr\u003e2026\u002f03\u003cbr\u003e-13.2%","\u8435\u82e3\u83dc \u672c\u5cf6\u5713\u8449\u003cbr\u003e2026\u002f04\u003cbr\u003e-27.4%","\u8435\u82e3\u83dc \u672c\u5cf6\u5713\u8449\u003cbr\u003e2026\u002f05\u003cbr\u003e-23.3%"],["\u82bd\u83dc\u985e \u7da0\u8c46\u82bd\u003cbr\u003e2024\u002f05\u003cbr\u003e-2.7%","\u82bd\u83dc\u985e \u7da0\u8c46\u82bd\u003cbr\u003e2024\u002f06\u003cbr\u003e-0.4%","\u82bd\u83dc\u985e \u7da0\u8c46\u82bd\u003cbr\u003e2024\u002f07\u003cbr\u003e+1.0%","\u82bd\u83dc\u985e \u7da0\u8c46\u82bd\u003cbr\u003e2024\u002f08\u003cbr\u003e+4.0%","\u82bd\u83dc\u985e \u7da0\u8c46\u82bd\u003cbr\u003e2024\u002f09\u003cbr\u003e+9.0%","\u82bd\u83dc\u985e \u7da0\u8c46\u82bd\u003cbr\u003e2024\u002f10\u003cbr\u003e+0.7%","\u82bd\u83dc\u985e \u7da0\u8c46\u82bd\u003cbr\u003e2024\u002f11\u003cbr\u003e-0.3%","\u82bd\u83dc\u985e \u7da0\u8c46\u82bd\u003cbr\u003e2024\u002f12\u003cbr\u003e+0.3%","\u82bd\u83dc\u985e \u7da0\u8c46\u82bd\u003cbr\u003e2025\u002f01\u003cbr\u003e-3.2%","\u82bd\u83dc\u985e \u7da0\u8c46\u82bd\u003cbr\u003e2025\u002f02\u003cbr\u003e+1.2%","\u82bd\u83dc\u985e \u7da0\u8c46\u82bd\u003cbr\u003e2025\u002f03\u003cbr\u003e+0.1%","\u82bd\u83dc\u985e \u7da0\u8c46\u82bd\u003cbr\u003e2025\u002f04\u003cbr\u003e+0.4%","\u82bd\u83dc\u985e \u7da0\u8c46\u82bd\u003cbr\u003e2025\u002f05\u003cbr\u003e-0.2%","\u82bd\u83dc\u985e \u7da0\u8c46\u82bd\u003cbr\u003e2025\u002f06\u003cbr\u003e+0.2%","\u82bd\u83dc\u985e \u7da0\u8c46\u82bd\u003cbr\u003e2025\u002f07\u003cbr\u003e-3.5%","\u82bd\u83dc\u985e \u7da0\u8c46\u82bd\u003cbr\u003e2025\u002f08\u003cbr\u003e+0.6%","\u82bd\u83dc\u985e \u7da0\u8c46\u82bd\u003cbr\u003e2025\u002f09\u003cbr\u003e-3.6%","\u82bd\u83dc\u985e \u7da0\u8c46\u82bd\u003cbr\u003e2025\u002f10\u003cbr\u003e-2.5%","\u82bd\u83dc\u985e \u7da0\u8c46\u82bd\u003cbr\u003e2025\u002f11\u003cbr\u003e+1.1%","\u82bd\u83dc\u985e \u7da0\u8c46\u82bd\u003cbr\u003e2025\u002f12\u003cbr\u003e-1.5%","\u82bd\u83dc\u985e \u7da0\u8c46\u82bd\u003cbr\u003e2026\u002f01\u003cbr\u003e-1.2%","\u82bd\u83dc\u985e \u7da0\u8c46\u82bd\u003cbr\u003e2026\u002f02\u003cbr\u003e+8.2%","\u82bd\u83dc\u985e \u7da0\u8c46\u82bd\u003cbr\u003e2026\u002f03\u003cbr\u003e-2.4%","\u82bd\u83dc\u985e \u7da0\u8c46\u82bd\u003cbr\u003e2026\u002f04\u003cbr\u003e-2.4%","\u82bd\u83dc\u985e \u7da0\u8c46\u82bd\u003cbr\u003e2026\u002f05\u003cbr\u003e-1.8%"],["\u5c0f\u767d\u83dc \u86b5\u4ed4\u767d\u003cbr\u003e2024\u002f05\u003cbr\u003e+18.0%","\u5c0f\u767d\u83dc \u86b5\u4ed4\u767d\u003cbr\u003e2024\u002f06\u003cbr\u003e-40.6%","\u5c0f\u767d\u83dc \u86b5\u4ed4\u767d\u003cbr\u003e2024\u002f07\u003cbr\u003e+60.6%","\u5c0f\u767d\u83dc \u86b5\u4ed4\u767d\u003cbr\u003e2024\u002f08\u003cbr\u003e+114.2%","\u5c0f\u767d\u83dc \u86b5\u4ed4\u767d\u003cbr\u003e2024\u002f09\u003cbr\u003e+16.9%","\u5c0f\u767d\u83dc \u86b5\u4ed4\u767d\u003cbr\u003e2024\u002f10\u003cbr\u003e+87.8%","\u5c0f\u767d\u83dc \u86b5\u4ed4\u767d\u003cbr\u003e2024\u002f11\u003cbr\u003e+75.0%","\u5c0f\u767d\u83dc \u86b5\u4ed4\u767d\u003cbr\u003e2024\u002f12\u003cbr\u003e-11.0%","\u5c0f\u767d\u83dc \u86b5\u4ed4\u767d\u003cbr\u003e2025\u002f01\u003cbr\u003e-63.8%","\u5c0f\u767d\u83dc \u86b5\u4ed4\u767d\u003cbr\u003e2025\u002f02\u003cbr\u003e-53.7%","\u5c0f\u767d\u83dc \u86b5\u4ed4\u767d\u003cbr\u003e2025\u002f03\u003cbr\u003e-46.3%","\u5c0f\u767d\u83dc \u86b5\u4ed4\u767d\u003cbr\u003e2025\u002f04\u003cbr\u003e-64.5%","\u5c0f\u767d\u83dc \u86b5\u4ed4\u767d\u003cbr\u003e2025\u002f05\u003cbr\u003e-55.1%","\u5c0f\u767d\u83dc \u86b5\u4ed4\u767d\u003cbr\u003e2025\u002f06\u003cbr\u003e-2.4%","\u5c0f\u767d\u83dc \u86b5\u4ed4\u767d\u003cbr\u003e2025\u002f07\u003cbr\u003e+27.6%","\u5c0f\u767d\u83dc \u86b5\u4ed4\u767d\u003cbr\u003e2025\u002f08\u003cbr\u003e+93.5%","\u5c0f\u767d\u83dc \u86b5\u4ed4\u767d\u003cbr\u003e2025\u002f09\u003cbr\u003e-43.0%","\u5c0f\u767d\u83dc \u86b5\u4ed4\u767d\u003cbr\u003e2025\u002f10\u003cbr\u003e+82.1%","\u5c0f\u767d\u83dc \u86b5\u4ed4\u767d\u003cbr\u003e2025\u002f11\u003cbr\u003e-51.1%","\u5c0f\u767d\u83dc \u86b5\u4ed4\u767d\u003cbr\u003e2025\u002f12\u003cbr\u003e-52.5%","\u5c0f\u767d\u83dc \u86b5\u4ed4\u767d\u003cbr\u003e2026\u002f01\u003cbr\u003e-13.3%","\u5c0f\u767d\u83dc \u86b5\u4ed4\u767d\u003cbr\u003e2026\u002f02\u003cbr\u003e-29.6%","\u5c0f\u767d\u83dc \u86b5\u4ed4\u767d\u003cbr\u003e2026\u002f03\u003cbr\u003e-64.7%","\u5c0f\u767d\u83dc \u86b5\u4ed4\u767d\u003cbr\u003e2026\u002f04\u003cbr\u003e-21.3%","\u5c0f\u767d\u83dc \u86b5\u4ed4\u767d\u003cbr\u003e2026\u002f05\u003cbr\u003e+1.5%"],["\u82bd\u83dc\u985e \u9ec3\u8c46\u82bd\u003cbr\u003e2024\u002f05\u003cbr\u003e-0.1%","\u82bd\u83dc\u985e \u9ec3\u8c46\u82bd\u003cbr\u003e2024\u002f06\u003cbr\u003e-0.1%","\u82bd\u83dc\u985e \u9ec3\u8c46\u82bd\u003cbr\u003e2024\u002f07\u003cbr\u003e-0.3%","\u82bd\u83dc\u985e \u9ec3\u8c46\u82bd\u003cbr\u003e2024\u002f08\u003cbr\u003e-0.1%","\u82bd\u83dc\u985e \u9ec3\u8c46\u82bd\u003cbr\u003e2024\u002f09\u003cbr\u003e-0.3%","\u82bd\u83dc\u985e \u9ec3\u8c46\u82bd\u003cbr\u003e2024\u002f10\u003cbr\u003e+0.0%","\u82bd\u83dc\u985e \u9ec3\u8c46\u82bd\u003cbr\u003e2024\u002f11\u003cbr\u003e-0.1%","\u82bd\u83dc\u985e \u9ec3\u8c46\u82bd\u003cbr\u003e2024\u002f12\u003cbr\u003e-0.6%","\u82bd\u83dc\u985e \u9ec3\u8c46\u82bd\u003cbr\u003e2025\u002f01\u003cbr\u003e-0.9%","\u82bd\u83dc\u985e \u9ec3\u8c46\u82bd\u003cbr\u003e2025\u002f02\u003cbr\u003e-0.1%","\u82bd\u83dc\u985e \u9ec3\u8c46\u82bd\u003cbr\u003e2025\u002f03\u003cbr\u003e-0.1%","\u82bd\u83dc\u985e \u9ec3\u8c46\u82bd\u003cbr\u003e2025\u002f04\u003cbr\u003e-0.1%","\u82bd\u83dc\u985e \u9ec3\u8c46\u82bd\u003cbr\u003e2025\u002f05\u003cbr\u003e+0.0%","\u82bd\u83dc\u985e \u9ec3\u8c46\u82bd\u003cbr\u003e2025\u002f06\u003cbr\u003e+0.8%","\u82bd\u83dc\u985e \u9ec3\u8c46\u82bd\u003cbr\u003e2025\u002f07\u003cbr\u003e+1.0%","\u82bd\u83dc\u985e \u9ec3\u8c46\u82bd\u003cbr\u003e2025\u002f08\u003cbr\u003e-0.1%","\u82bd\u83dc\u985e \u9ec3\u8c46\u82bd\u003cbr\u003e2025\u002f09\u003cbr\u003e-0.1%","\u82bd\u83dc\u985e \u9ec3\u8c46\u82bd\u003cbr\u003e2025\u002f10\u003cbr\u003e+1.3%","\u82bd\u83dc\u985e \u9ec3\u8c46\u82bd\u003cbr\u003e2025\u002f11\u003cbr\u003e+0.8%","\u82bd\u83dc\u985e \u9ec3\u8c46\u82bd\u003cbr\u003e2025\u002f12\u003cbr\u003e-0.1%","\u82bd\u83dc\u985e \u9ec3\u8c46\u82bd\u003cbr\u003e2026\u002f01\u003cbr\u003e-0.1%","\u82bd\u83dc\u985e \u9ec3\u8c46\u82bd\u003cbr\u003e2026\u002f02\u003cbr\u003e+2.1%","\u82bd\u83dc\u985e \u9ec3\u8c46\u82bd\u003cbr\u003e2026\u002f03\u003cbr\u003e-0.8%","\u82bd\u83dc\u985e \u9ec3\u8c46\u82bd\u003cbr\u003e2026\u002f04\u003cbr\u003e-1.5%","\u82bd\u83dc\u985e \u9ec3\u8c46\u82bd\u003cbr\u003e2026\u002f05\u003cbr\u003e-1.4%"]],"x":["24\u002f05","24\u002f06","24\u002f07","24\u002f08","24\u002f09","24\u002f10","24\u002f11","24\u002f12","25\u002f01","25\u002f02","25\u002f03","25\u002f04","25\u002f05","25\u002f06","25\u002f07","25\u002f08","25\u002f09","25\u002f10","25\u002f11","25\u002f12","26\u002f01","26\u002f02","26\u002f03","26\u002f04","26\u002f05"],"y":["\u8579\u83dc \u5c0f\u8449","\u7518\u85af\u8449","\u7518\u85cd \u521d\u79cb","\u8435\u82e3\u83dc \u672c\u5cf6\u5713\u8449","\u82bd\u83dc\u985e \u7da0\u8c46\u82bd","\u5c0f\u767d\u83dc \u86b5\u4ed4\u767d","\u82bd\u83dc\u985e \u9ec3\u8c46\u82bd"],"z":{"dtype":"f8","bdata":"u1b5+tnkA8Cwe8HJXuhEwKgzFs2yfQ3AHBDLGEx4LkDn2zwZtbUlwDesVQPgpzxAV1x7NRktU0Dm8SvtAZlFQJm4+zaMtDNApT+niGDpQUB1fzrr504jQNGGpME6p0HA4SnVQxN4R8AYvt5GNLZCwK+l6rTGnQbAo4\u002fh5QDnLEBBy1q5TUBBwOorRwBr+AHAL+mC21gjDUBsoRxYnOw\u002fwND7UMTNITRAFAyntRqNFsBmIvG33g7uvxyxckK9sxPA16KSDHfTM8AD6wbCxd0swDcgEBHFPDrAGr+JBfFsIUCaNF0UgZhDQG6reCMYmydACIZLMVTFS0B35BU21l5NQFRQUaDNAVFAfCwBVTZrCMDMZ8Nt6qgVwBBwTb3gtD3A+6gT1RHUQMBmDUzco8lBwJAQwVlVqTrAoCnkClGDHkAzXOVeFsxNQPsWfbtHIjTA\u002fx5CGkflJUDAPILGp7gjwNLbQje7FTbA8lAjwhx4L8DTBQ5nhixBwBltmHA2lkDA4GQzhMvJNcBwk7uOQeE2wHBQgniaDBpAgIpHO9j\u002fNUCVxENlXIdJQBQpKbrUUVJAYKLFPkU+VUCT4D4t9lNSQPNF+nrwekNArb0+7\u002fQFTUCwWuMNqAJDwDJyFa10F07ArY6MxUO3UsAoomv5SRNSwMPnkce2IFDA9ROVxoM1QcAwQlDUn9AaQDte6JipOVpAn8bGAME9WkBCDgISJIhGQL+UiVIIjDnAjZbjdTGaTsA2oGA2HZ9PwBO0PeOrG1LAcjAjOtQXU8CoL8cbeRFNwAFSPnp4ihrAu7La06wpIcDMAOSBR21IwCJzZ3HYI0JAX\u002fmtpWomUEAGmSykzCEwQKLD2XscBVdAokCh7il0T0CvbHOdFc0cQCWhpjHtWkrAfiAxTb2XSMB9KNXHb+Q1wFMYBPjMlEfAYO8tVHV1TMDmkbdlQOskwJzs6Xwz\u002fTFAW\u002fYQm9gCT0DVQvs2ncUkQIokTF6FJjlAfrXEJj2bIEDBilbVI1Y8wOWj9miiADfAYINbm\u002fG0QMABVWxwA3YqwEuz\u002fvaGYjvAzg6EvuJWN8C7Rv\u002f041sFwJOOmJb9Otq\u002f9qisSOcS8D+X+S839ykQQIfA+cFCCyJAGzQ3hDBn5T\u002fhZbYsPG7Rv7vT0peByNA\u002fu45+1dW3CcCmRTuZZCvzP9\u002fD9COw\u002fb8\u002f2A+DOkgo2T\u002fxuZFFH5rEvwdn5oQCOcg\u002fWtFrF09gDMCwhna8xizkP+ZGnZN6kAzAWAdfhiY0BMAkzzDigSXxP58OqtVFRfe\u002f7bebtYHZ8r+aRtBMx2EgQKjArYXYNAPAZGvXgQk3A8CDOb0AyXv8v5PNpCrgBTJAatMmz0FRRMAM6b1fKk9OQGf1gUxbjVxA6MlwFlTeMECy+wLXVvVVQJDmNSRUvVJA6wzhr3zpJcCyIt0MTepPwFebXB2z3ErAnKOSxoAqR8AeySf\u002fFiJQwNcE+w7GiEvAOd4z93dlA8CXf9T9\u002f5I7QNzlSk+PYFdAVSpxkY56RcAWXjIZz4ZUQK7jigh5kknAt6A3p2hESsBijKT3AaUqwF\u002fsIRLgjT3ArspoSxIqUMBLaO78pFM1wK+YQAET9Pc\u002fayeAAPf2wr\u002fnt6\u002fhbTaqv2cyNZXLptC\u002f57ev4W02qr8HSgiFNtTQv4u9T7MMnI4\u002f57ev4W02qr\u002fJkFbULmjjv\u002fyYbFWI8uu\u002fS+KBTS6rsr\u002fnt6\u002fhbTaqv+e3r+FtNqq\u002fLcJvQJHUlj8kKxHUlEfqPyvxO\u002fKHs\u002fA\u002f57ev4W02qr\u002fnt6\u002fhbTaqv0CPmQLrdvU\u002f2ekEULaH6D\u002fnt6\u002fhbTaqv+e3r+FtNqq\u002fwPvSkF2aAEB4AqMiu\u002f7pv0Ni7D0iqve\u002fS5fu\u002fDwk9r8=","shape":"7, 25"},"zmax":60,"zmid":0,"zmin":-60,"type":"heatmap"}],                        {"template":{"data":{"histogram2dcontour":[{"type":"histogram2dcontour","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"choropleth":[{"type":"choropleth","colorbar":{"outlinewidth":0,"ticks":""}}],"histogram2d":[{"type":"histogram2d","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"heatmap":[{"type":"heatmap","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"contourcarpet":[{"type":"contourcarpet","colorbar":{"outlinewidth":0,"ticks":""}}],"contour":[{"type":"contour","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"surface":[{"type":"surface","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"mesh3d":[{"type":"mesh3d","colorbar":{"outlinewidth":0,"ticks":""}}],"scatter":[{"fillpattern":{"fillmode":"overlay","size":10,"solidity":0.2},"type":"scatter"}],"parcoords":[{"type":"parcoords","line":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterpolargl":[{"type":"scatterpolargl","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"bar":[{"error_x":{"color":"#2a3f5f"},"error_y":{"color":"#2a3f5f"},"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"scattergeo":[{"type":"scattergeo","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterpolar":[{"type":"scatterpolar","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"scattergl":[{"type":"scattergl","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatter3d":[{"type":"scatter3d","line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattermap":[{"type":"scattermap","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattermapbox":[{"type":"scattermapbox","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterternary":[{"type":"scatterternary","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattercarpet":[{"type":"scattercarpet","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"carpet":[{"aaxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"baxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"type":"carpet"}],"table":[{"cells":{"fill":{"color":"#EBF0F8"},"line":{"color":"white"}},"header":{"fill":{"color":"#C8D4E3"},"line":{"color":"white"}},"type":"table"}],"barpolar":[{"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"pie":[{"automargin":true,"type":"pie"}]},"layout":{"autotypenumbers":"strict","colorway":["#636efa","#EF553B","#00cc96","#ab63fa","#FFA15A","#19d3f3","#FF6692","#B6E880","#FF97FF","#FECB52"],"font":{"color":"#2a3f5f"},"hovermode":"closest","hoverlabel":{"align":"left"},"paper_bgcolor":"white","plot_bgcolor":"#E5ECF6","polar":{"bgcolor":"#E5ECF6","angularaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"radialaxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"ternary":{"bgcolor":"#E5ECF6","aaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"baxis":{"gridcolor":"white","linecolor":"white","ticks":""},"caxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"sequential":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"sequentialminus":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"diverging":[[0,"#8e0152"],[0.1,"#c51b7d"],[0.2,"#de77ae"],[0.3,"#f1b6da"],[0.4,"#fde0ef"],[0.5,"#f7f7f7"],[0.6,"#e6f5d0"],[0.7,"#b8e186"],[0.8,"#7fbc41"],[0.9,"#4d9221"],[1,"#276419"]]},"xaxis":{"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","automargin":true,"zerolinewidth":2},"yaxis":{"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","automargin":true,"zerolinewidth":2},"scene":{"xaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2},"yaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2},"zaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2}},"shapedefaults":{"line":{"color":"#2a3f5f"}},"annotationdefaults":{"arrowcolor":"#2a3f5f","arrowhead":0,"arrowwidth":1},"geo":{"bgcolor":"white","landcolor":"#E5ECF6","subunitcolor":"white","showland":true,"showlakes":true,"lakecolor":"white"},"title":{"x":0.05},"mapbox":{"style":"light"}}},"font":{"family":"Noto Sans TC, Microsoft JhengHei, PingFang TC, sans-serif","color":"#262626","size":13},"hoverlabel":{"font":{"family":"Noto Sans TC, Microsoft JhengHei, PingFang TC, sans-serif","size":13},"bgcolor":"white","bordercolor":"#D8D8D8"},"title":{"font":{"size":17,"color":"#262626"},"text":"\u5927\u53f0\u5317\u852c\u83dc\u6279\u767c\u5e02\u5834\uff1a\u5e38\u898b\u71d9\u9752\u83dc\u6708\u5747\u50f9\u5b63\u7bc0\u6027\u6f32\u8dcc\u71b1\u5716\u003cbr\u003e\u003csup\u003e\u984f\u8272 = \u76f8\u5c0d\u5168\u671f\u5747\u50f9\u6f32\u8dcc\u5e45\uff08\u6df1\u7da0\u504f\u8cb4\u3001\u6dfa\u8272\u504f\u4fbf\u5b9c\uff09\u003c\u002fsup\u003e","x":0.02,"xanchor":"left"},"xaxis":{"tickfont":{"size":11},"side":"bottom","linecolor":"#D8D8D8"},"yaxis":{"tickfont":{"size":11},"autorange":"reversed","linecolor":"#D8D8D8"},"margin":{"l":130,"r":80,"t":90,"b":70},"paper_bgcolor":"rgba(0,0,0,0)","plot_bgcolor":"rgba(0,0,0,0)","height":520},                        {"displayModeBar": true, "responsive": true, "modeBarButtonsToRemove": ["lasso2d", "select2d"]}                    )                };            </script> </div>
+</div></iframe>
+  </div>
+  <p>
+    此圖僅顯示七種燙青菜，顏色代表該月均價相對各品項全期均價的漲跌幅（%）——
+    色塊越深代表該月越貴，越淺代表越便宜。
+  </p>
+  <p>
+    以資料確認：高麗菜在 2025 年 8 月的單月交易量僅 1.1M 公斤（全年最低），
+    月均價卻高達 47.34 元（全年最高），與春季的 5–8M 公斤、10–20 元形成強烈對比。
+    推測這可能與高麗菜<strong>夏季主要仰賴高山產區</strong>供應、量不足導致價格上升有關，
+    但其確切成因需要更多生產面資料佐證。
+  </p>
+  <p>
+    整體季節規律：<strong>多數葉菜（高麗菜、小白菜、大陸妹、地瓜葉）夏季明顯偏貴</strong>，
+    推測與各作物的適合生長季節有關；
+    <strong>空心菜（蕹菜）走勢相反</strong>——夏季最便宜（2025/05 較全期均值約 −78%），
+    冬季偏貴（2026/02 約 +175%），符合空心菜為夏季葉菜、高溫多濕時生長旺盛的作物特性；
+    <strong>黃豆芽全年幾乎無季節性波動</strong>，與其 CV＝0.039 的結果完全一致——
+    不論哪個月，顏色深淺都接近，驗證了人工栽培環境切斷季節影響的推測。
+  </p>
+
+  <!-- ===== 八、結論 ===== -->
+  <h2>八、結論</h2>
+  <h3>8.1 三個假設是否成立？</h3>
+  <p>
+    本研究的核心假設是：燙青菜之所以集中於特定幾種，是因為這些蔬菜同時具備
+    「低均價 × 全年穩定供貨 × 可預測的採購成本」三個條件。
+    從資料來看，七種燙青菜的供貨率均為 1.00，均價全數低於 108 個品項的中位數 50.1 元，
+    前兩個條件<strong>完全成立</strong>。
+  </p>
+  <p>
+    然而「採購成本可預測性」這個條件只有部分成立。
+    黃豆芽的 CV 僅 0.039，是 108 種品項中最穩定的，完全符合預期；
+    但高麗菜（CV≈0.69）、小白菜（CV≈0.79）的年內波動程度相當高，
+    並不符合「穩定」的直覺印象。
+  </p>
+
+  <h3>8.2 穩定機制：多品項替換池的緩衝作用</h3>
+  <p>
+    這個矛盾可以從另一個角度來理解。值得注意的是，
+    即使高麗菜在夏季達到全年最高價（2025/08 約 47 元），
+    這個「最貴的價格」仍低於 108 個品項的均價中位數（50.1 元）——
+    也就是說，<strong>燙青菜在季節高峰時仍屬相對便宜的選擇</strong>，
+    並不會因為漲價而被排除在可用範圍之外。
+  </p>
+  <p>
+    在此基礎上，多種便宜葉菜同時存在，進一步提供了靈活選用的空間。
+    不同燙青菜的季節高峰與低谷並不完全重疊——例如高麗菜夏季偏貴、空心菜夏季偏便宜；
+    冬季則相反。對餐廳而言，<em>替換池的意義不在於被迫替換，
+      而在於本來就有多種便宜選擇可以靈活調配</em>，
+    讓整體燙青菜的採購成本在不同季節都能維持在低位，
+    即使單一品項的個別波動相當大。
+  </p>
+  <p>
+    豆芽菜是特例：黃豆芽與綠豆芽同時具備低價、全年穩定供貨<em>與</em>高穩定性，
+    這三個條件同時成立，推測與室內受控環境栽培的特性直接相關。
+  </p>
+
+  <h3>8.3 研究限制</h3>
+  <ul>
+    <li><strong>批發價 ≠ 零售價：</strong>本研究使用的是批發市場交易行情，
+      與餐廳實際進貨價格（受供貨商加成、規格議價等因素影響）可能存在落差，
+      結論無法直接推算餐廳的採購成本。</li>
+    <li><strong>品項代表性：</strong>本研究僅選取各通俗名稱下日均交易量最大的細分品種，
+      例如高麗菜僅選「甘藍 初秋」，未涵蓋其他甘藍品種；
+      小白菜的品種選擇同樣可能影響結果。</li>
+    <li><strong>市場代表性：</strong>資料僅涵蓋大台北地區四個批發市場，
+      無法代表全台的蔬菜供需結構；南部或東部的批發行情可能呈現不同規律。</li>
+    <li><strong>資料期間限制：</strong>兩年期間的氣候與天災狀況屬於特定樣本，
+      未必能代表長期均值；若某年颱風特別多，可能高估特定蔬菜的 CV。</li>
+  </ul>
+
+  <h3>8.4 未來延伸方向</h3>
+  <p>
+    未來可進一步比對批發價與餐廳菜單報價的相關性、
+    納入更長時間區間的資料以驗證季節規律的一致性，
+    或加入生產面資料（種植面積、產地氣溫等）來驗證「夏季高麗菜仰賴高山產區」等目前僅能推測的機制。
+  </p>
+
+  <hr style="margin-top: 3rem; border-color: #eee;">
+  <p style="text-align:center; color:#aaa; font-size:0.85rem;">
+    本報告由洪嘉琪與 Claude 共同討論與撰寫 ·
+    資料來源：農業部農糧署 | 農產品批發交易市場行情站
+  </p>
+
+</body>
+
+</html>

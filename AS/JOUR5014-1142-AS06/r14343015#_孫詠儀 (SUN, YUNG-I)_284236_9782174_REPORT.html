@@ -1,0 +1,202 @@
+
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <title>台北二市場進口甜椒交易量短期波動分析</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: "Microsoft JhengHei", "Noto Sans TC", sans-serif; max-width: 900px; margin: 0 auto; padding: 20px; background: #fafafa; color: #333; line-height: 1.8; }
+    h1 { color: #1a1a1a; border-bottom: 4px solid #C62828; padding-bottom: 12px; margin-bottom: 20px; font-size: 1.8em; }
+    h2 { color: #444; margin: 30px 0 15px; border-left: 5px solid #C62828; padding-left: 12px; }
+    h3 { color: #555; margin: 20px 0 10px; }
+    .info-box { background: #FFF3E0; padding: 18px; border-radius: 10px; margin: 15px 0; border-left: 5px solid #FF9800; }
+    table { border-collapse: collapse; width: 100%; margin: 15px 0; font-size: 0.95em; }
+    th { background: #C62828; color: white; padding: 10px; }
+    td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+    tr:nth-child(even) { background: #f9f9f9; }
+    img { max-width: 100%; height: auto; margin: 15px 0; border-radius: 10px; box-shadow: 0 3px 12px rgba(0,0,0,0.12); }
+    .highlight { background: #FFF9C4; padding: 2px 6px; border-radius: 3px; }
+    ul, ol { margin: 10px 0 10px 25px; }
+    li { margin: 5px 0; }
+    code { background: #f4f4f4; padding: 2px 6px; border-radius: 3px; font-size: 0.9em; }
+    pre { background: #263238; color: #AEEA00; padding: 15px; border-radius: 8px; overflow-x: auto; font-size: 0.85em; line-height: 1.5; }
+    .footer { margin-top: 40px; padding-top: 15px; border-top: 1px solid #ddd; color: #888; font-size: 0.9em; text-align: center; }
+  </style>
+</head>
+<body>
+
+<h1>📊 台北二市場進口甜椒交易量短期波動分析</h1>
+
+<div class="info-box">
+  <strong>研究題目：</strong>進口蔬菜交易量的日間變化——以台北二市場甜椒為例（2026年4月）<br>
+  <strong>使用 AI 工具：</strong>DeepSeek（深度求索公司開發的大型語言模型）<br>
+  <strong>爬蟲技術：</strong>R 語言 + crul 套件，模擬 ASP.NET AJAX 請求<br>
+  <strong>資料來源：</strong>農業部農產品交易行情網
+</div>
+
+<h2>1. 專題內容說明</h2>
+<p>
+本研究運用 R 語言爬蟲技術，從農業部農產品交易行情網站擷取台北二市場進口蔬菜的交易資料，
+分析進口甜椒在 <span class="highlight">2026年4月18日至4月29日</span> 期間的交易量波動。
+因網站僅保留近一個月的交易紀錄，無法取得2月戰爭期間的歷史資料，
+故將研究焦點調整為進口甜椒交易量的短期波動分析。
+</p>
+
+<h2>2. 爬蟲設計與過程</h2>
+
+<h3>2.1 目標網站分析</h3>
+<ul>
+  <li><strong>網站：</strong><code>amis.afa.gov.tw/veg/VegProdDayTransInfo.aspx</code></li>
+  <li><strong>架構：</strong>ASP.NET WebForm + AJAX UpdatePanel</li>
+  <li><strong>請求方式：</strong>POST，Content-Type 為 <code>application/x-www-form-urlencoded; charset=UTF-8</code></li>
+  <li><strong>關鍵參數：</strong>__VIEWSTATE、__EVENTVALIDATION（每次請求需重新取得）</li>
+  <li><strong>日期格式：</strong>民國年（115/02/01），非西元年</li>
+  <li><strong>市場代碼：</strong>台北二 = 104</li>
+</ul>
+
+<h3>2.2 爬蟲流程</h3>
+<ol>
+  <li>使用 <code>crul::HttpClient</code> 建立 HTTP 客戶端，自動管理 Cookie</li>
+  <li>GET 初始頁面，以 <code>rvest</code> 解析三個隱藏欄位</li>
+  <li>POST 查詢：市場=台北二(104)、日期=115/02/01~115/05/01、產品=7項進口蔬菜</li>
+  <li>解析 ASP.NET AJAX 回應格式（<code>length|type|updatePanel|...|HTML</code>）</li>
+  <li>從回應中擷取 HTML 表格並以 <code>rvest::html_table()</code> 解析</li>
+  <li>清理資料：移除導航文字、轉換民國年、數值型別轉換</li>
+</ol>
+
+<h3>2.3 遇到的困難與解決方法</h3>
+<table>
+  <tr><th>困難</th><th>原因</th><th>解決方法</th></tr>
+  <tr><td>httr::POST 持續失敗</td><td>ASP.NET ViewState 與 Session 綁定</td><td>改用 crul 套件，自動管理 Cookie</td></tr>
+  <tr><td>Content-Type 錯誤</td><td>使用 text/plain</td><td>從瀏覽器 DevTools 確認為 application/x-www-form-urlencoded</td></tr>
+  <tr><td>日期格式錯誤</td><td>使用西元年 2026/02/01</td><td>改用民國年 115/02/01</td></tr>
+  <tr><td>市場名稱錯誤</td><td>使用「台北二市場」</td><td>應使用「台北二」</td></tr>
+  <tr><td>回應為 Error.htm</td><td>ViewState 過期</td><td>每次 POST 前先 GET 取得新 ViewState</td></tr>
+  <tr><td>歷史資料無法取得</td><td>網站僅保留近一個月資料</td><td>調整研究題目為短期交易量分析</td></tr>
+</table>
+
+<h2>3. 爬取到的資料</h2>
+<ul>
+  <li><strong>資料筆數：</strong>10 筆</li>
+  <li><strong>日期範圍：</strong>115/04/18 ~ 115/05/01</li>
+  <li><strong>產品：</strong>FK9 甜椒 進口</li>
+  <li><strong>市場：</strong>台北二市場（代碼 104）</li>
+  <li><strong>價格：</strong>穩定維持 110 元/公斤（上價=中價=下價=平均價）</li>
+  <li><strong>交易量範圍：</strong>100 ~ 400 公斤</li>
+  <li><strong>平均交易量：</strong>273 公斤</li>
+</ul>
+
+<table>
+  <tr><th>交易日期</th><th>產品</th><th>平均價(元/公斤)</th><th>交易量(公斤)</th><th>星期</th></tr>
+
+  <tr>
+    <td>115/04/18</td>
+    <td>FK9 甜椒 進口</td>
+    <td>110</td>
+    <td>400</td>
+    <td>星期六</td>
+  </tr>
+  <tr>
+    <td>115/04/19</td>
+    <td>FK9 甜椒 進口</td>
+    <td>110</td>
+    <td>100</td>
+    <td>星期日</td>
+  </tr>
+  <tr>
+    <td>115/04/22</td>
+    <td>FK9 甜椒 進口</td>
+    <td>110</td>
+    <td>280</td>
+    <td>星期三</td>
+  </tr>
+  <tr>
+    <td>115/04/24</td>
+    <td>FK9 甜椒 進口</td>
+    <td>110</td>
+    <td>150</td>
+    <td>星期五</td>
+  </tr>
+  <tr>
+    <td>115/04/25</td>
+    <td>FK9 甜椒 進口</td>
+    <td>110</td>
+    <td>350</td>
+    <td>星期六</td>
+  </tr>
+  <tr>
+    <td>115/04/26</td>
+    <td>FK9 甜椒 進口</td>
+    <td>110</td>
+    <td>400</td>
+    <td>星期日</td>
+  </tr>
+  <tr>
+    <td>115/04/28</td>
+    <td>FK9 甜椒 進口</td>
+    <td>110</td>
+    <td>300</td>
+    <td>星期二</td>
+  </tr>
+  <tr>
+    <td>115/04/29</td>
+    <td>FK9 甜椒 進口</td>
+    <td>110</td>
+    <td>300</td>
+    <td>星期三</td>
+  </tr>
+  <tr>
+    <td>115/04/30</td>
+    <td>FK9 甜椒 進口</td>
+    <td>110</td>
+    <td>150</td>
+    <td>星期四</td>
+  </tr>
+  <tr>
+    <td>115/05/01</td>
+    <td>FK9 甜椒 進口</td>
+    <td>110</td>
+    <td>300</td>
+    <td>星期五</td>
+  </tr>
+</table>
+
+<h2>4. 視覺化圖表說明</h2>
+
+<h3>圖 1：交易量長條圖</h3>
+<img src="volume_bar.png" alt="交易量長條圖">
+<p>
+交易量在 <strong>4/25 和 4/26（週六、週日）達最高峰（350-400 公斤）</strong>，
+而 <strong>4/19（週日）僅 100 公斤</strong>，為期間最低。波動幅度達 4 倍。
+</p>
+
+<h3>圖 2：交易量趨勢線（LOESS 平滑）</h3>
+<img src="volume_trend.png" alt="交易量趨勢線">
+<p>
+LOESS 曲線顯示交易量 <strong>先升後降</strong>，4/19 低谷後上升至 4/25-26 高峰，隨後回落。
+</p>
+
+<h3>圖 3：價格與交易量雙軸對照</h3>
+<img src="price_volume_dual.png" alt="價格與交易量雙軸對照">
+<p>
+<strong>價格（紅線）完全平穩（110 元/公斤）</strong>，交易量（綠柱）則有明顯起伏。
+這正是我們調整題目聚焦「交易量波動」的原因。
+</p>
+
+<h2>5. 分析結論</h2>
+<ol>
+  <li><strong>價格僵固性：</strong>進口甜椒價格完全穩定（110 元/公斤），可能因進口商有長期合約價格。</li>
+  <li><strong>交易量波動：</strong>8 個交易日中交易量從 100 到 400 公斤，波動達 4 倍。</li>
+  <li><strong>週末效應：</strong>週末交易量較高，可能因市場備貨需求增加。</li>
+  <li><strong>研究限制：</strong>網站僅保留近一個月資料，無法取得 2 月戰爭期間數據進行前後對比。</li>
+  <li><strong>爬蟲技術驗證：</strong>成功突破 ASP.NET WebForm + AJAX 防護機制。</li>
+</ol>
+
+<div class="footer">
+  <p>報告產生時間：2026-05-17 23:40:54.727304 | 使用 AI 工具：DeepSeek | 程式語言：R</p>
+</div>
+
+</body>
+</html>
+

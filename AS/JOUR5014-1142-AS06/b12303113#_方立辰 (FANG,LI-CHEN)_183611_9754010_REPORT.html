@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>農產品交易行情專題報告 - 產銷履歷(TAP)十年發展與政策分析</title>
+    <style>
+        body { font-family: "Microsoft JhengHei", Arial, sans-serif; line-height: 1.6; color: #333; max-width: 1100px; margin: 0 auto; padding: 20px; }
+        h1, h2, h3 { color: #1e3a8a; border-bottom: 2px solid #3b82f6; padding-bottom: 10px; }
+        .info-box { background: #f0f9ff; padding: 15px; border-radius: 8px; border-left: 5px solid #3b82f6; margin: 20px 0; }
+        .policy-box { background: #fffbeb; padding: 20px; border-radius: 8px; border: 1px solid #fcd34d; margin: 20px 0; font-size: 0.95em; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 0.9em; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: center; }
+        th { background-color: #3b82f6; color: white; }
+        tr:nth-child(even) { background-color: #f8fafc; }
+        .image-container { text-align: center; margin: 30px 0; }
+        .image-container img { max-width: 100%; border: 1px solid #ddd; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .conclusion { background: #f0fdf4; border: 1px solid #86efac; padding: 20px; border-radius: 8px; margin-top: 30px; }
+        footer { margin-top: 50px; text-align: center; color: #64748b; font-size: 0.85em; border-top: 1px solid #e2e8f0; padding-top: 20px; }
+        .highlight { color: #ef4444; font-weight: bold; }
+        .no-data { color: #94a3b8; font-style: italic; }
+    </style>
+</head>
+<body>
+
+    <h1>農產品交易行情專題報告</h1>
+
+    <div class="info-box">
+        <p><strong>專題題目：</strong>2017-2026 (106-115) 產銷履歷 (TAP) 蔬果交易量之成長趨勢與政策演進分析</p>
+        <p><strong>使用 AI：</strong>Gemini CLI (Google AI)</p>
+        <p><strong>爬取日期：</strong>2026-05-12</p>
+        <p><strong>資料來源：</strong><a href="https://amis.afa.gov.tw/main/Main.aspx" target="_blank">農產品批發市場交易行情站 (AMIS)</a></p>
+    </div>
+
+    <h2>一、 政策背景：從「試辦」到「法制化」</h2>
+    <div class="policy-box">
+        <h3>產銷履歷制度之意涵與發展</h3>
+        <p>
+            台灣推動「農產品產銷履歷制度 (TAP)」旨在建立從<strong>「農場」到「餐桌」</strong>的公開、透明及可追溯之一貫化安心保證制度。其核心理念如同「農產品的身分證」，透過資訊的公開性，營造生產者、消費者及通路業者的三贏局面。
+        </p>
+        <ul>
+            <li><strong>2004年：</strong> 農委會開始推動農產品產銷履歷試辦計畫。</li>
+            <li><strong>2006年：</strong> 將此制度納入「新農業運動」，回應國人對食品安全的需求。</li>
+            <li><strong>2007年：</strong> 「農產品生產及驗證管理法」正式公布施行，確立了法制化基礎。</li>
+            <li><strong>2008年：</strong> 進入擴大行銷供貨的新階段，目標將相關驗證標章整合，提升台灣農業的競爭力。</li>
+        </ul>
+        <p>
+            依據「良好農業規範 (TGAP)」，制度涵蓋了土壤、水質監測，以及中下游的資材與衛生安全管理，確保每一份 TAP 產品皆符合標準。
+        </p>
+    </div>
+
+    <h2>二、 數據分析方法與採樣策略</h2>
+    <ol>
+        <li><strong>一致性採樣：</strong> 本報告統一採用每年度第 1、4、7、10 月之<strong>季度數據</strong>進行分析，確保各年度間之比較基礎一致。</li>
+        <li><strong>時間維度：</strong> 由於產銷履歷電子化交易紀錄於民國 106 年 (2017) 後方趨於成熟，數據圖表從 106 年起算。</li>
+        <li><strong>單位轉換：</strong> 網站原始數據為「公斤 (KG)」，本報告為求清晰，統一除以 1000 轉換為<strong>「公噸 (Tons)」</strong>。</li>
+    </ol>
+
+    <h2>三、 數據分析與視覺化</h2>
+    
+    <div class="image-container">
+        <img src="growth_chart_consistent.png" alt="全台11大市場 TAP 季度交易量趨勢圖">
+        <p>圖 1：2017-2026 全台主要市場產銷履歷 (TAP) 季度交易量趨勢 (公噸)</p>
+    </div>
+
+    <h3>市場年總交易量成長統計 (自各市場首年有紀錄起算至114年)：</h3>
+    <table>
+        <tr>
+            <th>市場名稱</th>
+            <th>首年紀錄</th>
+            <th>首年年總銷量 (公噸)</th>
+            <th>114年年總銷量 (公噸)</th>
+            <th>累計成長率 (對比首年)</th>
+            <th>當前狀態</th>
+        </tr>
+        <tr>
+            <td>台北一 (萬大)</td>
+            <td>106</td>
+            <td>3,486.3</td>
+            <td>45,583.9</td>
+            <td class="highlight">1,207.51%</td>
+            <td>全台規模最大，成長逾12倍。</td>
+        </tr>
+        <tr>
+            <td>台北二 (民族)</td>
+            <td>106</td>
+            <td>1,076.6</td>
+            <td>17,657.5</td>
+            <td class="highlight">1,540.13%</td>
+            <td>成長率驚人，展現強大消費力。</td>
+        </tr>
+        <tr>
+            <td>三重區</td>
+            <td>107</td>
+            <td>170.8</td>
+            <td>4,006.7</td>
+            <td class="highlight">2,246.35%</td>
+            <td>全台成長之冠，擴張逾22倍。</td>
+        </tr>
+        <tr>
+            <td>台中市</td>
+            <td>107</td>
+            <td>499.5</td>
+            <td>7,312.0</td>
+            <td class="highlight">1,364.00%</td>
+            <td>中部地區TAP認證普及率顯著提升。</td>
+        </tr>
+        <tr>
+            <td>板橋區</td>
+            <td>108</td>
+            <td>2,323.5</td>
+            <td>8,996.5</td>
+            <td>287.19%</td>
+            <td>新北市重要供應鏈節點。</td>
+        </tr>
+        <tr>
+            <td>桃農</td>
+            <td>108</td>
+            <td>770.4</td>
+            <td>5,003.2</td>
+            <td>549.42%</td>
+            <td>桃園地區交易量穩健擴張。</td>
+        </tr>
+        <tr>
+            <td>高雄市</td>
+            <td>109</td>
+            <td>3,304.6</td>
+            <td>2,508.4</td>
+            <td>-24.09%*</td>
+            <td>南部核心，114年數據受波動影響。</td>
+        </tr>
+        <tr>
+            <td>屏東市</td>
+            <td>108</td>
+            <td>1,106.9</td>
+            <td>1,390.5</td>
+            <td>25.62%</td>
+            <td>交易量緩步回升中。</td>
+        </tr>
+        <tr>
+            <td>豐原區</td>
+            <td>113</td>
+            <td>405.4</td>
+            <td>560.0</td>
+            <td>38.13%</td>
+            <td>近年開始導入產銷履歷系統。</td>
+        </tr>
+        <tr>
+            <td class="no-data">鳳山區</td>
+            <td>N/A</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0.00%</td>
+            <td class="no-data">目前無產銷履歷交易數據</td>
+        </tr>
+        <tr>
+            <td class="no-data">花蓮市</td>
+            <td>N/A</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0.00%</td>
+            <td class="no-data">目前無產銷履歷交易數據</td>
+        </tr>
+    </table>
+    <p><small>*註：年總銷量計算方式為該年度四季（1, 4, 7, 10月）採樣值之總和，以確保跨年度比較之公平性。負值可能受單一年度氣候或產地調節影響。</small></p>
+
+    <div class="conclusion">
+        <h2>四、 結論與發現</h2>
+        <ol>
+            <li><strong>法制化成效顯著：</strong> 從 106 年起各市場數據顯著增加，呼應了 2007 年「農產品生產及驗證管理法」施行後的長期推廣成果。</li>
+            <li><strong>「農場到餐桌」的落實：</strong> 台北一、台北二市場的穩定增長，顯示都會區消費者對 TAP 「身分證」制度的高度信賴。</li>
+            <li><strong>成長潛力：</strong> 三重、板橋等二線核心市場的爆發式成長，說明 TAP 認證已從高端市場向下滲透至一般家庭消費。</li>
+            <li><strong>區域數位鴻溝：</strong> 鳳山、花蓮等市場尚無顯著 TAP 紀錄，顯示政策推廣在特定區域或小型市場仍有精進空間。</li>
+        </ol>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 農產品數據分析專案 | Assignment 6 | 基於農委會政策面之 TAP 數據研究</p>
+    </footer>
+
+</body>
+</html>

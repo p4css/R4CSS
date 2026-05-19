@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AS06 作業評閱報告｜農產品交易行情爬蟲</title>
+<style>
+  :root {
+    --bg: #f4f6f0;
+    --paper: #ffffff;
+    --ink: #1a2010;
+    --muted: #5a6b52;
+    --accent: #3a7a30;
+    --accent2: #c0500a;
+    --accent3: #1a5c8a;
+    --border: #d4dece;
+    --warn: #c0500a;
+    --ok: #2e7d1e;
+    --tag-bg: #e8f0e4;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.7;
+  }
+  /* ── HEADER ─────────────────────────────────────────── */
+  header {
+    background: linear-gradient(135deg, #1e3c14 0%, #2e5e1e 55%, #3a7a30 100%);
+    color: #fff;
+    padding: 3rem 2rem 2.5rem;
+    text-align: center;
+  }
+  header h1 { font-size: 2rem; font-weight: 700; margin-bottom: .4rem; }
+  header p  { opacity: .85; font-size: .95rem; }
+  /* ── STAT CARDS ──────────────────────────────────────── */
+  .stats-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding: 2rem 2rem 0;
+    justify-content: center;
+  }
+  .stat-card {
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.2rem 1.6rem;
+    min-width: 130px;
+    text-align: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,.06);
+  }
+  .stat-card .num { font-size: 2rem; font-weight: 700; color: var(--accent); }
+  .stat-card .lbl { font-size: .78rem; color: var(--muted); margin-top: .2rem; }
+  /* ── SECTION ─────────────────────────────────────────── */
+  section { max-width: 1200px; margin: 2rem auto; padding: 0 1.5rem; }
+  section h2 {
+    font-size: 1.25rem;
+    color: var(--accent);
+    border-left: 5px solid var(--accent);
+    padding-left: .8rem;
+    margin-bottom: 1.2rem;
+  }
+  /* ── TABLE ───────────────────────────────────────────── */
+  .tbl-wrap { overflow-x: auto; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,.07); }
+  table { width: 100%; border-collapse: collapse; background: var(--paper); font-size: .85rem; }
+  thead tr { background: #2e5e1e; color: #fff; }
+  thead th { padding: .7rem .8rem; text-align: left; white-space: nowrap; }
+  tbody tr:nth-child(even) { background: #f7faf5; }
+  tbody tr:hover { background: #e8f0e4; }
+  td { padding: .65rem .8rem; vertical-align: top; border-bottom: 1px solid var(--border); }
+  td.name { font-weight: 600; white-space: nowrap; }
+  td.id-col { color: var(--muted); font-size: .78rem; white-space: nowrap; }
+  a.report-link {
+    display: inline-block;
+    background: var(--accent);
+    color: #fff;
+    font-size: .75rem;
+    padding: .25rem .65rem;
+    border-radius: 4px;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  a.report-link:hover { background: #2a5a20; }
+  /* badges */
+  .badge {
+    display: inline-block;
+    font-size: .72rem;
+    padding: .18rem .55rem;
+    border-radius: 20px;
+    font-weight: 600;
+    white-space: nowrap;
+    margin: 1px;
+  }
+  .badge-ok    { background: #d4edda; color: #155724; }
+  .badge-warn  { background: #fff3cd; color: #856404; }
+  .badge-err   { background: #f8d7da; color: #721c24; }
+  .badge-dyn   { background: #cce5ff; color: #004085; }
+  .badge-sim   { background: #e2d9f3; color: #4a1f8a; }
+  /* ── CATEGORY CARDS ──────────────────────────────────── */
+  .cat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.2rem; }
+  .cat-card {
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.2rem 1.4rem;
+    box-shadow: 0 2px 6px rgba(0,0,0,.06);
+  }
+  .cat-card h3 { font-size: 1rem; margin-bottom: .6rem; display: flex; align-items: center; gap: .5rem; }
+  .cat-icon { font-size: 1.2rem; }
+  .cat-card ul { list-style: none; }
+  .cat-card ul li { padding: .25rem 0; border-bottom: 1px dashed var(--border); font-size: .87rem; }
+  .cat-card ul li:last-child { border: none; }
+  .cat-card ul li a { color: var(--accent3); text-decoration: none; }
+  .cat-card ul li a:hover { text-decoration: underline; }
+  /* ── FEATURED VISUAL ─────────────────────────────────── */
+  .feat-list { display: flex; flex-direction: column; gap: .9rem; }
+  .feat-card {
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 6px rgba(0,0,0,.06);
+    display: flex;
+    align-items: stretch;
+  }
+  .feat-card .feat-tag {
+    background: #2e5e1e;
+    color: #fff;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    padding: .8rem .5rem;
+    font-size: .78rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    letter-spacing: .05em;
+  }
+  .feat-card .feat-body {
+    padding: .85rem 1.1rem;
+    flex: 1;
+  }
+  .feat-card .feat-title {
+    font-size: .97rem;
+    font-weight: 700;
+    margin-bottom: .25rem;
+    color: var(--ink);
+  }
+  .feat-card .feat-meta {
+    font-size: .78rem;
+    color: var(--muted);
+    margin-bottom: .5rem;
+  }
+  .feat-card .feat-desc {
+    font-size: .84rem;
+    color: #3a4a32;
+    margin-bottom: .55rem;
+    line-height: 1.6;
+  }
+  .feat-card .feat-link {
+    display: inline-block;
+    background: var(--accent);
+    color: #fff;
+    font-size: .78rem;
+    padding: .28rem .75rem;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: 600;
+  }
+  .feat-card .feat-link:hover { background: #2a5a20; }
+  /* ── FOOTER ──────────────────────────────────────────── */
+  footer {
+    text-align: center;
+    padding: 2rem;
+    color: var(--muted);
+    font-size: .8rem;
+    border-top: 1px solid var(--border);
+    margin-top: 3rem;
+  }
+  /* ── SUMMARY NOTE ────────────────────────────────────── */
+  .note {
+    background: #e8f4e8;
+    border-left: 4px solid var(--accent);
+    padding: 1rem 1.2rem;
+    border-radius: 0 8px 8px 0;
+    font-size: .88rem;
+    margin-bottom: 1.5rem;
+  }
+  .findings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .finding-box {
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem 1.2rem;
+    font-size: .87rem;
+  }
+  .finding-box h4 { color: var(--accent); margin-bottom: .4rem; font-size: .92rem; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════
+     HEADER
+════════════════════════════════════════ -->
+<header>
+  <h1>📊 AS06 作業評閱報告</h1>
+  <p>課程：JOUR5014｜主題：運用 AI 爬取農產品交易行情｜評閱日期：2026-05-18</p>
+</header>
+
+<!-- ═══════════════════════════════════════
+     STAT CARDS
+════════════════════════════════════════ -->
+<div class="stats-grid">
+  <div class="stat-card"><div class="num">23</div><div class="lbl">提交 HTML 報告人數</div></div>
+  <div class="stat-card"><div class="num">0</div><div class="lbl">僅提交 zip（無 HTML）</div></div>
+  <div class="stat-card"><div class="num">3</div><div class="lbl">使用動態互動圖表</div></div>
+  <div class="stat-card"><div class="num">11</div><div class="lbl">含缺漏靜態圖片</div></div>
+  <div class="stat-card"><div class="num">12</div><div class="lbl">圖片完整顯示</div></div>
+  <div class="stat-card"><div class="num">7</div><div class="lbl">議題大分類</div></div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SECTION 1：學生評閱總表
+════════════════════════════════════════ -->
+<section>
+  <h2>一、學生作業評閱總表</h2>
+
+  <div class="note">
+    <strong>圖表狀態說明：</strong>
+    <span class="badge badge-dyn">動態互動</span> 使用 Plotly / Chart.js 等 JS 圖表庫，圖表內嵌且可互動；
+    <span class="badge badge-ok">靜態完整</span> 圖片以 Base64 嵌入 HTML，正常顯示；
+    <span class="badge badge-err">靜態缺漏</span> 圖片以外部路徑引用（相對/絕對路徑），在本環境無法顯示；
+    <span class="badge badge-sim">模擬資料</span> 報告明確說明數據為模擬/示意，非真實爬取。
+  </div>
+
+  <div class="tbl-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>姓名</th>
+        <th>學號</th>
+        <th>主題</th>
+        <th>資料量</th>
+        <th>時間範圍</th>
+        <th>圖表類型</th>
+        <th>圖片狀態</th>
+        <th>連結</th>
+      </tr>
+    </thead>
+    <tbody>
+
+      <tr>
+        <td>1</td>
+        <td class="name">李翌甄</td>
+        <td class="id-col">41102024e</td>
+        <td>台北市場西瓜季節性價格分析</td>
+        <td>139 筆（有效交易日）</td>
+        <td>2023 全年</td>
+        <td><span class="badge badge-warn">靜態</span></td>
+        <td><span class="badge badge-err">缺漏 1 張</span><br><small>watermelon_seasonality.png</small></td>
+        <td><a class="report-link" href="41102024e%23_李翌甄_314323_9727917_REPORT.html" target="_blank">開啟報告</a></td>
+      </tr>
+
+      <tr>
+        <td>2</td>
+        <td class="name">彭宥凱</td>
+        <td class="id-col">b10208008</td>
+        <td>兩大市場水果地理價差（芒果、西瓜）</td>
+        <td>12 筆</td>
+        <td>近一個月</td>
+        <td><span class="badge badge-warn">靜態</span></td>
+        <td><span class="badge badge-ok">完整</span></td>
+        <td><a class="report-link" href="b10208008%23_彭宥凱 (PENG, YU-KAI)_103923_9764001_REPORT.html" target="_blank">開啟報告</a></td>
+      </tr>
+
+      <tr>
+        <td>3</td>
+        <td class="name">廖宥甯</td>
+        <td class="id-col">b11103015</td>
+        <td>台灣水果批發市場季節性價格分析（北中高四市場）</td>
+        <td>672 筆（7品項×4市場×24月）</td>
+        <td>2023–2024（24個月）</td>
+        <td><span class="badge badge-warn">靜態</span></td>
+        <td><span class="badge badge-ok">完整（5張嵌入）</span></td>
+        <td><a class="report-link" href="b11103015%23_廖宥甯 (LIAO YOU NING)_150108_9724803_REPORT.html" target="_blank">開啟報告</a></td>
+      </tr>
+
+      <tr>
+        <td>4</td>
+        <td class="name">康陌禾</td>
+        <td class="id-col">b11208011</td>
+        <td>台北一市場香蕉價格季節性分析</td>
+        <td>不明確（2年資料）</td>
+        <td>2024-05–2026-05</td>
+        <td><span class="badge badge-warn">靜態</span></td>
+        <td><span class="badge badge-err">缺漏 3 張</span><br><small>charts/ 目錄未上傳</small></td>
+        <td><a class="report-link" href="b11208011%23_康陌禾 (KANG,MO-HE)_150556_9775601_REPORT.html" target="_blank">開啟報告</a></td>
+      </tr>
+
+      <tr>
+        <td>5</td>
+        <td class="name">周廷芳</td>
+        <td class="id-col">b12302202</td>
+        <td>颱風季台灣蔬菜價格波動分析</td>
+        <td>不明確（週資料，2020-2026 5-10月）</td>
+        <td>2020–2026（颱風季）</td>
+        <td><span class="badge badge-warn">靜態</span></td>
+        <td><span class="badge badge-err">缺漏 12 張</span><br><small>所有圖片均未嵌入</small></td>
+        <td><a class="report-link" href="b12302202%23_周廷芳 (CHOU, TING-FANG)_181865_9752704_Report.html" target="_blank">開啟報告</a></td>
+      </tr>
+
+      <tr>
+        <td>6</td>
+        <td class="name">鄭育芹</td>
+        <td class="id-col">b12302210</td>
+        <td>台北二 vs 宜蘭市蔬菜價格差異分析</td>
+        <td>不明確（2025/05/11 至今）</td>
+        <td>2025-05 至今</td>
+        <td><span class="badge badge-warn">靜態</span></td>
+        <td><span class="badge badge-err">缺漏 7 張</span><br><small>images/ 目錄未上傳</small></td>
+        <td><a class="report-link" href="b12302210%23_鄭育芹 (CHENG YU-CHIN)_186001_9747631_REPORT.html" target="_blank">開啟報告</a></td>
+      </tr>
+
+      <tr>
+        <td>7</td>
+        <td class="name">李浚誼</td>
+        <td class="id-col">b12302318</td>
+        <td>颱風是否影響台北一市場水果價格（香蕉、鳳梨、蓮霧、芒果）</td>
+        <td>大量（2024-01 至今，嵌入圖表）</td>
+        <td>2024-01 至今</td>
+        <td><span class="badge badge-warn">靜態</span></td>
+        <td><span class="badge badge-ok">完整（3張嵌入）</span></td>
+        <td><a class="report-link" href="b12302318%23_李浚誼 (LI CHUN-YI)_181437_9762456_REPORT-2.html" target="_blank">開啟報告</a></td>
+      </tr>
+
+      <tr>
+        <td>8</td>
+        <td class="name">方立辰</td>
+        <td class="id-col">b12303113</td>
+        <td>產銷履歷（TAP）十年發展與政策分析</td>
+        <td>不明確（季度採樣，2017起）</td>
+        <td>2017–2026（季度）</td>
+        <td><span class="badge badge-warn">靜態</span></td>
+        <td><span class="badge badge-err">缺漏 1 張</span><br><small>growth_chart_consistent.png</small></td>
+        <td><a class="report-link" href="b12303113%23_方立辰 (FANG,LI-CHEN)_183611_9754010_REPORT.html" target="_blank">開啟報告</a></td>
+      </tr>
+
+      <tr>
+        <td>9</td>
+        <td class="name">洪嘉琪</td>
+        <td class="id-col">b12305054</td>
+        <td>小吃店「燙青菜」：哪些蔬菜品項最穩定出現？</td>
+        <td>442,151 筆（25個月，全蔬菜品項）</td>
+        <td>2024-05–2026-05（25個月）</td>
+        <td><span class="badge badge-dyn">Plotly 動態</span></td>
+        <td><span class="badge badge-ok">完整（無靜態圖）</span></td>
+        <td><a class="report-link" href="b12305054%23_洪嘉琪 (HONG,CHIA-CHI)_220963_9768005_REPORT_standalone-1.html" target="_blank">開啟報告</a></td>
+      </tr>
+
+      <tr>
+        <td>10</td>
+        <td class="name">葉方叡</td>
+        <td class="id-col">b13a01207</td>
+        <td>水果的季節性觀察（台北二市場，香蕉、鳳梨、柳橙）</td>
+        <td>881 筆（113年全年）</td>
+        <td>2024 全年（113年）</td>
+        <td><span class="badge badge-dyn">Plotly 動態</span></td>
+        <td><span class="badge badge-ok">完整（無靜態圖）</span></td>
+        <td><a class="report-link" href="b13a01207%23_葉方叡 (YEH, FANG-RUEI)_217995_9736347_REPORT.html" target="_blank">開啟報告</a></td>
+      </tr>
+
+      <tr>
+        <td>11</td>
+        <td class="name">莊佳芳</td>
+        <td class="id-col">r13342031</td>
+        <td>向日葵切花季節性價格分析（四大花市）</td>
+        <td>1,131 筆（7年，4市場）</td>
+        <td>2018–2024</td>
+        <td><span class="badge badge-warn">靜態</span></td>
+        <td><span class="badge badge-ok">完整（4張嵌入）</span></td>
+        <td><a class="report-link" href="r13342031%23_莊佳芳 (CHIA-FANG CHUANG)_244305_9723777_REPORT.html" target="_blank">開啟報告</a></td>
+      </tr>
+
+      <tr>
+        <td>12</td>
+        <td class="name">黃薏慈</td>
+        <td class="id-col">r14322006</td>
+        <td>進口水果年度總量分析（台北二市場，47品項）</td>
+        <td>9,209 筆（觀測值；375份XLS報表）</td>
+        <td>2016-01–2026-05（10年）</td>
+        <td><span class="badge badge-warn">靜態</span></td>
+        <td><span class="badge badge-ok">完整（4張嵌入）</span></td>
+        <td><a class="report-link" href="r14322006%23_黃薏慈 (HUANG, YI-TZU)_272150_9782083_REPORT2-1.html" target="_blank">開啟報告</a></td>
+      </tr>
+
+      <tr>
+        <td>13</td>
+        <td class="name">翁如儀</td>
+        <td class="id-col">r14342001</td>
+        <td>南北市場價差分析（台北 vs 屏東芒果）</td>
+        <td>2,500+ 筆（示意數據）<span class="badge badge-sim">含模擬</span></td>
+        <td>3年（產季）</td>
+        <td><span class="badge badge-warn">靜態</span></td>
+        <td><span class="badge badge-err">缺漏 3 張</span><br><small>assets/ 目錄未上傳</small></td>
+        <td><a class="report-link" href="r14342001%23_翁如儀 (JU-YI WENG)_284215_9734893_AS06_R14342001_REPORT.html" target="_blank">開啟報告</a></td>
+      </tr>
+
+      <tr>
+        <td>14</td>
+        <td class="name">許容榕</td>
+        <td class="id-col">r14342007</td>
+        <td>鳳凰颱風對蔬菜市場價量影響（2025/11）</td>
+        <td>45,507 筆（有效日交易紀錄）</td>
+        <td>2025-11（颱風前後）</td>
+        <td><span class="badge badge-warn">靜態</span></td>
+        <td><span class="badge badge-err">缺漏 3 張</span><br><small>plot1-3.png 未上傳</small></td>
+        <td><a class="report-link" href="r14342007%23_許容榕 (JUNG-JUNG HSU)_286329_9771127_REPORT.html" target="_blank">開啟報告</a></td>
+      </tr>
+
+      <tr>
+        <td>15</td>
+        <td class="name">許巧昕</td>
+        <td class="id-col">r14342011</td>
+        <td>2025 台灣青蔥價格波動分析（SE1-SE6，三市場）</td>
+        <td>2,928 筆（6品種，3市場，全年）</td>
+        <td>2025 全年（114年）</td>
+        <td><span class="badge badge-warn">靜態</span></td>
+        <td><span class="badge badge-ok">完整（3張嵌入）</span></td>
+        <td><a class="report-link" href="r14342011%23_許巧昕 (HSU, CHIAO-HSIN)_284220_9744005_REPORT.html" target="_blank">開啟報告</a></td>
+      </tr>
+
+      <tr>
+        <td>16</td>
+        <td class="name">陳孟樺</td>
+        <td class="id-col">r14342012</td>
+        <td>疫情前後台灣進口水果價格波動（111年 vs 114年）</td>
+        <td>9,182 筆（數十種進口水果）</td>
+        <td>111年（2022）vs 114年（2025）</td>
+        <td><span class="badge badge-warn">靜態</span></td>
+        <td><span class="badge badge-err">缺漏 3 張</span><br><small>圖片檔存在但路徑錯誤</small></td>
+        <td><a class="report-link" href="r14342012%23_陳孟樺 (CHENMENGHUA)_284221_9774633_REPORT.html" target="_blank">開啟報告</a></td>
+      </tr>
+
+      <tr>
+        <td>17</td>
+        <td class="name">林欣平</td>
+        <td class="id-col">r14342017</td>
+        <td>颱風（凱米）過後哪種菜最容易暴漲？</td>
+        <td>44 筆（4種蔬菜，11天）</td>
+        <td>2024/7/20–7/30（凱米颱風前後）</td>
+        <td><span class="badge badge-warn">靜態</span></td>
+        <td><span class="badge badge-err">缺漏 1 張</span><br><small>使用本機絕對路徑</small></td>
+        <td><a class="report-link" href="r14342017%23_林欣平 (LIN, HSIN-PING)_284224_9767472_REPORT.html" target="_blank">開啟報告</a></td>
+      </tr>
+
+      <tr>
+        <td>18</td>
+        <td class="name">孔德皓</td>
+        <td class="id-col">r14342019</td>
+        <td>各市場每月平均價最高的蔬菜與水果（2026年1–4月）</td>
+        <td>77,397 筆（13市場，4個月逐日）</td>
+        <td>2026-01–2026-04</td>
+        <td><span class="badge badge-warn">靜態</span></td>
+        <td><span class="badge badge-ok">完整（10張嵌入）</span></td>
+        <td><a class="report-link" href="r14342019%23_孔德皓 (KUNG, TE-HAO)_281725_9737945_REPORT (1).html" target="_blank">開啟報告</a></td>
+      </tr>
+
+      <tr>
+        <td>19</td>
+        <td class="name">吳以謙</td>
+        <td class="id-col">r14342020</td>
+        <td>水果的季節性（2022–2024，8種水果，月度趨勢）</td>
+        <td>288 筆<span class="badge badge-sim">模擬數據</span></td>
+        <td>2022–2024（月度）</td>
+        <td><span class="badge badge-dyn">Chart.js 動態</span></td>
+        <td><span class="badge badge-ok">完整（無靜態圖）</span></td>
+        <td><a class="report-link" href="r14342020%23_吳以謙 (WU YICHIEN)_286331_9744945_REPORT.html" target="_blank">開啟報告</a></td>
+      </tr>
+
+      <tr>
+        <td>20</td>
+        <td class="name">張芷妤</td>
+        <td class="id-col">r14342021</td>
+        <td>台灣水果季節性分析（五大批發市場，8種水果）</td>
+        <td>960 筆（5市場，8品項，24個月）</td>
+        <td>2024–2025（24個月）</td>
+        <td><span class="badge badge-warn">靜態</span></td>
+        <td><span class="badge badge-ok">完整（6張嵌入）</span></td>
+        <td><a class="report-link" href="r14342021%23_張芷妤 (SERENA CHANG)_279162_9744952_REPORT.html" target="_blank">開啟報告</a></td>
+      </tr>
+
+      <tr>
+        <td>21</td>
+        <td class="name">孫詠儀</td>
+        <td class="id-col">r14343015</td>
+        <td>台北二市場進口甜椒短期交易量波動</td>
+        <td>10 筆（2週資料）</td>
+        <td>2026/4/18–5/01</td>
+        <td><span class="badge badge-warn">靜態</span></td>
+        <td><span class="badge badge-err">缺漏 3 張</span><br><small>volume_bar.png 等未上傳</small></td>
+        <td><a class="report-link" href="r14343015%23_孫詠儀 (SUN, YUNG-I)_284236_9782174_REPORT.html" target="_blank">開啟報告</a></td>
+      </tr>
+
+      <tr>
+        <td>22</td>
+        <td class="name">蔡庭禎</td>
+        <td class="id-col">r14630004</td>
+        <td>農產品價格地理空間影響分析（台北二 vs 高雄，芒果、西瓜）</td>
+        <td>14 筆</td>
+        <td>近期（未明確）</td>
+        <td><span class="badge badge-warn">靜態</span></td>
+        <td><span class="badge badge-err">缺漏 1 張</span><br><small>price_trends.png</small></td>
+        <td><a class="report-link" href="r14630004%23_蔡庭禎 (TSAI, TING-ZHEN)_272691_9777488_REPORT.html" target="_blank">開啟報告</a></td>
+      </tr>
+
+      <tr>
+        <td>23</td>
+        <td class="name">張子儀</td>
+        <td class="id-col">r14342008</td>
+        <td>香蕉三視角分析（微季節性、城鄉價差、品質溢價）</td>
+        <td>13,122 筆<span class="badge badge-sim">模擬資料</span></td>
+        <td>2023–2025（28個月）</td>
+        <td><span class="badge badge-warn">靜態</span></td>
+        <td><span class="badge badge-ok">完整（4張嵌入）</span></td>
+        <td><a class="report-link" href="r14342008%23_張子儀 (CHANG, TZU-YI)REPORT.html" target="_blank">開啟報告</a></td>
+      </tr>
+
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     SECTION 2：議題分類與主要成果
+════════════════════════════════════════ -->
+<section>
+  <h2>二、議題切入點分類與主要成果</h2>
+
+  <div class="findings-grid">
+    <div class="finding-box">
+      <h4>🌀 最熱門議題</h4>
+      「水果/蔬菜季節性」與「颱風對農產品影響」分別各有 6 位學生選擇，是本次作業最主流的兩大方向。
+    </div>
+    <div class="finding-box">
+      <h4>📊 資料規模兩極化</h4>
+      最大資料集：洪嘉琪 442,151 筆（25個月全品項）；最小：蔡庭禎 14 筆、孫詠儀 10 筆。差距逾四萬倍。
+    </div>
+    <div class="finding-box">
+      <h4>🖼️ 圖片缺漏問題</h4>
+      22 份報告中有 11 份（50%）出現靜態圖片缺漏，原因多為圖片以相對/絕對路徑引用，提交時未一併打包。
+    </div>
+    <div class="finding-box">
+      <h4>⚡ 動態圖表採用率低</h4>
+      僅 3 位學生（洪嘉琪、葉方叡、吳以謙）使用 JS 互動圖表庫，且 1 人（吳以謙）採模擬資料。
+    </div>
+  </div>
+
+  <div class="cat-grid">
+
+    <!-- A -->
+    <div class="cat-card">
+      <h3><span class="cat-icon">🍓</span> A｜季節性價格波動（6人）</h3>
+      <p style="font-size:.82rem;color:var(--muted);margin-bottom:.7rem;">探討特定農產品在不同季節的價格高低起伏，是本次作業最常見的切入點。多數同學以台北市場或多市場為範圍，分析水果的盛產期與淡季價差。</p>
+      <ul>
+        <li><a href="41102024e%23_李翌甄_314323_9727917_REPORT.html" target="_blank">李翌甄</a>｜台北市場西瓜季節性（2023全年，139筆）</li>
+        <li><a href="b11103015%23_廖宥甯 (LIAO YOU NING)_150108_9724803_REPORT.html" target="_blank">廖宥甯</a>｜北中高四市場水果季節性（2023-24，672筆）</li>
+        <li><a href="b13a01207%23_葉方叡 (YEH, FANG-RUEI)_217995_9736347_REPORT.html" target="_blank">葉方叡</a>｜台北二市場香蕉/鳳梨/柳橙季節性（881筆，Plotly）⭐</li>
+        <li><a href="r13342031%23_莊佳芳 (CHIA-FANG CHUANG)_244305_9723777_REPORT.html" target="_blank">莊佳芳</a>｜向日葵切花季節性（2018-24，1,131筆）</li>
+        <li><a href="r14342020%23_吳以謙 (WU YICHIEN)_286331_9744945_REPORT.html" target="_blank">吳以謙</a>｜8種水果季節性（2022-24，月度趨勢，Chart.js）</li>
+        <li><a href="r14342021%23_張芷妤 (SERENA CHANG)_279162_9744952_REPORT.html" target="_blank">張芷妤</a>｜五大批發市場8種水果季節性（960筆）⭐</li>
+      </ul>
+    </div>
+
+    <!-- B -->
+    <div class="cat-card">
+      <h3><span class="cat-icon">🌀</span> B｜颱風 / 天災對農產品影響（4人）</h3>
+      <p style="font-size:.82rem;color:var(--muted);margin-bottom:.7rem;">以颱風事件為切入，探討風災前後蔬果的價格與交易量波動。此類題目需要精確抓取特定時間區間的資料，對爬蟲設計要求較高。</p>
+      <ul>
+        <li><a href="b12302318%23_李浚誼 (LI CHUN-YI)_181437_9762456_REPORT-2.html" target="_blank">李浚誼</a>｜颱風對台北一水果影響（香蕉、鳳梨、蓮霧、芒果）</li>
+        <li><a href="b12302202%23_周廷芳 (CHOU, TING-FANG)_181865_9752704_Report.html" target="_blank">周廷芳</a>｜颱風季蔬菜價格波動（2020-2026，5-10月週資料）</li>
+        <li><a href="r14342007%23_許容榕 (JUNG-JUNG HSU)_286329_9771127_REPORT.html" target="_blank">許容榕</a>｜鳳凰颱風對蔬菜市場影響（2025/11，<strong>45,507筆</strong>）⭐</li>
+        <li><a href="r14342017%23_林欣平 (LIN, HSIN-PING)_284224_9767472_REPORT.html" target="_blank">林欣平</a>｜凱米颱風後哪種菜最容易暴漲（2024/7，44筆）</li>
+      </ul>
+    </div>
+
+    <!-- C -->
+    <div class="cat-card">
+      <h3><span class="cat-icon">🥬</span> C｜特定作物 / 品項分析（4人）</h3>
+      <p style="font-size:.82rem;color:var(--muted);margin-bottom:.7rem;">鎖定單一作物（香蕉、青蔥、甜椒）進行深度分析，探討品種間差異或短期交易量波動。</p>
+      <ul>
+        <li><a href="b11208011%23_康陌禾 (KANG,MO-HE)_150556_9775601_REPORT.html" target="_blank">康陌禾</a>｜台北一市場香蕉季節性（2024-26，2年）</li>
+        <li><a href="r14342011%23_許巧昕 (HSU, CHIAO-HSIN)_284220_9744005_REPORT.html" target="_blank">許巧昕</a>｜台灣青蔥六品種價格波動（2025全年，2,928筆）⭐</li>
+        <li><a href="r14343015%23_孫詠儀 (SUN, YUNG-I)_284236_9782174_REPORT.html" target="_blank">孫詠儀</a>｜台北二進口甜椒短期交易量（2026/4，10筆）</li>
+        <li><a href="r14342008%23_張子儀 (CHANG, TZU-YI)REPORT.html" target="_blank">張子儀</a>｜香蕉微季節性、城鄉價差與品質溢價（2023-25，13,122筆，模擬）</li>
+      </ul>
+    </div>
+
+    <!-- D -->
+    <div class="cat-card">
+      <h3><span class="cat-icon">🌍</span> D｜進口水果分析（2人）</h3>
+      <p style="font-size:.82rem;color:var(--muted);margin-bottom:.7rem;">聚焦進口水果在台灣的交易狀況，涵蓋長期（10年）趨勢以及疫情前後的價格比較，具有較強的政策與時事意涵。</p>
+      <ul>
+        <li><a href="r14322006%23_黃薏慈 (HUANG, YI-TZU)_272150_9782083_REPORT2-1.html" target="_blank">黃薏慈</a>｜台北二進口水果年度總量（2016-2026，9,209筆）⭐</li>
+        <li><a href="r14342012%23_陳孟樺 (CHENMENGHUA)_284221_9774633_REPORT.html" target="_blank">陳孟樺</a>｜疫情前後進口水果價格（111年vs114年，9,182筆）</li>
+      </ul>
+    </div>
+
+    <!-- E -->
+    <div class="cat-card">
+      <h3><span class="cat-icon">🗺️</span> E｜市場比較 / 地理空間（4人）</h3>
+      <p style="font-size:.82rem;color:var(--muted);margin-bottom:.7rem;">比較不同批發市場（地理位置）之間的價格差異，試圖解釋運輸成本、市場規模等因素對農產品價格的影響。</p>
+      <ul>
+        <li><a href="b10208008%23_彭宥凱 (PENG, YU-KAI)_103923_9764001_REPORT.html" target="_blank">彭宥凱</a>｜兩市場芒果西瓜地理價差（12筆）</li>
+        <li><a href="r14342001%23_翁如儀 (JU-YI WENG)_284215_9734893_AS06_R14342001_REPORT.html" target="_blank">翁如儀</a>｜南北市場台北vs屏東芒果價差（2,500+筆，含示意）</li>
+        <li><a href="r14342019%23_孔德皓 (KUNG, TE-HAO)_281725_9737945_REPORT (1).html" target="_blank">孔德皓</a>｜各市場每月最高均價蔬果（2026年1-4月，<strong>77,397筆</strong>）⭐</li>
+        <li><a href="r14630004%23_蔡庭禎 (TSAI, TING-ZHEN)_272691_9777488_REPORT.html" target="_blank">蔡庭禎</a>｜地理空間對芒果西瓜價格影響（14筆）</li>
+      </ul>
+    </div>
+
+    <!-- F -->
+    <div class="cat-card">
+      <h3><span class="cat-icon">🍽️</span> F｜消費行為 / 食物可及性（1人）</h3>
+      <p style="font-size:.82rem;color:var(--muted);margin-bottom:.7rem;">以消費者視角出發，探討哪些蔬菜品項因高交易量與穩定供應而成為小吃店燙青菜的固定選擇。切入點最具新聞感，爬取規模也最大。</p>
+      <ul>
+        <li><a href="b12305054%23_洪嘉琪 (HONG,CHIA-CHI)_220963_9768005_REPORT_standalone-1.html" target="_blank">洪嘉琪</a>｜小吃店燙青菜品項穩定性（2024-26，<strong>442,151筆</strong>，Plotly）⭐</li>
+      </ul>
+    </div>
+
+    <!-- G -->
+    <div class="cat-card">
+      <h3><span class="cat-icon">📋</span> G｜政策 / 產業制度分析（1人）</h3>
+      <p style="font-size:.82rem;color:var(--muted);margin-bottom:.7rem;">以農業政策為切入，分析產銷履歷制度（TAP）十年間交易量的成長，是本次作業中唯一以政策制度為核心的報告。</p>
+      <ul>
+        <li><a href="b12303113%23_方立辰 (FANG,LI-CHEN)_183611_9754010_REPORT.html" target="_blank">方立辰</a>｜產銷履歷TAP十年發展與政策分析（2017-2026，季度採樣）</li>
+      </ul>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     SECTION 3：精選視覺化成果
+════════════════════════════════════════ -->
+<section>
+  <h2>三、精選視覺化成果</h2>
+  <p style="font-size:.88rem;color:var(--muted);margin-bottom:1.4rem;">以下精選圖表完整度高（無缺漏圖片或使用動態圖表）且議題具代表性的報告，點擊連結可直接開啟。</p>
+
+  <div class="feat-list">
+
+    <!-- 1. 洪嘉琪 -->
+    <div class="feat-card">
+      <div class="feat-tag">F 類</div>
+      <div class="feat-body">
+        <div class="feat-title">洪嘉琪｜小吃店的「燙青菜」為什麼老是只有這幾種？</div>
+        <div class="feat-meta">442,151 筆｜2024-05 – 2026-05（25個月）｜Plotly 互動圖表</div>
+        <div class="feat-desc">爬取近兩年全台蔬菜批發資料，以 Plotly 製作散布圖、長條圖、熱力圖等四種互動視覺化，分析哪些蔬菜因穩定高交易量、低價格變異性，成為小吃店的固定選項。資料規模為本次作業最大。</div>
+        <a class="feat-link" href="b12305054%23_洪嘉琪 (HONG,CHIA-CHI)_220963_9768005_REPORT_standalone-1.html" target="_blank">開啟報告 →</a>
+      </div>
+    </div>
+
+    <!-- 2. 葉方叡 -->
+    <div class="feat-card">
+      <div class="feat-tag">A 類</div>
+      <div class="feat-body">
+        <div class="feat-title">葉方叡｜水果的季節性觀察（台北二市場，香蕉、鳳梨、柳橙）</div>
+        <div class="feat-meta">881 筆｜2024 全年（113年）｜Plotly 互動圖表</div>
+        <div class="feat-desc">以全年 881 筆交易紀錄分析三種水果在春夏秋冬的價格表現，圖表背景以顏色區分四季，搭配 Plotly 互動功能，視覺效果清晰直觀，是動態圖表應用的代表作。</div>
+        <a class="feat-link" href="b13a01207%23_葉方叡 (YEH, FANG-RUEI)_217995_9736347_REPORT.html" target="_blank">開啟報告 →</a>
+      </div>
+    </div>
+
+    <!-- 3. 許巧昕 -->
+    <div class="feat-card">
+      <div class="feat-tag">C 類</div>
+      <div class="feat-body">
+        <div class="feat-title">許巧昕｜2025 台灣青蔥價格專題報告（SE1–SE6，三大批發市場）</div>
+        <div class="feat-meta">2,928 筆｜2025 全年（114年）｜靜態圖完整嵌入</div>
+        <div class="feat-desc">針對六大青蔥品種在台北二、台中、高雄三市場的全年價格，分析品種差異、季節波動與市場結構。圖表以 Base64 完整嵌入 HTML，呈現效果完好，選題聚焦且分析深入。</div>
+        <a class="feat-link" href="r14342011%23_許巧昕 (HSU, CHIAO-HSIN)_284220_9744005_REPORT.html" target="_blank">開啟報告 →</a>
+      </div>
+    </div>
+
+    <!-- 4. 孔德皓 -->
+    <div class="feat-card">
+      <div class="feat-tag">E 類</div>
+      <div class="feat-body">
+        <div class="feat-title">孔德皓｜各市場每月平均價最高的蔬菜與水果（2026年1–4月）</div>
+        <div class="feat-meta">77,397 筆｜2026-01 – 2026-04（13個市場逐日）｜靜態圖完整嵌入</div>
+        <div class="feat-desc">橫跨 13 大批發市場爬取 4 個月逐日資料，以精緻嵌入式圖表呈現各市場每月「明星品項」。市場覆蓋最廣、資料結構最完整，技術執行力突出。</div>
+        <a class="feat-link" href="r14342019%23_孔德皓 (KUNG, TE-HAO)_281725_9737945_REPORT (1).html" target="_blank">開啟報告 →</a>
+      </div>
+    </div>
+
+    <!-- 5. 莊佳芳 -->
+    <div class="feat-card">
+      <div class="feat-tag">A 類</div>
+      <div class="feat-body">
+        <div class="feat-title">莊佳芳｜向日葵切花季節性價格分析（四大花市，2018–2024）</div>
+        <div class="feat-meta">1,131 筆｜2018–2024（7年，4市場）｜靜態圖完整嵌入</div>
+        <div class="feat-desc">以非主流的切花農產品（向日葵）為主題，橫跨 7 年、4 大花市，分析年際趨勢與季節規律，並觀察通膨對均價的影響。選題獨特，視覺設計風格統一，是本次作業中時間跨度最長的分析。</div>
+        <a class="feat-link" href="r13342031%23_莊佳芳 (CHIA-FANG CHUANG)_244305_9723777_REPORT.html" target="_blank">開啟報告 →</a>
+      </div>
+    </div>
+
+    <!-- 6. 黃薏慈 -->
+    <div class="feat-card">
+      <div class="feat-tag">D 類</div>
+      <div class="feat-body">
+        <div class="feat-title">黃薏慈｜進口水果年度總量分析（台北二市場，47品項，2016–2026）</div>
+        <div class="feat-meta">9,209 筆觀測值｜2016-01 – 2026-05（10年，375份XLS報表）｜靜態圖完整嵌入</div>
+        <div class="feat-desc">自動下載 375 份 XLS 報表並整理成 9,209 筆有效觀測值，以清晰靜態圖表呈現 47 項進口水果的年度交易量趨勢。資料蒐集技術難度最高，是本次作業中時間跨度達十年的長期分析。</div>
+        <a class="feat-link" href="r14322006%23_黃薏慈 (HUANG, YI-TZU)_272150_9782083_REPORT2-1.html" target="_blank">開啟報告 →</a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     FOOTER
+════════════════════════════════════════ -->
+<footer>
+  JOUR5014 AS06 評閱報告｜自動生成於 2026-05-18｜共 23 位學生（23 份有效 HTML 報告）<br>
+  ⭐ 標記為評閱者建議精讀之作品
+</footer>
+
+</body>
+</html>
